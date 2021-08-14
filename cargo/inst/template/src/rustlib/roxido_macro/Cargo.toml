@@ -1,0 +1,16 @@
+[package]
+name = "roxido_macro"
+version = "0.4.0"
+authors = ["David B. Dahl <dahl@stat.byu.edu>"]
+edition = "2018"
+description = "Macro to support writing R packages based on Rust"
+homepage = "https://dahl.byu.edu"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0.74", features = ["full"] }
+quote = "1.0"

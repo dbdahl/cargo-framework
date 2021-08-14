@@ -1,0 +1,16 @@
+Users of the binary package do **not** need to have Cargo (the package manager
+of the Rust programming language).  Installing the source package, however,
+uses Cargo to compile Rust source code.  The "cargo" package on CRAN
+facilitates finding and running Cargo on the system.  If a suitable Cargo
+installation is not available, a static library is instead downloaded for
+select operating systems and CPU architectures.  
+
+See https://rustup.rs to set up Cargo.  The default options are sufficient in
+most situations.  On Windows, however, please do the following:
+
+   - Download rustup-init.exe from https://win.rustup.rs
+   - In the terminal, run:  rustup-init.exe -y --default-host x86_64-pc-windows-gnu
+   - Restart the terminal (so the new terminal picks up changes to your PATH).
+   - In a new terminal, run:  rustup target add i686-pc-windows-gnu
+
+

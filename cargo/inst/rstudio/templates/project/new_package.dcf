@@ -1,0 +1,3 @@
+Binding: new_package
+Title: R Package Using Rust and the 'cargo' Framework
+OpenFiles: src/rustlib/src/lib.rs,src/rustlib/src/registration.rs

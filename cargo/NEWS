@@ -1,0 +1,32 @@
+0.1.37 (2021-08-14)
+  * Expanded the functionality of the 'cargo' framework for Rust-based package
+    development, beyond its foundation in release 0.1.30.
+  * Added the rust_fn function to embed Rust code directly in an R script.
+
+0.1.30 (2021-05-24)
+  * Added functionality make a complete package stub, ready for Rust
+    development.  See the "new_package" function, or, in RStudio, select the
+    following menu sequence: "File" -> "New Project..." -> "New Directory" ->
+    "R Package Using Rust and the 'cargo' Framework".
+  * Added "register_calls" function to automatically generate Rust code to register
+    Rust functions used in .Call() function calls. Rerun this function when usage of
+    .Call() changes.
+
+0.1.29 (2021-03-29)
+  * Explicitly search for rustc and set the RUSTC environment variable.
+  * Fixed an ERROR on Solaris and NOTEs on development version of R.
+
+0.1.28 (2021-03-16)
+  * Improved run() function to return a logical indicating success, avoid
+    warnings and errors, and limit the number of parallel jobs to two (as per
+    CRAN policy).
+  * Added experimental support for "aarch64-apple-darwin" target.
+  * The is_available() function is scheduled for removal.
+  * The install() function is not exported and may be removed.
+
+0.1.19 (2021-03-08)
+  * Fixed CRAN concern about large download and file cache.
+
+0.1.10 (2021-03-03)
+  * First version on CRAN.
+

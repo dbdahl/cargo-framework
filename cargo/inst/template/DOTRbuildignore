@@ -1,0 +1,5 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^src/staticlib.tar.gz$
+^src/rustlib/(.*/)*target$
+^src/rustlib/(.*/)*\.idea$

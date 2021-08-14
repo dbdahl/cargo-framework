@@ -1,0 +1,15 @@
+LIBDIR = rustlib/target/release
+STATLIB = $(LIBDIR)/librustlib.a
+
+PKG_LIBS = -L$(LIBDIR) -lrustlib
+
+all: clean
+
+$(SHLIB): $(STATLIB)
+
+$(STATLIB):
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript" ../tools/staticlib.R
+
+clean:
+	rm -Rf $(SHLIB) $(STATLIB)
+

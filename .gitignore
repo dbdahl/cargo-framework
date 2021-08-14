@@ -1,0 +1,8 @@
+.DS_Store
+.Rhistory
+.Rproj.user
+.RData
+.Ruserdata
+*.Rcheck
+/*_*.tar.gz
+.idea
