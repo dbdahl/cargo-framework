@@ -6,3 +6,4 @@
 *.Rcheck
 /*_*.tar.gz
 .idea
+/README.html
