@@ -34,7 +34,7 @@ cross_compile <- function(destination_directory, pkgroot=".", targets="CRAN", mi
     file.rename(paste0(pkgroot,"/src/rustlib/target/",target,"/release/librustlib.a"), paste0(pkgroot,"/src/rustlib/target/release/librustlib.a"))
     tgz_destination_dir <- paste0(destination_directory,"/",name_and_version)
     dir.create(tgz_destination_dir, showWarnings=FALSE)
-    tgz_destination <- normalizePath(paste0(tgz_destination_dir,"/",target,".tar.gz"), mustWork=TRUE)
+    tgz_destination <- normalizePath(paste0(tgz_destination_dir,"/",target,".tar.gz"), mustWork=FALSE)
     setwd(paste0(pkgroot,"/src"))
     tar(tgz_destination, files="rustlib/target/release/librustlib.a", compression="gzip")
     setwd(cwd)
