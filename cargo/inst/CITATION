@@ -1,4 +1,4 @@
-citHeader("To cite in publications, please use:")
+citHeader("To cite in publications, please use")
 
 citEntry(entry  = "misc",
   title         = "Writing R Extensions in Rust",
