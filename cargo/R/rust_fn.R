@@ -18,6 +18,8 @@
 #'   longjmp functionality when Rust code panics?
 #' @param invisible Should the compiled function return values invisibly?
 #'
+#' @return An R function implemented with the supplied Rust code.
+#'
 #' @importFrom utils packageDate
 #' @export
 #'

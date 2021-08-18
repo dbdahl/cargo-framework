@@ -37,6 +37,9 @@ longjmp functionality when Rust code panics?}
 
 \item{invisible}{Should the compiled function return values invisibly?}
 }
+\value{
+An R function implemented with the supplied Rust code.
+}
 \description{
 This function takes Rust code as a string from the last unnamed argument,
 takes variable names for all other unnamed arguments, compiles the Rust
