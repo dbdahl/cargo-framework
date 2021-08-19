@@ -185,46 +185,6 @@ download_staticlib <- function(..., description_file=file.path("..","DESCRIPTION
 
 ## Private
 
-install <- function(force=FALSE) {
-  windows <- .Platform$OS.type=="windows"
-  if ( ! force ) {
-    if ( ! interactive() ) stop("This function requires either user confirmation or 'force=TRUE'.")
-      while ( TRUE ) {
-        response <- toupper(trimws(readline(prompt=paste0("Do you want to install Cargo? [y/N] "))))
-        if ( response %in% c("N","") ) return(invisible(FALSE))
-        if ( response %in% c("Y") ) break
-      }
-  }
-  temp_install_home <- mkdir(tempfile("cargo"))
-  rustup_init <- file.path(temp_install_home, sprintf("rustup-init.%s",ifelse(windows,"exe","sh")))
-  URL <- ifelse(windows,"https://win.rustup.rs/x86_64","https://sh.rustup.rs")
-  if ( tryCatch(utils::download.file(URL, rustup_init, mode="wb"), warning=function(e) 1, error=function(e) 1) != 0 ) {
-    cat(sprintf("Could not download '%s' to '%s'.\n", URL, rustup_init))
-    return(invisible(FALSE))
-  }
-  if ( windows ) {
-    rustup_cmd <- file.path("~/.cargo","bin","rustup.exe")
-    lines <- c(
-      paste0(shQuote(normalizePath(rustup_init,mustWork=FALSE))," -q -y --no-modify-path --default-host x86_64-pc-windows-gnu"),
-      paste0(shQuote(normalizePath(rustup_cmd,mustWork=FALSE))," target add i686-pc-windows-gnu"))
-    rustup_init_bat <- file.path(temp_install_home, "rustup-init.bat")
-    writeLines(lines, rustup_init_bat)
-    if ( system2(rustup_init_bat) != 0 ) {
-      cat(sprintf("There was a problem running the rustup installer at '%s'.\n", rustup_init_bat))
-      return(invisible(FALSE))
-    }
-  } else {
-    # Suppress output to avoid spurious output that can trip up automatic checks on old platforms.
-    if ( system2("sh", c(shQuote(rustup_init),"-q","-y","--no-modify-path")) != 0 ) {
-      cat(sprintf("There was a problem running the rustup installer at '%s'.\n", rustup_init))
-      return(invisible(FALSE))
-    }
-  }
-  unlink(temp_install_home, recursive=TRUE, force=TRUE)
-  cat("\n### Cargo installation was successful. ###\n\n")
-  invisible(TRUE)
-}
-
 find_cmd <- function(what) {
   if ( .Platform$OS.type=="windows" ) what <- paste0(what,".exe")
   if ( Sys.getenv("R_CARGO_HOME","<unset>") != "<unset>" ) {
