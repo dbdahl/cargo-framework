@@ -116,17 +116,24 @@ run <- function(..., minimum_version=file.path("..","DESCRIPTION"), verbose=TRUE
 #' Determine the Rust Build Target
 #'
 #' This function tries to determine the appropriate Rust target for this
-#' instance of R.
+#' instance of R.  Or, it gives the targets necessary for CRAN build machines.
 #'
-#' @return A string giving a Rust target, or \code{""} if this cannot be
-#'   determined.
+#' @param cran Are targets for all CRAN build machines desired?
+#'
+#' @return If \code{cran=FALSE}, a string giving a Rust target, or \code{""} if
+#'   this cannot be determined.  If \code{cran=TRUE}, a character vector giving
+#'   the targets necessary for CRAN build machines.
 #'
 #' @export
+#' @seealso cross_compile
 #'
 #' @examples
 #' target()
 #'
-target <- function() {
+target <- function(cran=FALSE) {
+  if ( isTRUE(cran) ) {
+    return(c("i686-pc-windows-gnu","x86_64-pc-windows-gnu","aarch64-apple-darwin","x86_64-apple-darwin","x86_64-unknown-linux-gnu"))
+  }
   info <- Sys.info()
   sysname <- info['sysname']
   machine <- info['machine']

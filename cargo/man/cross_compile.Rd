@@ -7,7 +7,7 @@
 cross_compile(
   destination_directory,
   pkgroot = ".",
-  targets = "CRAN",
+  target = "CRAN",
   minimum_version = file.path(pkgroot, "DESCRIPTION"),
   verbose = TRUE
 )
@@ -18,9 +18,9 @@ should be added.}
 
 \item{pkgroot}{The root directory of the package.}
 
-\item{targets}{A character vector giving Rust targets (e.g.
+\item{target}{A character vector giving Rust targets (e.g.
 \code{"x86_64-pc-windows-gnu"}). The value \code{"CRAN"} is replaced by all
-CRAN targets.}
+targets for CRAN build machines.}
 
 \item{minimum_version}{A character string representing the minimum version of
 Rust that is needed. Or a path to the DESCRIPTION file, in which case the
@@ -37,4 +37,7 @@ platforms. The package developer can then uploaded these to a web server.
 Then, if a particular CRAN build machine does not have a sufficient
 installation of the Rust toolchain, the package's \file{tools/staticlib.R}
 script can download the appropriate static library.
+}
+\seealso{
+target
 }
