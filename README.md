@@ -63,3 +63,8 @@ A BibTeX entry for LaTeX users is
     primaryclass = {cs.PL},
   }
 ```
+
+# Related Projects
+
++ [extendr](https://github.com/extendr/extendr)
++ [Rust in R](https://github.com/r-rust)
