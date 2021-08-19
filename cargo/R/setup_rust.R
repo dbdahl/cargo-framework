@@ -14,7 +14,7 @@ setup_rust <- function(force=FALSE) {
   if ( ! force ) {
     if ( ! interactive() ) stop("This function requires either user confirmation or 'force=TRUE'.")
       while ( TRUE ) {
-        response <- toupper(trimws(readline(prompt=paste0("Do you want to install the Rust toolchain? [y/N] "))))
+        response <- toupper(trimws(readline(prompt=paste0("Do you want to install the Rust toolchain and targets? [y/N] "))))
         if ( response %in% c("N","") ) return(invisible(FALSE))
         if ( response %in% c("Y") ) break
       }
@@ -49,6 +49,6 @@ setup_rust <- function(force=FALSE) {
       return(invisible(FALSE))
     }
   }
-  cat("\n### Rust was successfully setup. ###\n\n")
+  cat("\n### Rust was successfully set up. ###\n\n")
   invisible(TRUE)
 }
