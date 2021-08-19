@@ -43,6 +43,14 @@ remotes::install_github("dbdahl/cargo-framework/cargo")
 For usage information, please see the paper
 [*Writing R Extensions in Rust*]( https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
 
+## Examples
+
+The following are [Rust](https://www.rust-lang.org/)-based packages on [CRAN](https://cran.r-project.org/)
+that were developed using this framework.
+
++ [salso](https://cran.r-project.org/package=salso)
++ [caviarpd](https://cran.r-project.org/package=caviarpd)
+
 ## Citation
 
 To cite in publications, please use
