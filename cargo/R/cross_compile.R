@@ -17,6 +17,8 @@
 #' @return \code{NULL}, invisibly.
 #'
 #' @seealso target
+#'
+#' @importFrom utils tar
 #' @export
 #'
 cross_compile <- function(destination_directory, pkgroot=".", target="CRAN", minimum_version=file.path(pkgroot,"DESCRIPTION"), verbose=TRUE) {

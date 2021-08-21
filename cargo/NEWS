@@ -1,8 +1,10 @@
-0.1.37.* (DEVELOPMENT)
+0.1.38 (2021-08-21)
   * Added setup_rust function to aid in installing the Rust toolchain and
     targets needed for compiling static libraries for CRAN build machines.
   * Added cross_compile function to compile static libraries for all targets
     used by CRAN build machines.
+  * Added api_documentation function to launch web browser to show the API
+    for the cargo framework.
 
 0.1.37 (2021-08-14)
   * Expanded the functionality of the 'cargo' framework for Rust-based package

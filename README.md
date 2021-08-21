@@ -61,7 +61,7 @@ Setting up your environment is easy.
 
 ```r
 library(cargo)
-setup_rust(TRUE)   # Only available in the development version.
+setup_rust(TRUE)
 ```
 
 Make a new package named, for example, `foo`:
@@ -101,7 +101,7 @@ foo
 You can browse the documentation of the API for the cargo framework:
 
 ```r
-cargo::api_documentation("foo")   # Only available in the development version.
+cargo::api_documentation("foo")
 ```
 
 And, you can extend the framework by editing `foo/src/rustlib/roxido/src/r.rs`.
