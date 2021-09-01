@@ -6,7 +6,7 @@ edition = "2018"
 description = "Macros to support the roxido crate"
 homepage = "https://github.com/dbdahl/cargo-framework"
 license = "MIT OR Apache-2.0"
-publish = true
+publish = false
 
 [lib]
 proc-macro = true
