@@ -18,7 +18,7 @@ commonly-used parts of [R](https://www.r-project.org/)'s API with minimal
 overhead and allows a programmer to easily add additional wrappers.
 
 This repository hosts the source of the
-[cargo](https://cran.r-project.org/package=cargo) package hosted on
+[cargo](https://cran.r-project.org/package=cargo) package on
 [CRAN](https://cran.r-project.org/).
 
 ## Installation
@@ -42,6 +42,9 @@ remotes::install_github("dbdahl/cargo-framework/cargo")
 
 For usage information, please see the paper
 [*Writing R Extensions in Rust*]( https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
+
+The [rustdoc](https://docs.rs/roxido/) for the [roxido](https://crates.io/crates/roxido) crate
+documents the `Rval` structure and its functions.
 
 ## Examples
 
