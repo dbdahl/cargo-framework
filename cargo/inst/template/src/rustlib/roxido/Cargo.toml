@@ -1,10 +1,9 @@
 [package]
 name = "roxido"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["David B. Dahl <dahl@stat.byu.edu>"]
 edition = "2018"
 description = "A framework is provided to transparently develop R packages using Rust with minimal overhead, and more wrappers are easily added."
-documentation = "https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf"
 homepage = "https://github.com/dbdahl/cargo-framework"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
