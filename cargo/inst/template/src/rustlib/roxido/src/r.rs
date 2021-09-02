@@ -294,8 +294,6 @@ impl Rval {
 
     /// Duplicate an object.
     ///
-    /// When assignments are done in R such as
-    ///
     /// Since multiple symbols may be bound to the same object, if the usual R semantics are to
     /// apply, any code which alters one of them needs to make a copy before modifying the copy.
     /// This method is commonly called on arguments to `.Call` before modifying them.
