@@ -669,6 +669,18 @@ impl Rval {
         }
     }
 
+    /// Coerce the object to storage mode `character` and get the associated `&str` value.
+    ///
+    /// If coercion is not possible (because, for example, no UTF-8 representation exists), `""` is returned.
+    ///
+    pub fn as_str(self) -> &'static str {
+        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
+        match c_str.to_str() {
+            Ok(x) => x,
+            Err(_) => "",
+        }
+    }
+
     /// Get the number of rows in a matrix.
     ///
     /// # Panics
