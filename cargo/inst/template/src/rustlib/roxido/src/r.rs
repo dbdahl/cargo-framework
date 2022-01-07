@@ -1145,6 +1145,34 @@ impl NewProtected<&mut [i32]> for Rval {
     }
 }
 
+impl TryNewProtected<&[usize]> for Rval {
+    type Error = TryFromIntError;
+    fn try_new(x: &[usize], pc: &mut Pc) -> Result<Self, Self::Error> {
+        let (rval, slice) = Rval::new_vector_integer(x.len(), pc);
+        for (r, s) in slice.iter_mut().zip(x) {
+            match i32::try_from(*s) {
+                Ok(z) => *r = z,
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(rval)
+    }
+}
+
+impl TryNewProtected<&mut [usize]> for Rval {
+    type Error = TryFromIntError;
+    fn try_new(x: &mut [usize], pc: &mut Pc) -> Result<Self, Self::Error> {
+        let (rval, slice) = Rval::new_vector_integer(x.len(), pc);
+        for (r, s) in slice.iter_mut().zip(x) {
+            match i32::try_from(*s) {
+                Ok(z) => *r = z,
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(rval)
+    }
+}
+
 impl TryFrom<Rval> for &[u8] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static [u8], &'static str> {

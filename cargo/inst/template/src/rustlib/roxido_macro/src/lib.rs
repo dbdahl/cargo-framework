@@ -14,7 +14,7 @@
 //! transparent [Rust](https://www.rust-lang.org/)-based API which wraps
 //! commonly-used parts of [R](https://www.r-project.org/)'s API with minimal
 //! overhead and allows a programmer to easily add additional wrappers.
-//! 
+//!
 //! This crate provides the `roxido` procedural macro to support the
 //! [roxido](https://crates.io/crates/roxido) crate
 

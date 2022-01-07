@@ -14,7 +14,7 @@
 //! transparent [Rust](https://www.rust-lang.org/)-based API which wraps
 //! commonly-used parts of [R](https://www.r-project.org/)'s API with minimal
 //! overhead and allows a programmer to easily add additional wrappers.
-//! 
+//!
 //! This crate provides the Rust API for the cargo framework.  Of particular note
 //! is the [Rval] structure and its functions.
 
