@@ -34,15 +34,15 @@ Cargo found at: /home/dahl/.cargo/bin/cargo
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/home/dahl/docs/devel/cargo-framework-new/tests/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/home/dahl/docs/devel/cargo-framework-new/tests/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework-new/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.20s
+   Compiling roxido_macro v0.5.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.21s
 Built Rust static library.
 ** libs
-gcc -I"/home/dahl/local/R/devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/local/R/devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/devel/lib/R/lib -lR
-installing to /home/dahl/local/R/devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+gcc -I"/home/dahl/local/R/4.2.0-latest/lib/R/include" -DNDEBUG   -I/usr/local/include   -fpic  -g -O2  -c shim.c -o shim.o
+gcc -shared -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -lR
+installing to /home/dahl/local/R/4.2.0-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -54,7 +54,7 @@ installing to /home/dahl/local/R/devel/lib/R/library/00LOCK-testpkg/00new/testpk
 ** testing if installed package keeps a record of temporary installation path
 * DONE (testpkg)
 R CMD INSTALL testpkg
-* installing to library ‘/home/dahl/local/R/devel/lib/R/library’
+* installing to library ‘/home/dahl/local/R/4.2.0-latest/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
@@ -66,7 +66,7 @@ Cargo found at: /home/dahl/.cargo/bin/cargo
 Built Rust static library.
 ** libs
 make: Nothing to be done for 'all'.
-installing to /home/dahl/local/R/devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+installing to /home/dahl/local/R/4.2.0-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -96,8 +96,8 @@ Removed empty directory ‘testpkg/src/rust/vendor’
 * building ‘testpkg_0.1.0.tar.gz’
 
 ------------- FFT -------------
-* using log directory ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck’
-* using R Under development (unstable) (2022-04-18 r82209)
+* using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
+* using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-pc-linux-gnu (64-bit)
 * using session charset: UTF-8
 * using option ‘--as-cran’
@@ -171,11 +171,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 
 Status: 3 NOTEs
 See
-  ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+  ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
 
 
-* installing to library ‘/home/dahl/local/R/devel/lib/R/library’
+* installing to library ‘/home/dahl/local/R/4.2.0-latest/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
@@ -189,15 +189,15 @@ Cargo found at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/tmp/Rtmpy0V8SH/R.INSTALL4afdf2a7da123/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/tmp/Rtmpy0V8SH/R.INSTALL4afdf2a7da123/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/tmp/Rtmpy0V8SH/R.INSTALL4afdf2a7da123/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.14s
+   Compiling roxido_macro v0.5.0 (/tmp/RtmpEOcMxw/R.INSTALLa9fa6a69471a/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/tmp/RtmpEOcMxw/R.INSTALLa9fa6a69471a/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/tmp/RtmpEOcMxw/R.INSTALLa9fa6a69471a/testpkg/src/rust)
+    Finished release [optimized] target(s) in 6.74s
 Built Rust static library.
 ** libs
-gcc -I"/home/dahl/local/R/devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/local/R/devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/devel/lib/R/lib -lR
-installing to /home/dahl/local/R/devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+gcc -I"/home/dahl/local/R/4.2.0-latest/lib/R/include" -DNDEBUG   -I/usr/local/include   -fpic  -g -O2  -c shim.c -o shim.o
+gcc -shared -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -lR
+installing to /home/dahl/local/R/4.2.0-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -212,8 +212,8 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0_R_x86_64-pc-linux-gnu
 * DONE (testpkg)
 [1]  0.6607697 -2.0529830 -1.4992061
 ------------- FTF -------------
-* using log directory ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck’
-* using R Under development (unstable) (2022-04-18 r82209)
+* using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
+* using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-pc-linux-gnu (64-bit)
 * using session charset: UTF-8
 * using option ‘--as-cran’
@@ -287,11 +287,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 
 Status: 3 NOTEs
 See
-  ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+  ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
 
 
-* installing to library ‘/home/dahl/local/R/devel/lib/R/library’
+* installing to library ‘/home/dahl/local/R/4.2.0-latest/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
@@ -303,15 +303,15 @@ Cargo found at: /home/dahl/.cargo/bin/cargo
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/tmp/RtmpkKEahm/R.INSTALL4b8113f28d559/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/tmp/RtmpkKEahm/R.INSTALL4b8113f28d559/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/tmp/RtmpkKEahm/R.INSTALL4b8113f28d559/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.12s
+   Compiling roxido_macro v0.5.0 (/tmp/RtmpMYrruU/R.INSTALLb1554df25db2/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/tmp/RtmpMYrruU/R.INSTALLb1554df25db2/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/tmp/RtmpMYrruU/R.INSTALLb1554df25db2/testpkg/src/rust)
+    Finished release [optimized] target(s) in 6.72s
 Built Rust static library.
 ** libs
-gcc -I"/home/dahl/local/R/devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/local/R/devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/devel/lib/R/lib -lR
-installing to /home/dahl/local/R/devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+gcc -I"/home/dahl/local/R/4.2.0-latest/lib/R/include" -DNDEBUG   -I/usr/local/include   -fpic  -g -O2  -c shim.c -o shim.o
+gcc -shared -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -lR
+installing to /home/dahl/local/R/4.2.0-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -326,8 +326,8 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0_R_x86_64-pc-linux-gnu
 * DONE (testpkg)
 [1]  0.6607697 -2.0529830 -1.4992061
 ------------- TFF -------------
-* using log directory ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck’
-* using R Under development (unstable) (2022-04-18 r82209)
+* using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
+* using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-pc-linux-gnu (64-bit)
 * using session charset: UTF-8
 * using option ‘--as-cran’
@@ -401,11 +401,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 
 Status: 3 NOTEs
 See
-  ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+  ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
 
 
-* installing to library ‘/home/dahl/local/R/devel/lib/R/library’
+* installing to library ‘/home/dahl/local/R/4.2.0-latest/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
@@ -415,15 +415,15 @@ Cargo found at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/tmp/RtmpmLPvSV/R.INSTALL4c0282862c29b/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/tmp/RtmpmLPvSV/R.INSTALL4c0282862c29b/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/tmp/RtmpmLPvSV/R.INSTALL4c0282862c29b/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.14s
+   Compiling roxido_macro v0.5.0 (/tmp/Rtmp8tIeiO/R.INSTALLb8c43cef718b/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/tmp/Rtmp8tIeiO/R.INSTALLb8c43cef718b/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/tmp/Rtmp8tIeiO/R.INSTALLb8c43cef718b/testpkg/src/rust)
+    Finished release [optimized] target(s) in 6.71s
 Built Rust static library.
 ** libs
-gcc -I"/home/dahl/local/R/devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/local/R/devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/devel/lib/R/lib -lR
-installing to /home/dahl/local/R/devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+gcc -I"/home/dahl/local/R/4.2.0-latest/lib/R/include" -DNDEBUG   -I/usr/local/include   -fpic  -g -O2  -c shim.c -o shim.o
+gcc -shared -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/local/R/4.2.0-latest/lib/R/lib -lR
+installing to /home/dahl/local/R/4.2.0-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -438,8 +438,8 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0_R_x86_64-pc-linux-gnu
 * DONE (testpkg)
 [1]  0.6607697 -2.0529830 -1.4992061
 ------------- FFF -------------
-* using log directory ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck’
-* using R Under development (unstable) (2022-04-18 r82209)
+* using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
+* using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-pc-linux-gnu (64-bit)
 * using session charset: UTF-8
 * using option ‘--as-cran’
@@ -501,11 +501,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 
 Status: 2 NOTEs
 See
-  ‘/home/dahl/docs/devel/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+  ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
 
 
-* installing to library ‘/home/dahl/local/R/devel/lib/R/library’
+* installing to library ‘/home/dahl/local/R/4.2.0-latest/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
