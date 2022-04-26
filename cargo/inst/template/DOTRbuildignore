@@ -1,5 +1,7 @@
+^src/librust.a
+^src/rust/(.*/)*target
+^src/rust/vendor/
+^src/rust/[.]cargo
+^src/rust/(.*/)*[.]idea
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^src/staticlib.tar.gz$
-^src/rustlib/(.*/)*target$
-^src/rustlib/(.*/)*\.idea$

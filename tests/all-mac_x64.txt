@@ -1,0 +1,558 @@
+Rscript -e "cargo::install(TRUE)"
+
+The cargo package would like to download Rust from https://rustup.rs/ (an
+official website of the Rust project) and then install Rust into the directory:
+    /Users/dahl/Library/Caches/org.R-project.R/R/cargo
+That directory will then be used to keep the Rust installation up-to-date. It
+will also be used to: 1. cache shared libraries for R packages based on Rust
+and 2. enable cached compilation for the cargo::rust_fn function. The cargo
+package purges unused cache items every 91 days, but you can change the
+frequency by modifying the last line of the "last-purge" file in that
+directory. You can revoke permission at any time by deleting that directory.
+
+Agreement accepted due to 'force=TRUE'.
+
+trying URL 'https://sh.rustup.rs'
+Content type 'text/x-sh' length 21102 bytes (20 KB)
+==================================================
+downloaded 20 KB
+
+Running installation. Please be patient.
+Installation was successfull.
+cd ../cargo/tests; R CMD BATCH testthat.R
+mv ../cargo/tests/testthat.Rout rust_fn.Rout
+rm -rf testpkg
+Rscript -e "cargo::new_package('testpkg')"
+Installing package into ‘/Users/dahl/Library/R/x86_64/4.1/library’
+(as ‘lib’ is unspecified)
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Condition not met.
+Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
+Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo found at: /Users/dahl/.cargo/bin/cargo
+   Compiling proc-macro2 v1.0.37
+   Compiling unicode-xid v0.2.2
+   Compiling syn v1.0.91
+   Compiling quote v1.0.18
+   Compiling roxido_macro v0.5.0 (/Users/dahl/cargo-framework-new/tests/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/Users/dahl/cargo-framework-new/tests/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/Users/dahl/cargo-framework-new/tests/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.33s
+Built Rust static library.
+** libs
+clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
+clang -mmacosx-version-min=10.13 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/dahl/Library/R/x86_64/4.1/library/00LOCK-testpkg/00new/testpkg/libs
+** R
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (testpkg)
+R CMD INSTALL testpkg
+* installing to library ‘/Users/dahl/Library/R/x86_64/4.1/library’
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Condition not met.
+Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
+Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo found at: /Users/dahl/.cargo/bin/cargo
+    Finished release [optimized] target(s) in 0.03s
+Built Rust static library.
+** libs
+make: Nothing to be done for `all'.
+installing to /Users/dahl/Library/R/x86_64/4.1/library/00LOCK-testpkg/00new/testpkg/libs
+** R
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (testpkg)
+Rscript -e "cargo::prebuild('testpkg')"
+ℹ Loading testpkg
+Writing NAMESPACE
+Writing NAMESPACE
+Rscript -e "cargo::prebuild('testpkg')"
+ℹ Loading testpkg
+Writing NAMESPACE
+Writing NAMESPACE
+R CMD build testpkg
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* preparing ‘testpkg’:
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+Removed empty directory ‘testpkg/src/rust/vendor’
+* building ‘testpkg_0.1.0.tar.gz’
+
+------------- FFT -------------
+* using log directory ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck’
+* using R version 4.1.3 (2022-03-10)
+* using platform: x86_64-apple-darwin17.0 (64-bit)
+* using session charset: UTF-8
+* using option ‘--as-cran’
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* this is package ‘testpkg’ version ‘0.1.0’
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘First Last <name@gmail.com>’
+
+New submission
+* checking package namespace information ... OK
+* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
+  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
+ OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘testpkg’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Authors@R field gives persons with invalid ORCID identifiers:
+  First Last <name@gmail.com> [aut, cre] (ORCID-ID)
+* checking top-level files ... WARNING
+A complete check needs the 'checkbashisms' script.
+See section ‘Configure and cleanup’ in the ‘Writing R Extensions’
+manual.
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in shell scripts ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... OK
+* checking for GNU extensions in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking use of PKG_*FLAGS in Makefiles ... OK
+* checking use of SHLIB_OPENMP_*FLAGS in Makefiles ... OK
+* checking pragmas in C/C++ headers and code ... OK
+* checking compilation flags used ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+
+Status: 1 WARNING, 2 NOTEs
+See
+  ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+for details.
+
+
+* installing to library ‘/Users/dahl/Library/R/x86_64/4.1/library’
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Method bypassed by R_CARGO_RUN_NO_ENVIR environment variable.
+Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
+Method bypassed by R_CARGO_RUN_NO_PATH environment variable.
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
+   Compiling proc-macro2 v1.0.37
+   Compiling unicode-xid v0.2.2
+   Compiling syn v1.0.91
+   Compiling quote v1.0.18
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpknDYDY/R.INSTALL7d1263b407f8/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpknDYDY/R.INSTALL7d1263b407f8/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpknDYDY/R.INSTALL7d1263b407f8/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.56s
+Built Rust static library.
+** libs
+clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
+clang -mmacosx-version-min=10.13 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/dahl/Library/R/x86_64/4.1/library/00LOCK-testpkg/00new/testpkg/libs
+** R
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* creating tarball
+packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
+* DONE (testpkg)
+[1]  0.6607697 -2.0529830 -1.4992061
+------------- FTF -------------
+* using log directory ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck’
+* using R version 4.1.3 (2022-03-10)
+* using platform: x86_64-apple-darwin17.0 (64-bit)
+* using session charset: UTF-8
+* using option ‘--as-cran’
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* this is package ‘testpkg’ version ‘0.1.0’
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘First Last <name@gmail.com>’
+
+New submission
+* checking package namespace information ... OK
+* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
+  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
+ OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘testpkg’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Authors@R field gives persons with invalid ORCID identifiers:
+  First Last <name@gmail.com> [aut, cre] (ORCID-ID)
+* checking top-level files ... WARNING
+A complete check needs the 'checkbashisms' script.
+See section ‘Configure and cleanup’ in the ‘Writing R Extensions’
+manual.
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in shell scripts ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... OK
+* checking for GNU extensions in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking use of PKG_*FLAGS in Makefiles ... OK
+* checking use of SHLIB_OPENMP_*FLAGS in Makefiles ... OK
+* checking pragmas in C/C++ headers and code ... OK
+* checking compilation flags used ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+
+Status: 1 WARNING, 2 NOTEs
+See
+  ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+for details.
+
+
+* installing to library ‘/Users/dahl/Library/R/x86_64/4.1/library’
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Method bypassed by R_CARGO_RUN_NO_ENVIR environment variable.
+Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
+Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo found at: /Users/dahl/.cargo/bin/cargo
+   Compiling proc-macro2 v1.0.37
+   Compiling unicode-xid v0.2.2
+   Compiling syn v1.0.91
+   Compiling quote v1.0.18
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpncgv9a/R.INSTALL80bd4892456c/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpncgv9a/R.INSTALL80bd4892456c/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpncgv9a/R.INSTALL80bd4892456c/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.52s
+Built Rust static library.
+** libs
+clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
+clang -mmacosx-version-min=10.13 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/dahl/Library/R/x86_64/4.1/library/00LOCK-testpkg/00new/testpkg/libs
+** R
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* creating tarball
+packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
+* DONE (testpkg)
+[1]  0.6607697 -2.0529830 -1.4992061
+------------- TFF -------------
+* using log directory ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck’
+* using R version 4.1.3 (2022-03-10)
+* using platform: x86_64-apple-darwin17.0 (64-bit)
+* using session charset: UTF-8
+* using option ‘--as-cran’
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* this is package ‘testpkg’ version ‘0.1.0’
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘First Last <name@gmail.com>’
+
+New submission
+* checking package namespace information ... OK
+* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
+  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
+ OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘testpkg’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Authors@R field gives persons with invalid ORCID identifiers:
+  First Last <name@gmail.com> [aut, cre] (ORCID-ID)
+* checking top-level files ... WARNING
+A complete check needs the 'checkbashisms' script.
+See section ‘Configure and cleanup’ in the ‘Writing R Extensions’
+manual.
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in shell scripts ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... OK
+* checking for GNU extensions in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking use of PKG_*FLAGS in Makefiles ... OK
+* checking use of SHLIB_OPENMP_*FLAGS in Makefiles ... OK
+* checking pragmas in C/C++ headers and code ... OK
+* checking compilation flags used ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+
+Status: 1 WARNING, 2 NOTEs
+See
+  ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+for details.
+
+
+* installing to library ‘/Users/dahl/Library/R/x86_64/4.1/library’
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
+   Compiling proc-macro2 v1.0.37
+   Compiling unicode-xid v0.2.2
+   Compiling syn v1.0.91
+   Compiling quote v1.0.18
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpUe8D7Y/R.INSTALL84681c529323/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpUe8D7Y/R.INSTALL84681c529323/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpUe8D7Y/R.INSTALL84681c529323/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.52s
+Built Rust static library.
+** libs
+clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
+clang -mmacosx-version-min=10.13 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/dahl/Library/R/x86_64/4.1/library/00LOCK-testpkg/00new/testpkg/libs
+** R
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* creating tarball
+packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
+* DONE (testpkg)
+[1]  0.6607697 -2.0529830 -1.4992061
+------------- FFF -------------
+* using log directory ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck’
+* using R version 4.1.3 (2022-03-10)
+* using platform: x86_64-apple-darwin17.0 (64-bit)
+* using session charset: UTF-8
+* using option ‘--as-cran’
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* this is package ‘testpkg’ version ‘0.1.0’
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘First Last <name@gmail.com>’
+
+New submission
+* checking package namespace information ... OK
+* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
+  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
+ OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘testpkg’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Authors@R field gives persons with invalid ORCID identifiers:
+  First Last <name@gmail.com> [aut, cre] (ORCID-ID)
+* checking top-level files ... WARNING
+A complete check needs the 'checkbashisms' script.
+See section ‘Configure and cleanup’ in the ‘Writing R Extensions’
+manual.
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in shell scripts ... OK
+* checking compilation flags in Makevars ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+
+Status: 1 WARNING, 2 NOTEs
+See
+  ‘/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log’
+for details.
+
+
+* installing to library ‘/Users/dahl/Library/R/x86_64/4.1/library’
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Method bypassed by R_CARGO_RUN_NO_ENVIR environment variable.
+Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
+Method bypassed by R_CARGO_RUN_NO_PATH environment variable.
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Method bypassed by R_CARGO_RUN_NO_CACHE environment variable.
+Cargo not found.
+Could not find a suitable Cargo installation.
+The package's Rust code can be compiled by the end user when Cargo is installed. Hint: cargo::install().
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* creating tarball
+packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
+* DONE (testpkg)
+Error in .Call(.myrnorm, n, mean, sd) : 
+  Cargo was not found. Did you run cargo::install() and then restart R?
+Calls: <Anonymous> -> .Call
+Execution halted
+[1]  0.6607697 -2.0529830 -1.4992061
+[1]  0.6607697 -2.0529830 -1.4992061
+Error in .Call(.myrnorm, n, mean, sd) : 
+  Cargo was not found. Did you run cargo::install() and then restart R?
+Calls: <Anonymous> -> .Call
+Execution halted

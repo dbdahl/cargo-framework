@@ -1,0 +1,9 @@
+.idea/
+.cargo/
+target/
+vendor/
+*.so
+*.o
+*.a
+.Rhistory
+.Rproj.user/

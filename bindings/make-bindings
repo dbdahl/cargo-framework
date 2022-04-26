@@ -2,10 +2,10 @@
 
 cd $(readlink -f $(dirname "$0"))
 CWD="$PWD"
-DEST="$CWD/../cargo/inst/template/src/rustlib/roxido/src/rbindings.rs"
+DEST="$CWD/../cargo/inst/template/src/rust/roxido/src/rbindings.rs"
 
 function usage {
-  >&2 echo "usage: $0 R-X.X.X.tar.gz"
+  >&2 echo "usage: $0 R*.tar.gz"
   exit 1
 }
 
@@ -21,7 +21,7 @@ then
   usage
 fi
 
-SRC_DIR=$(basename $SRC_TARBALL .tar.gz)
+SRC_DIR=$(tar tf $SRC_TARBALL | cut -d / -f 1 | uniq)
 if [[ ! -e "$SRC_DIR" ]]
 then
   rm -rf "$SRC_DIR"
@@ -37,6 +37,8 @@ else
 fi
 
 cd src/include
+
+rm $DEST
 
 cat <<EOT > $DEST
 //! Automatically Generated Bindings for R's C API.

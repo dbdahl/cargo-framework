@@ -1,0 +1,75 @@
+# Cargo Framework configuration script from the cargo package, version X@X.
+
+# In case Cargo is not found, wrap parts of examples in \dontrun{}.
+# Assumes working directory is package root.
+make_Rd_from_template <- function(shlib) {
+    pattern <- "^#\\s*R_CARGO\\s*(.*)"
+    rdfiles <- list.files("man", full.names=TRUE)
+    for ( rdfile in rdfiles ) {
+        if ( dir.exists(rdfile) ) next
+        lines <- readLines(rdfile)
+        lines <- if ( shlib ) {
+            lines[!grepl(pattern, lines)]
+        } else {
+            sub(pattern,"\\1",lines)
+        }
+        writeLines(lines, rdfile)
+    }
+}
+
+# In case Cargo is not found, prepare Rust code to be embedded in binary package.
+# Assumes working directory is package root.
+package_rust_source_in_installation_package <- function(pkgname) {
+    dir.create("inst", showWarnings=FALSE)
+    file.rename("src/rust", "inst/rust")
+    unlink("src", recursive=TRUE)
+    unlink("inst/rust/vendor", recursive=TRUE)
+    unlink("inst/rust/.cargo", recursive=TRUE)
+    lines <- c('','#[no_mangle]',
+               sprintf('extern "C" fn R_init_%s(info: *mut rbindings::DllInfo) {', pkgname),
+               sprintf('    R_init_%s_rust(info);', pkgname),
+               '}')
+    cat(paste0(lines,collapse="\n"), "\n", sep="", file="inst/rust/src/registration.rs", append=TRUE)
+    cargo_toml_filename <- "inst/rust/Cargo.toml"
+    lines <- readLines(cargo_toml_filename)
+    lines <- sub('^(\\s*crate-type\\s*=\\s*\\[\\s*)".*"','\\1"cdylib"',lines)
+    writeLines(lines, cargo_toml_filename)
+}
+
+# In case Cargo is not found, turn off shared library registration.
+# Assumes working directory is package root.
+deregister <- function() {
+    lines <- readLines("NAMESPACE")
+    lines <- lines[!grepl("useDynLib", lines, fixed=TRUE)]
+    writeLines(lines, "NAMESPACE")
+    file.rename("tools/registration.R", "R/registration.R")
+}
+
+####
+#### Try to compile Rust code.
+####
+
+setwd("src/rust")
+if ( ! dir.exists("vendor") ) untar("vendor.tar.gz", tar="internal")
+
+if ( cargo::run('build', '--offline', '--release', '--jobs', '2', minimum_version='../..') == 0 ) {
+
+    file.copy("target/release/librust.a", "..", overwrite=TRUE)
+    if ( ! file.exists("#SRC#") ) make_Rd_from_template(TRUE)
+    cat("Built Rust static library.\n")
+
+} else {
+
+    setwd("../..")
+    if ( file.exists("#SRC#") ) {
+        cat("Cargo must be available for development. Hint: cargo::install().\n")
+        q(status=1)
+    }
+    pkgname <- read.dcf("DESCRIPTION")[,"Package"]
+    package_rust_source_in_installation_package(pkgname)
+    deregister()
+    make_Rd_from_template(FALSE)
+    cat("Could not find a suitable Cargo installation.\n")
+    cat("The package's Rust code can be compiled by the end user when Cargo is installed. Hint: cargo::install().\n")
+
+}

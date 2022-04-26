@@ -45,7 +45,7 @@ test_that("longjmp", {
   expect_silent(f2 <- rust_fn('
       panic!("Oops!");
   ', longjmp=TRUE, invisible=TRUE))
-  expect_silent(f3 <- rust_fn('
+  expect_silent(f4 <- rust_fn('
       panic!("Oops!");
   ', longjmp=FALSE, invisible=FALSE))
   expect_silent(f4 <- rust_fn('
@@ -145,13 +145,7 @@ test_that("usize", {
       use std::convert::TryFrom;
       Rval::try_new(usize::try_from(a).unwrap(), &mut pc).unwrap()
   ')
-  f2 <- rust_fn(a, '
-      use std::convert::TryInto;
-      let b: usize = a.try_into().unwrap();
-      Rval::try_new(b.try_into().unwrap(), &mut pc).unwrap()
-  ')
-
-  for ( f in list(f1,f2) ) {
+  for ( f in list(f1) ) {
     expect_equal(f(7), 7L)
     expect_equal(f(c(7,6,5,4)), 7L)
     expect_error(f(c()))

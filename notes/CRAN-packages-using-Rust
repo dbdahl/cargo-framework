@@ -1,0 +1,24 @@
+db <- tools::CRAN_package_db()
+db$Package[grepl("Cargo",db$SystemRequirements)]
+db$Package[grepl("R *\\(>= 4.1",db$Depends))]
+
+names(db)
+https://cran.r-project.org/src/contrib/abc_2.1.tar.gz
+
+names <- db$Package
+destfiles <- sprintf("%s_%s.tar.gz", db$Package, db$Version)
+urls <- paste0("https://cran.r-project.org/src/contrib/", destfiles)
+
+seq <- sample(seq_along(urls))
+
+for ( i in seq_along(seq) ) {
+    download.file(urls[seq[i]], destfiles[seq[i]], mode="wb")
+    untar(destfiles[seq[i]])
+    if ( file.exists(file.path(names[seq[i]],"inst","doc","index.html")) ) {
+        cat(names[seq[i]],"\n")
+        break
+    }
+}
+
+names <- db$Package
+names <- db$Package

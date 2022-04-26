@@ -1,0 +1,8 @@
+_ Make template package
+_ Update bindings for R 4.2.0
+_ Make repository public
+_ Convert:
+    _ pumpkin
+    _ fangs
+    _ caviarpd
+    _ salso
