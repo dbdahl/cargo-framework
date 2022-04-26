@@ -23,7 +23,7 @@ cd ../cargo/tests; R CMD BATCH testthat.R
 mv ../cargo/tests/testthat.Rout rust_fn.Rout
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
-Installing package into 'C:/Users/dahl/Documents/R/win-library/4.1'
+Installing package into 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 (as 'lib' is unspecified)
 * installing *source* package 'testpkg' ...
 ** using staged installation
@@ -36,18 +36,18 @@ Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\cargo-framework-new\tests\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\cargo-framework-new\tests\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\cargo-framework-new\tests\testpkg\src\rust)
-    Finished release [optimized] target(s) in 14.34s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust)
+    Finished release [optimized] target(s) in 13.23s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
 so building only the main architecture
 
-gcc  -I"C:/PROGRA~1/R/R-42~1.0BE/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
-gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0BE/bin/x64 -lR
-installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/testpkg/libs/x64
+gcc  -I"C:/PROGRA~1/R/R-42~1.0/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
+gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0/bin/x64 -lR
+installing to C:/Users/dahl/AppData/Local/R/win-library/4.2/00LOCK-testpkg/00new/testpkg/libs/x64
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -58,7 +58,7 @@ installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/tes
 ** testing if installed package keeps a record of temporary installation path
 * DONE (testpkg)
 R CMD INSTALL testpkg
-* installing to library 'C:/Users/dahl/Documents/R/win-library/4.1'
+* installing to library 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 * installing *source* package 'testpkg' ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
@@ -73,7 +73,7 @@ Warning: this package has a non-empty 'configure.win' file,
 so building only the main architecture
 
 make: Nothing to be done for 'all'.
-installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/testpkg/libs/x64
+installing to C:/Users/dahl/AppData/Local/R/win-library/4.2/00LOCK-testpkg/00new/testpkg/libs/x64
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -84,13 +84,7 @@ installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/tes
 ** testing if installed package keeps a record of temporary installation path
 * DONE (testpkg)
 Rscript -e "cargo::prebuild('testpkg')"
-ℹ Loading testpkg
-Writing NAMESPACE
-Writing NAMESPACE
 Rscript -e "cargo::prebuild('testpkg')"
-ℹ Loading testpkg
-Writing NAMESPACE
-Writing NAMESPACE
 R CMD build testpkg
 * checking for file 'testpkg/DESCRIPTION' ... OK
 * preparing 'testpkg':
@@ -103,8 +97,8 @@ Removed empty directory 'testpkg/src/rust/vendor'
 Warning: file 'testpkg/configure' did not have execute permissions: corrected
 
 ------------- FFT -------------
-* using log directory 'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck'
-* using R version 4.2.0 beta (2022-04-12 r82161 ucrt)
+* using log directory 'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck'
+* using R version 4.2.0 (2022-04-22 ucrt)
 * using platform: x86_64-w64-mingw32 (64-bit)
 * using session charset: UTF-8
 * using option '--as-cran'
@@ -116,9 +110,7 @@ Maintainer: 'First Last <name@gmail.com>'
 
 New submission
 * checking package namespace information ... OK
-* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
-  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
- OK
+* checking package dependencies ... OK
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK
@@ -183,7 +175,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpKCnh5i/Rd2pdf12f84389e31'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpoFw8ns/Rd2pdf1e9851bf48f5'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -192,16 +184,16 @@ Found the following files/directories:
 
 Status: 1 ERROR, 1 WARNING, 3 NOTEs
 See
-  'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log'
+  'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
 
-* installing to library 'C:/Users/dahl/Documents/R/win-library/4.1'
+* installing to library 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 * installing *source* package 'testpkg' ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
-Method bypassed by R_CARGO_RUN_NO_ENVIR environment variable.
+Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Method bypassed by R_CARGO_RUN_NO_PATH environment variable.
+Method bypassed by R_CARGO_RUN_PATH environment variable.
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
 Cargo found at: C:\Users\dahl\AppData\Local/R/cache/R/cargo/cargo/bin/cargo.exe
@@ -209,18 +201,18 @@ Cargo found at: C:\Users\dahl\AppData\Local/R/cache/R/cargo/cargo/bin/cargo.exe
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpSkiQAc\R.INSTALL8087c217b34\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpSkiQAc\R.INSTALL8087c217b34\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpSkiQAc\R.INSTALL8087c217b34\testpkg\src\rust)
-    Finished release [optimized] target(s) in 12.51s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpGWjY55\R.INSTALL14c43af7e\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpGWjY55\R.INSTALL14c43af7e\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpGWjY55\R.INSTALL14c43af7e\testpkg\src\rust)
+    Finished release [optimized] target(s) in 13.20s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
 so building only the main architecture
 
-gcc  -I"C:/PROGRA~1/R/R-42~1.0BE/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
-gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0BE/bin/x64 -lR
-installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/testpkg/libs/x64
+gcc  -I"C:/PROGRA~1/R/R-42~1.0/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
+gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0/bin/x64 -lR
+installing to C:/Users/dahl/AppData/Local/R/win-library/4.2/00LOCK-testpkg/00new/testpkg/libs/x64
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -234,8 +226,8 @@ packaged installation of 'testpkg' as testpkg_0.1.0.zip
 * DONE (testpkg)
 [1]  0.6607697 -2.0529830 -1.4992061
 ------------- FTF -------------
-* using log directory 'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck'
-* using R version 4.2.0 beta (2022-04-12 r82161 ucrt)
+* using log directory 'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck'
+* using R version 4.2.0 (2022-04-22 ucrt)
 * using platform: x86_64-w64-mingw32 (64-bit)
 * using session charset: UTF-8
 * using option '--as-cran'
@@ -247,9 +239,7 @@ Maintainer: 'First Last <name@gmail.com>'
 
 New submission
 * checking package namespace information ... OK
-* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
-  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
- OK
+* checking package dependencies ... OK
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK
@@ -314,7 +304,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpIbqcIm/Rd2pdf12701d891288'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpYzGcwH/Rd2pdf1f705e394de4'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -323,14 +313,14 @@ Found the following files/directories:
 
 Status: 1 ERROR, 1 WARNING, 3 NOTEs
 See
-  'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log'
+  'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
 
-* installing to library 'C:/Users/dahl/Documents/R/win-library/4.1'
+* installing to library 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 * installing *source* package 'testpkg' ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
-Method bypassed by R_CARGO_RUN_NO_ENVIR environment variable.
+Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
 Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
@@ -338,18 +328,18 @@ Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpQDzMuL\R.INSTALLf044a6219c\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpQDzMuL\R.INSTALLf044a6219c\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpQDzMuL\R.INSTALLf044a6219c\testpkg\src\rust)
-    Finished release [optimized] target(s) in 12.94s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp8SEfrP\R.INSTALL1e6451ae7bdc\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp8SEfrP\R.INSTALL1e6451ae7bdc\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp8SEfrP\R.INSTALL1e6451ae7bdc\testpkg\src\rust)
+    Finished release [optimized] target(s) in 13.17s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
 so building only the main architecture
 
-gcc  -I"C:/PROGRA~1/R/R-42~1.0BE/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
-gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0BE/bin/x64 -lR
-installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/testpkg/libs/x64
+gcc  -I"C:/PROGRA~1/R/R-42~1.0/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
+gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0/bin/x64 -lR
+installing to C:/Users/dahl/AppData/Local/R/win-library/4.2/00LOCK-testpkg/00new/testpkg/libs/x64
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -363,8 +353,8 @@ packaged installation of 'testpkg' as testpkg_0.1.0.zip
 * DONE (testpkg)
 [1]  0.6607697 -2.0529830 -1.4992061
 ------------- TFF -------------
-* using log directory 'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck'
-* using R version 4.2.0 beta (2022-04-12 r82161 ucrt)
+* using log directory 'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck'
+* using R version 4.2.0 (2022-04-22 ucrt)
 * using platform: x86_64-w64-mingw32 (64-bit)
 * using session charset: UTF-8
 * using option '--as-cran'
@@ -376,9 +366,7 @@ Maintainer: 'First Last <name@gmail.com>'
 
 New submission
 * checking package namespace information ... OK
-* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
-  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
- OK
+* checking package dependencies ... OK
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK
@@ -443,7 +431,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpKWzO03/Rd2pdfac83e1b5f0a'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpyQTy6l/Rd2pdf19f8234f494b'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -452,10 +440,10 @@ Found the following files/directories:
 
 Status: 1 ERROR, 1 WARNING, 3 NOTEs
 See
-  'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log'
+  'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
 
-* installing to library 'C:/Users/dahl/Documents/R/win-library/4.1'
+* installing to library 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 * installing *source* package 'testpkg' ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
@@ -465,18 +453,18 @@ Cargo found at: C:/Users/dahl/AppData/Local/R/cache/R/cargo/cargo/bin/cargo.exe
    Compiling unicode-xid v0.2.2
    Compiling syn v1.0.91
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpUPj76O\R.INSTALL58862235b47\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpUPj76O\R.INSTALL58862235b47\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpUPj76O\R.INSTALL58862235b47\testpkg\src\rust)
-    Finished release [optimized] target(s) in 12.42s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpgP56S7\R.INSTALL1fe83e0b4b8e\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpgP56S7\R.INSTALL1fe83e0b4b8e\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpgP56S7\R.INSTALL1fe83e0b4b8e\testpkg\src\rust)
+    Finished release [optimized] target(s) in 13.68s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
 so building only the main architecture
 
-gcc  -I"C:/PROGRA~1/R/R-42~1.0BE/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
-gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0BE/bin/x64 -lR
-installing to C:/Users/dahl/Documents/R/win-library/4.1/00LOCK-testpkg/00new/testpkg/libs/x64
+gcc  -I"C:/PROGRA~1/R/R-42~1.0/include" -DNDEBUG     -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shim.c -o shim.o
+gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0/bin/x64 -lR
+installing to C:/Users/dahl/AppData/Local/R/win-library/4.2/00LOCK-testpkg/00new/testpkg/libs/x64
 ** R
 ** byte-compile and prepare package for lazy loading
 ** help
@@ -490,8 +478,8 @@ packaged installation of 'testpkg' as testpkg_0.1.0.zip
 * DONE (testpkg)
 [1]  0.6607697 -2.0529830 -1.4992061
 ------------- FFF -------------
-* using log directory 'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck'
-* using R version 4.2.0 beta (2022-04-12 r82161 ucrt)
+* using log directory 'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck'
+* using R version 4.2.0 (2022-04-22 ucrt)
 * using platform: x86_64-w64-mingw32 (64-bit)
 * using session charset: UTF-8
 * using option '--as-cran'
@@ -503,9 +491,7 @@ Maintainer: 'First Last <name@gmail.com>'
 
 New submission
 * checking package namespace information ... OK
-* checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
-  cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
- OK
+* checking package dependencies ... OK
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK
@@ -561,7 +547,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/Rtmp6pJ7d5/Rd2pdf13e03edf496c'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpcpD91Z/Rd2pdf1020787951b0'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -570,18 +556,18 @@ Found the following files/directories:
 
 Status: 1 ERROR, 1 WARNING, 3 NOTEs
 See
-  'C:/Users/dahl/cargo-framework-new/tests/testpkg.Rcheck/00check.log'
+  'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
 
-* installing to library 'C:/Users/dahl/Documents/R/win-library/4.1'
+* installing to library 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 * installing *source* package 'testpkg' ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
-Method bypassed by R_CARGO_RUN_NO_ENVIR environment variable.
+Method bypassed by R_CARGO_RUN environment variable.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Method bypassed by R_CARGO_RUN_NO_PATH environment variable.
+Method bypassed by R_CARGO_RUN environment variable.
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Method bypassed by R_CARGO_RUN_NO_CACHE environment variable.
+Method bypassed by R_CARGO_RUN environment variable.
 Cargo not found.
 Could not find a suitable Cargo installation.
 The package's Rust code can be compiled by the end user when Cargo is installed. Hint: cargo::install().
