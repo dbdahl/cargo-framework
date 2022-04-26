@@ -1,3 +1,14 @@
+0.2.3 (2022-04-26)
+  * Added functionality for the following:  The original approach downloaded
+    precompiled static libraries when compiling source packages if a sufficient
+    version of the Rust toolchain could not be found. With a recent revision to
+    CRAN policies, however, this approach is no longer allowed.  As such, if a
+    sufficient version cannot be found when compiling the source package, our Cargo
+    Framework embeds the Rust source code in the resulting binary package. The
+    .onLoad and .onAttach functions of the package can then compile the Rust code
+    if Cargo is available on the end user's machine, or ask the end user to allow
+    it to install Cargo and then compile the Rust code.
+
 0.1.38 (2021-08-21)
   * Added setup_rust function to aid in installing the Rust toolchain and
     targets needed for compiling static libraries for CRAN build machines.
