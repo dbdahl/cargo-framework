@@ -1,2 +1,2 @@
 PKG_LIBS = -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt
-shim.o: librust.a
+$(SHLIB): librust.a

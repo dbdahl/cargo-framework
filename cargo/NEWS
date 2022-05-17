@@ -1,3 +1,6 @@
+0.2.4 (XXXX-XX-XX)
+  * Better Makevars and Makevars.win.
+
 0.2.3 (2022-04-26)
   * Added functionality for the following:  The original approach downloaded
     precompiled static libraries when compiling source packages if a sufficient

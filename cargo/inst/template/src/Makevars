@@ -1,2 +1,2 @@
 PKG_LIBS = -L. -lrust
-shim.o: librust.a
+$(SHLIB): librust.a
