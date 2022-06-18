@@ -14,7 +14,7 @@ fn myrnorm(n: Rval, mean: Rval, sd: Rval) -> Rval {
         let (mean, sd) = (Rf_asReal(mean.0), Rf_asReal(sd.0));
         let length = isize::try_from(Rf_asInteger(n.0)).unwrap();
         let vec = Rf_protect(Rf_allocVector(REALSXP, length));
-        let slice = Rval(vec).slice_double().unwrap();
+        let slice = Rval(vec).slice_mut_double().unwrap();
         GetRNGstate();
         for x in slice { *x = Rf_rnorm(mean, sd); }
         PutRNGstate();

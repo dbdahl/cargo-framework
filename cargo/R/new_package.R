@@ -17,7 +17,7 @@ new_package <- function(path, ...) {
     dir.create(path)
     file.copy(list.files(system.file(file.path("template"), package="cargo"), all.files=TRUE, no..=TRUE, full.names=TRUE), path, recursive=TRUE)
     file.rename(file.path(path, "DOTRbuildignore"), file.path(path, ".Rbuildignore"))
-    # file.rename(file.path(path, "DOTgitignore"), file.path(path, ".gitignore"))
+    file.rename(file.path(path, "DOTgitignore"), file.path(path, ".gitignore"))
     sed("X@X", pkgname, file.path(path,"DESCRIPTION"))
     sed("X@X", pkgname, file.path(path,"NAMESPACE"))
     sed("X@X", pkgname, file.path(path,"R","useDynLib.R"))

@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+src/*.a
+src/*.o
+src/*.so
+src/rust/vendor
+src/rust/target
