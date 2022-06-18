@@ -1,5 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .RData
-.idea
+.idea$
 target$
+vendor$
+.cargo$
