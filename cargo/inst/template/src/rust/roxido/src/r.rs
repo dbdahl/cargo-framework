@@ -302,6 +302,60 @@ impl Rval {
         Self(pc.protect(unsafe { Rf_duplicate(self.0) }))
     }
 
+    /// Move Rust object to an R external pointer
+    ///
+    /// This method moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
+    /// Thus the programmer is then responsible to release the memory by calling [`Self::external_pointer_decode`].
+    ///
+    pub fn external_pointer_encode<T>(x: T, tag: Self) -> Self {
+        unsafe {
+            // Move to Box<_> and then forget about it.
+            let ptr = Box::into_raw(Box::new(x)) as *mut c_void;
+            Self(R_MakeExternalPtr(ptr, tag.0, R_NilValue))
+        }
+    }
+
+    /// Get tag for an R external pointer
+    ///
+    /// This method get the tag associated with an R external pointer, which was set by [`Self::external_pointer_encode`].
+    ///
+    pub fn external_pointer_tag(self) -> Self {
+        unsafe { Rval(R_ExternalPtrTag(self.0)) }
+    }
+
+    /// Move an R external pointer to a Rust object
+    ///
+    /// This method moves an R external pointer created by [`Self::external_pointer_encode`] to a Rust object and Rust will then manage its memory.
+    ///
+    pub fn external_pointer_decode<T>(self) -> T {
+        unsafe {
+            let ptr = R_ExternalPtrAddr(self.0) as *mut T;
+            *Box::from_raw(ptr)
+        }
+    }
+
+    /// Obtain a reference to a Rust object from an R external pointer
+    ///
+    /// This method obtained a reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
+    ///
+    pub fn external_pointer_decode_as_ref<T>(self) -> &'static T {
+        unsafe {
+            let ptr = R_ExternalPtrAddr(self.0) as *mut T;
+            ptr.as_ref().unwrap()
+        }
+    }
+
+    /// Obtain a mutable reference to a Rust object from an R external pointer
+    ///
+    /// This method obtained a mutable reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
+    ///
+    pub fn external_pointer_decode_as_mut_ref<T>(self) -> &'static mut T {
+        unsafe {
+            let ptr = R_ExternalPtrAddr(self.0) as *mut T;
+            ptr.as_mut().unwrap()
+        }
+    }
+
     /// Get the value `NULL`.
     pub fn nil() -> Self {
         Self(unsafe { R_NilValue })
@@ -732,6 +786,58 @@ impl Rval {
         rval: Self,
         code: u32,
         get_ptr: impl Fn(SEXP) -> *mut T,
+    ) -> Result<&'static [T], &'static str> {
+        let ft = unsafe { TYPEOF(rval.0) } as u32;
+        if ft == code {
+            let len = rval.len();
+            let slice = unsafe { std::slice::from_raw_parts(get_ptr(rval.0), len) };
+            Ok(slice)
+        } else {
+            Err("Object is not of the asserted type")
+        }
+    }
+
+    /// Get an `f64` slice associated with the object, or an error if the object is not of storage mode `double`.
+    ///
+    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// the associated R object exists.
+    ///
+    pub fn slice_double(self) -> Result<&'static [f64], &'static str> {
+        Self::slice(self, REALSXP, |x| unsafe { REAL(x) })
+    }
+
+    /// Get an `i32` slice associated with the object, or an error if the object is not of storage mode `integer`.
+    ///
+    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// the associated R object exists.
+    ///
+    pub fn slice_integer(self) -> Result<&'static [i32], &'static str> {
+        Self::slice(self, INTSXP, |x| unsafe { INTEGER(x) })
+    }
+
+    /// Get an `i32` slice (of logical values) associated with the object, or an error if the object is not of storage mode `logical`.
+    ///
+    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// the associated R object exists.
+    ///
+    pub fn slice_logical(self) -> Result<&'static [i32], &'static str> {
+        Self::slice(self, LGLSXP, |x| unsafe { LOGICAL(x) })
+    }
+
+    /// Get an `u8` slice associated with the object, or an error if the object is not of storage mode `raw`.
+    ///
+    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// the associated R object exists.
+    ///
+    pub fn slice_raw(self) -> Result<&'static [u8], &'static str> {
+        Self::slice(self, RAWSXP, |x| unsafe { RAW(x) })
+    }
+
+
+    fn slice_mut<T>(
+        rval: Self,
+        code: u32,
+        get_ptr: impl Fn(SEXP) -> *mut T,
     ) -> Result<&'static mut [T], &'static str> {
         let ft = unsafe { TYPEOF(rval.0) } as u32;
         if ft == code {
@@ -748,8 +854,8 @@ impl Rval {
     /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
-    pub fn slice_double(self) -> Result<&'static mut [f64], &'static str> {
-        Self::slice(self, REALSXP, |x| unsafe { REAL(x) })
+    pub fn slice_mut_double(self) -> Result<&'static mut [f64], &'static str> {
+        Self::slice_mut(self, REALSXP, |x| unsafe { REAL(x) })
     }
 
     /// Get an `i32` slice associated with the object, or an error if the object is not of storage mode `integer`.
@@ -757,8 +863,8 @@ impl Rval {
     /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
-    pub fn slice_integer(self) -> Result<&'static mut [i32], &'static str> {
-        Self::slice(self, INTSXP, |x| unsafe { INTEGER(x) })
+    pub fn slice_mut_integer(self) -> Result<&'static mut [i32], &'static str> {
+        Self::slice_mut(self, INTSXP, |x| unsafe { INTEGER(x) })
     }
 
     /// Get an `i32` slice (of logical values) associated with the object, or an error if the object is not of storage mode `logical`.
@@ -766,8 +872,8 @@ impl Rval {
     /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
-    pub fn slice_logical(self) -> Result<&'static mut [i32], &'static str> {
-        Self::slice(self, LGLSXP, |x| unsafe { LOGICAL(x) })
+    pub fn slice_mut_logical(self) -> Result<&'static mut [i32], &'static str> {
+        Self::slice_mut(self, LGLSXP, |x| unsafe { LOGICAL(x) })
     }
 
     /// Get an `u8` slice associated with the object, or an error if the object is not of storage mode `raw`.
@@ -775,8 +881,8 @@ impl Rval {
     /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
-    pub fn slice_raw(self) -> Result<&'static mut [u8], &'static str> {
-        Self::slice(self, RAWSXP, |x| unsafe { RAW(x) })
+    pub fn slice_mut_raw(self) -> Result<&'static mut [u8], &'static str> {
+        Self::slice_mut(self, RAWSXP, |x| unsafe { RAW(x) })
     }
 
     fn coerce<T>(
@@ -1088,14 +1194,14 @@ impl TryNewProtected<usize> for Rval {
 impl TryFrom<Rval> for &[f64] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static [f64], &'static str> {
-        x.slice_double().map(|x| &x[..])
+        x.slice_double()
     }
 }
 
 impl TryFrom<Rval> for &mut [f64] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static mut [f64], &'static str> {
-        x.slice_double()
+        x.slice_mut_double()
     }
 }
 
@@ -1118,14 +1224,14 @@ impl NewProtected<&mut [f64]> for Rval {
 impl TryFrom<Rval> for &[i32] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static [i32], &'static str> {
-        x.slice_integer().map(|x| &x[..])
+        x.slice_integer()
     }
 }
 
 impl TryFrom<Rval> for &mut [i32] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static mut [i32], &'static str> {
-        x.slice_integer()
+        x.slice_mut_integer()
     }
 }
 
@@ -1176,14 +1282,14 @@ impl TryNewProtected<&mut [usize]> for Rval {
 impl TryFrom<Rval> for &[u8] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static [u8], &'static str> {
-        x.slice_raw().map(|x| &x[..])
+        x.slice_raw()
     }
 }
 
 impl TryFrom<Rval> for &mut [u8] {
     type Error = &'static str;
     fn try_from(x: Rval) -> Result<&'static mut [u8], &'static str> {
-        x.slice_raw()
+        x.slice_mut_raw()
     }
 }
 
@@ -1385,6 +1491,7 @@ impl Pc {
     /// protection counter.  This is generally only used when code directly calls functions in
     /// [`crate::rbindings`].
     ///
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
     pub fn protect(&mut self, sexp: SEXP) -> SEXP {
         unsafe { Rf_protect(sexp) };
         self.counter += 1;
