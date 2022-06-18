@@ -1,6 +1,7 @@
-0.2.4 (2022-06-18)
+0.2.5 (2022-06-18)
   * Better Makevars and Makevars.win.
   * Minor bug fixes.
+  * Replaced "&mut pc" with "pc".
 
 0.2.3 (2022-04-26)
   * Added functionality for the following:  The original approach downloaded

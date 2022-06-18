@@ -559,7 +559,7 @@ impl Rval {
     ///
     /// This function panics if the object is not a character vector or if `i` is greater than or equal to the length of the vector.
     ///
-    pub fn set_character_element(self, i: usize, value: &str) {
+    pub fn set_character_element(self, i: usize, value: &str, pc: &mut Pc) {
         if !self.is_character() {
             panic!("Not of storage mode `character`");
         }
@@ -567,12 +567,11 @@ impl Rval {
         if i >= len {
             panic!("Index {} is out of bounds for vector of length {}", i, len);
         }
-        let mut pc = Pc::new();
         unsafe {
             SET_STRING_ELT(
                 self.0,
                 i.try_into().unwrap(),
-                Self::new_character(value, &mut pc).0,
+                Self::new_character(value, pc).0,
             );
         }
     }
