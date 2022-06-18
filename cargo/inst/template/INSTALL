@@ -1,4 +1,4 @@
-This package is based on Rust source code compiled by Cargo, its package
+This package is based on Rust source code compiled by Cargo, the Rust package
 manager. Cargo can be: 1. provided by the operating system package manager, 2.
 obtained from the Rust project at https://rustup.rs, or 3. provided by running
 cargo::install() in an interactive R session. Note that cargo::install() is
