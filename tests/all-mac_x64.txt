@@ -30,16 +30,16 @@ Installing package into ‘/Users/dahl/Library/R/x86_64/4.2/library’
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Condition not met.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/.cargo/bin/cargo
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
    Compiling roxido_macro v0.5.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.5.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust/roxido)
    Compiling rust v0.1.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 8.58s
+    Finished release [optimized] target(s) in 9.97s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -62,12 +62,12 @@ R CMD INSTALL testpkg
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Condition not met.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/.cargo/bin/cargo
-    Finished release [optimized] target(s) in 0.03s
+    Finished release [optimized] target(s) in 0.05s
 Built Rust static library.
 ** libs
-make: Nothing to be done for `all'.
+clang -mmacosx-version-min=10.13 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
 installing to /Users/dahl/Library/R/x86_64/4.2/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** byte-compile and prepare package for lazy loading
@@ -182,16 +182,16 @@ Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
 Method bypassed by R_CARGO_RUN_PATH environment variable.
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpJfgSjt/R.INSTALL2c366aeeb/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpJfgSjt/R.INSTALL2c366aeeb/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpJfgSjt/R.INSTALL2c366aeeb/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.53s
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpVL8cAN/R.INSTALL76ff7bec427c/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpVL8cAN/R.INSTALL76ff7bec427c/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpVL8cAN/R.INSTALL76ff7bec427c/testpkg/src/rust)
+    Finished release [optimized] target(s) in 9.44s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -299,16 +299,16 @@ for details.
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/.cargo/bin/cargo
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmprZQiW2/R.INSTALL6b57f58badc/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmprZQiW2/R.INSTALL6b57f58badc/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmprZQiW2/R.INSTALL6b57f58badc/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.61s
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpLMLkx4/R.INSTALL7ab31744742/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpLMLkx4/R.INSTALL7ab31744742/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpLMLkx4/R.INSTALL7ab31744742/testpkg/src/rust)
+    Finished release [optimized] target(s) in 9.45s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -414,16 +414,16 @@ for details.
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp3rfIY6/R.INSTALLa7154e270fb/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp3rfIY6/R.INSTALLa7154e270fb/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp3rfIY6/R.INSTALLa7154e270fb/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.54s
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpyAGACK/R.INSTALL7e6a32331161/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpyAGACK/R.INSTALL7e6a32331161/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpyAGACK/R.INSTALL7e6a32331161/testpkg/src/rust)
+    Finished release [optimized] target(s) in 9.52s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
