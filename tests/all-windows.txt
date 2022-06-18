@@ -30,16 +30,16 @@ Installing package into 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Condition not met.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
    Compiling roxido_macro v0.5.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido_macro)
    Compiling roxido v0.5.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido)
    Compiling rust v0.1.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust)
-    Finished release [optimized] target(s) in 13.23s
+    Finished release [optimized] target(s) in 20.87s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -64,15 +64,15 @@ R CMD INSTALL testpkg
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Condition not met.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
-    Finished release [optimized] target(s) in 0.02s
+    Finished release [optimized] target(s) in 0.03s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
 so building only the main architecture
 
-make: Nothing to be done for 'all'.
+gcc -shared -s -static-libgcc -o testpkg.dll tmp.def shim.o -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -LC:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-42~1.0/bin/x64 -lR
 installing to C:/Users/dahl/AppData/Local/R/win-library/4.2/00LOCK-testpkg/00new/testpkg/libs/x64
 ** R
 ** byte-compile and prepare package for lazy loading
@@ -175,7 +175,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpoFw8ns/Rd2pdf1e9851bf48f5'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpOYI6gj/Rd2pdfb3c2d4d7ce3'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -195,16 +195,16 @@ Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
 Method bypassed by R_CARGO_RUN_PATH environment variable.
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl\AppData\Local/R/cache/R/cargo/cargo/bin/cargo.exe
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpGWjY55\R.INSTALL14c43af7e\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpGWjY55\R.INSTALL14c43af7e\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpGWjY55\R.INSTALL14c43af7e\testpkg\src\rust)
-    Finished release [optimized] target(s) in 13.20s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp4E5EP8\R.INSTALL1b40356c1814\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp4E5EP8\R.INSTALL1b40356c1814\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp4E5EP8\R.INSTALL1b40356c1814\testpkg\src\rust)
+    Finished release [optimized] target(s) in 23.89s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -304,7 +304,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpYzGcwH/Rd2pdf1f705e394de4'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpSsQML3/Rd2pdf1bf01aa9104b'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -322,16 +322,16 @@ for details.
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp8SEfrP\R.INSTALL1e6451ae7bdc\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp8SEfrP\R.INSTALL1e6451ae7bdc\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\Rtmp8SEfrP\R.INSTALL1e6451ae7bdc\testpkg\src\rust)
-    Finished release [optimized] target(s) in 13.17s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpKgceUQ\R.INSTALL1d6054b6d2b\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpKgceUQ\R.INSTALL1d6054b6d2b\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpKgceUQ\R.INSTALL1d6054b6d2b\testpkg\src\rust)
+    Finished release [optimized] target(s) in 19.79s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -431,7 +431,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpyQTy6l/Rd2pdf19f8234f494b'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpcFgxSz/Rd2pdf1b045e2623dd'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
@@ -447,16 +447,16 @@ for details.
 * installing *source* package 'testpkg' ...
 ** using staged installation
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
-Cargo version '1.60.0' is installed, which satisfies the need for '1.60'.
+Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:/Users/dahl/AppData/Local/R/cache/R/cargo/cargo/bin/cargo.exe
-   Compiling proc-macro2 v1.0.37
-   Compiling unicode-xid v0.2.2
-   Compiling syn v1.0.91
+   Compiling proc-macro2 v1.0.39
+   Compiling unicode-ident v1.0.1
+   Compiling syn v1.0.96
    Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpgP56S7\R.INSTALL1fe83e0b4b8e\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpgP56S7\R.INSTALL1fe83e0b4b8e\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpgP56S7\R.INSTALL1fe83e0b4b8e\testpkg\src\rust)
-    Finished release [optimized] target(s) in 13.68s
+   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpWcsVYc\R.INSTALL5dc1dad61d4\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpWcsVYc\R.INSTALL5dc1dad61d4\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpWcsVYc\R.INSTALL5dc1dad61d4\testpkg\src\rust)
+    Finished release [optimized] target(s) in 18.86s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -547,7 +547,7 @@ Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
 Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
   pdflatex is not available
 Error in running tools::texi2pdf()
-You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpcpD91Z/Rd2pdf1020787951b0'
+You may want to clean up by 'rm -Rf C:/Users/dahl/AppData/Local/Temp/RtmpITOCck/Rd2pdf1f287c8b6f06'
 * checking for non-standard things in the check directory ... NOTE
 Found the following files/directories:
   'testpkg-manual.tex'
