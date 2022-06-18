@@ -122,8 +122,8 @@ get_lib_path <- function(verbose, cached) {
         dir.create(file.path(path,"R"), showWarnings=FALSE)
         rustlib_directory <- file.path(path,"rust")
         dir.create(rustlib_directory, showWarnings=FALSE)
-        file.copy(system.file(file.path("template","tools","src","rust","roxido"), package="cargo"), rustlib_directory, recursive=TRUE)
-        file.copy(system.file(file.path("template","tools","src","rust","roxido_macro"), package="cargo"), rustlib_directory, recursive=TRUE)
+        file.copy(system.file(file.path("template","src","rust","roxido"), package="cargo"), rustlib_directory, recursive=TRUE)
+        file.copy(system.file(file.path("template","src","rust","roxido_macro"), package="cargo"), rustlib_directory, recursive=TRUE)
         unlink(file.path(path, "rust", "target"),  recursive=TRUE, force=TRUE)
     }
     list(path=path, lock=lock, success=success, verbose=verbose)
