@@ -25,7 +25,7 @@ FFT: package
     export R_CARGO_RUN_ENVIR=FALSE
     export R_CARGO_RUN_PATH=FALSE
     export R_CARGO_RUN_CACHE=TRUE
-    R CMD check --as-cran testpkg_0.1.0.tar.gz
+    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
     rm -f testpkg_0.1.0.zip
     R CMD INSTALL --build testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
@@ -37,7 +37,7 @@ FTF: package
     export R_CARGO_RUN_ENVIR=FALSE
     export R_CARGO_RUN_PATH=TRUE
     export R_CARGO_RUN_CACHE=FALSE
-    R CMD check --as-cran testpkg_0.1.0.tar.gz
+    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
     rm -f testpkg_0.1.0.zip
     R CMD INSTALL --build testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
@@ -51,7 +51,7 @@ TFF: package
     export R_CARGO_RUN_ENVIR=TRUE
     export R_CARGO_RUN_PATH=FALSE
     export R_CARGO_RUN_CACHE=FALSE
-    R CMD check --as-cran testpkg_0.1.0.tar.gz
+    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
     rm -f testpkg_0.1.0.zip
     R CMD INSTALL --build testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
@@ -61,7 +61,7 @@ FFF: package
     echo "------------- FFF -------------"
     rm -rf {{cache_dir}}/packages
     export R_CARGO_RUN=FALSE
-    R CMD check --as-cran testpkg_0.1.0.tar.gz
+    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
     rm -f testpkg_0.1.0.zip
     R CMD INSTALL --build testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)" || true
