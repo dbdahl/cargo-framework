@@ -455,13 +455,6 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
-
-Found the following (possibly) invalid URLs:
-  URL: https://cran.r-project.org/doc/manuals/R-exts.html#Calling-_002eCall
-    From: man/convolve2.Rd
-    Status: Error
-    Message: libcurl error code 28:
-      	Connection timed out after 60010 milliseconds
 * checking package namespace information ... OK
 * checking package dependencies ...Warning: unable to access index for repository https://r.ddahl.org/src/contrib:
   cannot open URL 'https://r.ddahl.org/src/contrib/PACKAGES'
