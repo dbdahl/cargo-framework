@@ -1,3 +1,6 @@
+0.2.6 (2022-06-20)
+  * Minor bug fix: Include #SRC# file at package root.
+
 0.2.5 (2022-06-18)
   * Better Makevars and Makevars.win.
   * Minor bug fixes.
