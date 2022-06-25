@@ -1,5 +1,5 @@
 0.2.7 (2022-XX-XX)
-  * Use 'message' instead of 'cat' in cargo::run().
+  * Use message() instead of cat() in cargo::run().
 
 0.2.6 (2022-06-22)
   * Minor bug fix: Include #SRC# file at package root.
