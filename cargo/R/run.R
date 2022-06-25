@@ -39,7 +39,7 @@
 #'
 #' @examples
 #' if ( run("--version", must_be_silent=TRUE) != 0 ) {
-#'     cat("Cargo is not installed. Please run cargo::install() in an interactive session.")
+#'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
 run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE) {
@@ -49,7 +49,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
         if ( use_packageStartupMessage ) {
             packageStartupMessage(..., appendLF=FALSE)
         } else {
-            base::cat(...)
+            base::message(..., appendLF=FALSE)
         }
     }
     desc_file <- file.path(minimum_version, "DESCRIPTION")
