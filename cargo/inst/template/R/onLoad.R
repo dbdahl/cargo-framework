@@ -22,8 +22,6 @@
 
 pkg_envir <- environment()
 
-#' @importFrom tools R_user_dir
-#' @importFrom utils packageVersion
 #' @importFrom cargo run
 #' @importFrom cargo shlib_set shlib_get
 #' @importFrom utils untar
