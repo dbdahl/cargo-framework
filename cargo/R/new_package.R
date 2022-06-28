@@ -23,7 +23,9 @@ new_package <- function(path, ...) {
   sed("X@X", pkgname, file.path(path,"NAMESPACE"))
   sed("X@X", pkgname, file.path(path,"R","useDynLib.R"))
   sed("X@X", pkgname, file.path(path,"src","shim.c"))
-  sed("X@X", as.character(packageVersion("cargo")), file.path(path,"tools","configure.R"))
+  cargoVersion <- as.character(packageVersion("cargo"))
+  sed("V@V", cargoVersion, file.path(path,"DESCRIPTION"))
+  sed("V@V", cargoVersion, file.path(path,"configure"))
   register_calls(path)
   install.packages(path, repos=NULL, type="source")
 }
