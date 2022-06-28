@@ -43,126 +43,126 @@
 #' }
 #'
 run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE) {
-    args <- shQuote(c(...))
-    cat <- function(...) {
-        if ( must_be_silent ) return()
-        if ( use_packageStartupMessage ) {
-            packageStartupMessage(..., appendLF=FALSE)
-        } else {
-            base::message(..., appendLF=FALSE)
-        }
+  args <- shQuote(c(...))
+  msg <- function(...) {
+    if ( must_be_silent ) return()
+    if ( use_packageStartupMessage ) {
+      packageStartupMessage(..., appendLF=FALSE)
+    } else {
+      base::message(..., appendLF=FALSE)
     }
-    desc_file <- file.path(minimum_version, "DESCRIPTION")
-    msrv <- if ( file.exists(desc_file) ) {
-        desc <- read.dcf(desc_file)
-        x <- tryCatch(as.character(desc[,"SystemRequirements"]), error=function(e) NA)
-        if ( is.na(x) ) {
-            cat("Could not find 'SystemRequirements' field in DESCRIPTION file.\n")
-            return(100)
+  }
+  desc_file <- file.path(minimum_version, "DESCRIPTION")
+  msrv <- if ( file.exists(desc_file) ) {
+    desc <- read.dcf(desc_file)
+    x <- tryCatch(as.character(desc[,"SystemRequirements"]), error=function(e) NA)
+    if ( is.na(x) ) {
+      msg("Could not find 'SystemRequirements' field in DESCRIPTION file.\n")
+      return(100)
+    }
+    y <- gsub(".*[Cc]argo\\s*\\(>=\\s*([^)]+)\\).*","\\1", x)
+    if ( identical(x,y) ) {
+      msg("Could not find expected 'SystemRequirements: Cargo (>= XXXX)' in DESCRIPTION file.")
+      return(101)
+    }
+    gsub("\\s*([^ ]+)\\s*","\\1",y)
+  } else minimum_version
+  check_candidate <- function(cargo_home, rustup_home, can_install=FALSE, can_update=FALSE) {
+    vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
+    cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
+    if ( ! file.exists(cargo_cmd) ) {
+      if ( ! can_install ) return(201)
+      if ( ! install_engine(FALSE, use_packageStartupMessage, must_be_silent) ) {
+        return(202)
+      }
+    }
+    output <- system3(cargo_cmd, "--version", stdout=TRUE, env=vars)
+    if ( ! is.null(attr(output,"status")) ) {
+      msg("Cargo is installed, but broken.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
+      return(203)
+    }
+    version <- tryCatch({
+      version <- strsplit(output," ",fixed=TRUE)[[1]][2]
+      if ( is.na(version) ) {
+        msg(sprintf("Problem parsing Cargo version string: '%s'.\nPlease try again by running 'cargo::install()' in an interactive session.\n",paste(output,collapse=",")))
+        return(204)
+      }
+      if ( utils::compareVersion(version, msrv) < 0 ) {
+        msg(sprintf("Cargo version '%s' is installed, but '%s' is needed. Trying to update...\n",version,msrv))
+        if ( ! can_update ) {
+          msg("Upgrading this version is not permitted.\n")
+          return(205)
         }
-        y <- gsub(".*[Cc]argo\\s*\\(>=\\s*([^)]+)\\).*","\\1", x)
-        if ( identical(x,y) ) {
-            cat("Could not find expected 'SystemRequirements: Cargo (>= XXXX)' in DESCRIPTION file.")
-            return(101)
+        rustup_cmd <- file.path(cargo_home, "bin", paste0("rustup", ifelse(windows,".exe","")))
+        exit_status <- system3(rustup_cmd, "update", env=vars)
+        if ( exit_status != 0 ) {
+          msg("Upgrade failed.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
+          return(exit_status)
         }
-        gsub("\\s*([^ ]+)\\s*","\\1",y)
-    } else minimum_version
-    check_candidate <- function(cargo_home, rustup_home, can_install=FALSE, can_update=FALSE) {
-        vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
+      } else {
+        msg(sprintf("Cargo version '%s' is installed, which satisfies the need for '%s'.\n",version,msrv))
+      }
+      version
+    }, warning=identity, error=identity)
+    if ( inherits(version,"warning") || inherits(version,"error") ) {
+      msg(sprintf("Problem parsing Cargo version string '%s', comparing it against '%s', or running 'rustup update'.\nPlease try again by running 'cargo::install()' in an interactive session.\n",paste(output,collapse=","),msrv))
+      return(206)
+    }
+    0
+  }
+  windows <- .Platform$OS.type=="windows"
+  run_engine <- function(bypass_env_var, condition, cargo_home, rustup_home, can_install, can_update) {
+    general_bypass_env_var <- "R_CARGO_RUN"
+    if ( toupper(Sys.getenv(general_bypass_env_var, "TRUE")) == "FALSE" ) {
+      msg(sprintf("Method bypassed by %s environment variable.\n", general_bypass_env_var))
+      return(NULL)
+    }
+    if ( toupper(Sys.getenv(bypass_env_var, "TRUE")) == "FALSE" ) {
+      msg(sprintf("Method bypassed by %s environment variable.\n", bypass_env_var))
+      return(NULL)
+    }
+    if ( condition ) {
+      status <- check_candidate(cargo_home, rustup_home, can_install, can_update)
+      if ( status == 0 ) {
         cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
-        if ( ! file.exists(cargo_cmd) ) {
-            if ( ! can_install ) return(201)
-            if ( ! install_engine(FALSE, use_packageStartupMessage, must_be_silent) ) {
-                return(202)
-            }
-        }
-        output <- system3(cargo_cmd, "--version", stdout=TRUE, env=vars)
-        if ( ! is.null(attr(output,"status")) ) {
-            cat("Cargo is installed, but broken.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
-            return(203)
-        }
-        version <- tryCatch({
-            version <- strsplit(output," ",fixed=TRUE)[[1]][2]
-            if ( is.na(version) ) {
-                cat(sprintf("Problem parsing Cargo version string: '%s'.\nPlease try again by running 'cargo::install()' in an interactive session.\n",paste(output,collapse=",")))
-                return(204)
-            }
-            if ( utils::compareVersion(version, msrv) < 0 ) {
-                cat(sprintf("Cargo version '%s' is installed, but '%s' is needed. Trying to update...\n",version,msrv))
-                if ( ! can_update ) {
-                    cat("Upgrading this version is not permitted.\n")
-                    return(205)
-                }
-                rustup_cmd <- file.path(cargo_home, "bin", paste0("rustup", ifelse(windows,".exe","")))
-                exit_status <- system3(rustup_cmd, "update", env=vars)
-                if ( exit_status != 0 ) {
-                    cat("Upgrade failed.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
-                    return(exit_status)
-                }
-            } else {
-                cat(sprintf("Cargo version '%s' is installed, which satisfies the need for '%s'.\n",version,msrv))
-            }
-            version
-        }, warning=identity, error=identity)
-        if ( inherits(version,"warning") || inherits(version,"error") ) {
-            cat(sprintf("Problem parsing Cargo version string '%s', comparing it against '%s', or running 'rustup update'.\nPlease try again by running 'cargo::install()' in an interactive session.\n",paste(output,collapse=","),msrv))
-            return(206)
-        }
-        0
+        msg(sprintf("Cargo found at: %s\n", cargo_cmd))
+        vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
+        return(system3(cargo_cmd, args, env=vars))
+      } else {
+        msg("Method failed.\n")
+      }
+    } else {
+      msg("Condition not met.\n")
     }
-    windows <- .Platform$OS.type=="windows"
-    run_engine <- function(bypass_env_var, condition, cargo_home, rustup_home, can_install, can_update) {
-        general_bypass_env_var <- "R_CARGO_RUN"
-        if ( toupper(Sys.getenv(general_bypass_env_var, "TRUE")) == "FALSE" ) {
-            cat(sprintf("Method bypassed by %s environment variable.\n", general_bypass_env_var))
-            return(NULL)
-        }
-        if ( toupper(Sys.getenv(bypass_env_var, "TRUE")) == "FALSE" ) {
-            cat(sprintf("Method bypassed by %s environment variable.\n", bypass_env_var))
-            return(NULL)
-        }
-        if ( condition ) {
-            status <- check_candidate(cargo_home, rustup_home, can_install, can_update)
-            if ( status == 0 ) {
-                cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
-                cat(sprintf("Cargo found at: %s\n", cargo_cmd))
-                vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
-                return(system3(cargo_cmd, args, env=vars))
-            } else {
-                cat("Method failed.\n")
-            }
-        } else {
-            cat("Condition not met.\n")
-        }
-        NULL
+    NULL
+  }
+  for ( method in methods ) {
+    if ( method == "envir" ) {
+      msg("Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.\n")
+      status <- run_engine(
+        "R_CARGO_RUN_ENVIR",
+        ( Sys.getenv("CARGO_HOME","<unset>") != "<unset>" ) && ( Sys.getenv("RUSTUP_HOME","<unset>") != "<unset>" ),
+        Sys.getenv("CARGO_HOME"), Sys.getenv("RUSTUP_HOME"), FALSE, FALSE)
+      if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
+    } else if ( method == "path" ) {
+      prefix <- ifelse(windows,"%USERPROFILE%","$HOME")
+      msg(sprintf("Trying to find a suitable Cargo at %s/.cargo and %s/.rustup.\n", prefix, prefix))
+      prefix_dir <- Sys.getenv(ifelse(windows,"USERPROFILE","HOME"))
+      status <- run_engine(
+        "R_CARGO_RUN_PATH",
+        Sys.getenv(ifelse(windows,"USERPROFILE","HOME"),"<unset>") != "<unset>",
+        file.path(prefix_dir, ".cargo"), file.path(prefix_dir, ".rustup"), FALSE, FALSE)
+      if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
+    } else if ( method == "cache" ) {
+      prefix_dir <- tools::R_user_dir("cargo", "cache")
+      msg("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
+      status <- run_engine(
+        "R_CARGO_RUN_CACHE",
+        TRUE,
+        file.path(prefix_dir, "cargo"), file.path(prefix_dir, "rustup"), TRUE, TRUE)
+      if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
     }
-    for ( method in methods ) {
-        if ( method == "envir" ) {
-            cat("Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.\n")
-            status <- run_engine(
-                "R_CARGO_RUN_ENVIR",
-                ( Sys.getenv("CARGO_HOME","<unset>") != "<unset>" ) && ( Sys.getenv("RUSTUP_HOME","<unset>") != "<unset>" ),
-                Sys.getenv("CARGO_HOME"), Sys.getenv("RUSTUP_HOME"), FALSE, FALSE)
-            if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
-        } else if ( method == "path" ) {
-            prefix <- ifelse(windows,"%USERPROFILE%","$HOME")
-            cat(sprintf("Trying to find a suitable Cargo at %s/.cargo and %s/.rustup.\n", prefix, prefix))
-            prefix_dir <- Sys.getenv(ifelse(windows,"USERPROFILE","HOME"))
-            status <- run_engine(
-                "R_CARGO_RUN_PATH",
-                Sys.getenv(ifelse(windows,"USERPROFILE","HOME"),"<unset>") != "<unset>",
-                file.path(prefix_dir, ".cargo"), file.path(prefix_dir, ".rustup"), FALSE, FALSE)
-            if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
-        } else if ( method == "cache" ) {
-            prefix_dir <- tools::R_user_dir("cargo", "cache")
-            cat("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
-            status <- run_engine(
-                "R_CARGO_RUN_CACHE",
-                TRUE,
-                file.path(prefix_dir, "cargo"), file.path(prefix_dir, "rustup"), TRUE, TRUE)
-            if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
-        }
-    }
-    cat("Cargo not found.\n")
-    100
+  }
+  msg("Cargo not found.\n")
+  100
 }
