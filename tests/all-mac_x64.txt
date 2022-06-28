@@ -32,14 +32,14 @@ Condition not met.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
 Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/.cargo/bin/cargo
-   Compiling proc-macro2 v1.0.39
+   Compiling proc-macro2 v1.0.40
    Compiling unicode-ident v1.0.1
-   Compiling syn v1.0.96
-   Compiling quote v1.0.18
+   Compiling quote v1.0.20
+   Compiling syn v1.0.98
    Compiling roxido_macro v0.5.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.5.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust/roxido)
    Compiling rust v0.1.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.81s
+    Finished release [optimized] target(s) in 8.69s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -64,7 +64,7 @@ Condition not met.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
 Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/.cargo/bin/cargo
-    Finished release [optimized] target(s) in 0.03s
+    Finished release [optimized] target(s) in 0.04s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
@@ -96,7 +96,7 @@ Removed empty directory ‘testpkg/src/rust/vendor’
 * using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-apple-darwin17.0 (64-bit)
 * using session charset: UTF-8
-* using option ‘--as-cran’
+* using options ‘--no-manual --as-cran’
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
@@ -163,7 +163,6 @@ manual.
 * checking compilation flags used ... OK
 * checking compiled code ... OK
 * checking examples ... OK
-* checking PDF version of manual ... OK
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
@@ -184,14 +183,14 @@ Method bypassed by R_CARGO_RUN_PATH environment variable.
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
-   Compiling proc-macro2 v1.0.39
+   Compiling proc-macro2 v1.0.40
    Compiling unicode-ident v1.0.1
-   Compiling syn v1.0.96
-   Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpmb0V5O/R.INSTALL8d45748f6767/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpmb0V5O/R.INSTALL8d45748f6767/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpmb0V5O/R.INSTALL8d45748f6767/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.40s
+   Compiling quote v1.0.20
+   Compiling syn v1.0.98
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp1n6D7R/R.INSTALLb17462440da0/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp1n6D7R/R.INSTALLb17462440da0/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp1n6D7R/R.INSTALLb17462440da0/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.60s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -215,7 +214,7 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
 * using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-apple-darwin17.0 (64-bit)
 * using session charset: UTF-8
-* using option ‘--as-cran’
+* using options ‘--no-manual --as-cran’
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
@@ -282,7 +281,6 @@ manual.
 * checking compilation flags used ... OK
 * checking compiled code ... OK
 * checking examples ... OK
-* checking PDF version of manual ... OK
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
@@ -301,14 +299,14 @@ Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at $HOME/.cargo and $HOME/.rustup.
 Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/.cargo/bin/cargo
-   Compiling proc-macro2 v1.0.39
+   Compiling proc-macro2 v1.0.40
    Compiling unicode-ident v1.0.1
-   Compiling syn v1.0.96
-   Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpV3bpYg/R.INSTALL90f0470fb14/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpV3bpYg/R.INSTALL90f0470fb14/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpV3bpYg/R.INSTALL90f0470fb14/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.37s
+   Compiling quote v1.0.20
+   Compiling syn v1.0.98
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpjB2FLl/R.INSTALLb38b1f68b073/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpjB2FLl/R.INSTALLb38b1f68b073/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpjB2FLl/R.INSTALLb38b1f68b073/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.60s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -332,7 +330,7 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
 * using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-apple-darwin17.0 (64-bit)
 * using session charset: UTF-8
-* using option ‘--as-cran’
+* using options ‘--no-manual --as-cran’
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
@@ -399,7 +397,6 @@ manual.
 * checking compilation flags used ... OK
 * checking compiled code ... OK
 * checking examples ... OK
-* checking PDF version of manual ... OK
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
@@ -416,14 +413,14 @@ for details.
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
-   Compiling proc-macro2 v1.0.39
+   Compiling proc-macro2 v1.0.40
    Compiling unicode-ident v1.0.1
-   Compiling syn v1.0.96
-   Compiling quote v1.0.18
-   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpFII23f/R.INSTALL94a0621ef24e/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpFII23f/R.INSTALL94a0621ef24e/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpFII23f/R.INSTALL94a0621ef24e/testpkg/src/rust)
-    Finished release [optimized] target(s) in 10.32s
+   Compiling quote v1.0.20
+   Compiling syn v1.0.98
+   Compiling roxido_macro v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp8SU5m9/R.INSTALLb5a034b96e12/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp8SU5m9/R.INSTALLb5a034b96e12/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp8SU5m9/R.INSTALLb5a034b96e12/testpkg/src/rust)
+    Finished release [optimized] target(s) in 7.58s
 Built Rust static library.
 ** libs
 clang -mmacosx-version-min=10.13 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/usr/local/include   -fPIC  -Wall -g -O2  -c shim.c -o shim.o
@@ -447,7 +444,7 @@ packaged installation of ‘testpkg’ as ‘testpkg_0.1.0.tgz’
 * using R version 4.2.0 (2022-04-22)
 * using platform: x86_64-apple-darwin17.0 (64-bit)
 * using session charset: UTF-8
-* using option ‘--as-cran’
+* using options ‘--no-manual --as-cran’
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
@@ -505,7 +502,6 @@ manual.
 * checking line endings in shell scripts ... OK
 * checking compilation flags in Makevars ... OK
 * checking examples ... OK
-* checking PDF version of manual ... OK
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
