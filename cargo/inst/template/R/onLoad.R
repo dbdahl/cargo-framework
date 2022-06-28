@@ -22,8 +22,7 @@
 
 pkg_envir <- environment()
 
-#' @importFrom cargo run
-#' @importFrom cargo shlib_set shlib_get
+#' @importFrom cargo run shlib_set shlib_get
 #' @importFrom utils untar
 load_library <- function(libname, pkgname, must_be_silent) {
     if ( any(dir.exists(file.path(libname, pkgname, c("libs", "src")))) ) {

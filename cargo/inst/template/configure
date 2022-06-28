@@ -2,8 +2,6 @@
 
 cat <<'EOF' | "${R_HOME}/bin${R_ARCH_BIN}/Rscript" -
 
-# Cargo Framework configuration script from the cargo package, version V@V.
-
 # In case Cargo is not found, wrap parts of examples in \dontrun{}.
 # Assumes working directory is package root.
 make_Rd_from_template <- function(shlib) {
