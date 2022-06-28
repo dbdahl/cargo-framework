@@ -6,4 +6,5 @@ src/*.a
 src/*.o
 src/*.so
 src/rust/vendor
-src/rust/target
+src/rust/**/target
+src/rust/.idea
