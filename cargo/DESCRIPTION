@@ -11,6 +11,7 @@ BugReports: https://github.com/dbdahl/cargo-framework/issues
 License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 4.0.0)
 Suggests: roxygen2 (>= 7.2.0), testthat (>= 3.1.4)
+SystemRequirements: Cargo [Rust package manager]
 Encoding: UTF-8
 RoxygenNote: 7.2.0
 Roxygen: list(markdown = TRUE)

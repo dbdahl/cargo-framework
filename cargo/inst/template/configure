@@ -57,6 +57,7 @@ if ( ! dir.exists("vendor") ) untar("vendor.tar.gz", tar="internal")
 if ( cargo::run('build', '--offline', '--release', '--jobs', '2', minimum_version='../..') == 0 ) {
 
     file.copy("target/release/librust.a", "..", overwrite=TRUE)
+    setwd("../..")
     if ( ! file.exists("#SRC#") ) make_Rd_from_template(TRUE)
     message("Built Rust static library.")
 
