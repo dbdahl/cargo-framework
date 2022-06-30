@@ -6,7 +6,7 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-    load_library(libname, pkgname, FALSE)
+    load_library(libname, pkgname, TRUE)
 }
 
 .onUnload <- function(libpath) {
