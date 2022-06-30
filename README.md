@@ -35,13 +35,14 @@ You can also install the development version using the
 [remotes](https://cran.r-project.org/package=remotes) package:
 
 ```r
+install.packages("remotes")
 remotes::install_github("dbdahl/cargo-framework/cargo")
 ```
 
 ## Usage
 
 For usage information, please see the paper
-[*Writing R Extensions in Rust*]( https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
+[*Writing R Extensions in Rust*](https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
 
 The [rustdoc](https://docs.rs/roxido/) for the [roxido](https://crates.io/crates/roxido) crate
 documents the `Rval` structure and its functions.
@@ -53,18 +54,19 @@ that were developed using this framework.
 
 + [salso](https://cran.r-project.org/package=salso)
 + [caviarpd](https://cran.r-project.org/package=caviarpd)
++ [fangs](https://cran.r-project.org/package=fangs)
 
 ## Getting Started
 
 Please read the paper
-[*Writing R Extensions in Rust*]( https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf)
+[*Writing R Extensions in Rust*](https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf)
 for full details but, to get a taste, consider the follow...
 
 Setting up your environment is easy.
 
 ```r
 library(cargo)
-setup_rust(TRUE)
+cargo::install()
 ```
 
 Make a new package named, for example, `foo`:
@@ -85,48 +87,48 @@ foo::myrnorm(5, 0, 1)
 ```
 
 Now start hacking away on your new Rust-based package.  In particular, some of
-the more interesting files are listed below.  See especially `foo/src/rustlib/src/lib.rs`.
+the more interesting files are listed below.  See especially `src/rust/src/lib.rs`.
 
 ```
 foo
 ├── DESCRIPTION
 ├── R
 │   └── myrnorm.R
-├── src
-│   ├── rustlib
-│   │   ├── roxido ...
-│   │   └── src
-│   │       └── lib.rs
-└── tools
-    └── staticlib.R
+└── src
+    └── rust
+        ├── roxido ...
+        └── src
+            └── lib.rs
 ```
 
 You can browse the documentation of the API for the cargo framework:
 
 ```r
-cargo::api_documentation("foo")
+setwd("foo/src/rust/roxido")
+cargo::run("doc", "--open")
 ```
 
-And, you can extend the framework by editing `foo/src/rustlib/roxido/src/r.rs`.
+And, you can extend the framework by editing `foo/src/rust/roxido/src/r.rs`.
 
 Finally, you can also embed Rust code directly in your R scripts:
 
 ```r
-sum.of.squares <- cargo::rust_fn(x, '
-    let ss = x.slice_double().unwrap().iter().fold(0.0, |s,z| s + (*z)*(*z));
-    Rval::new(ss.sqrt(), &mut pc)
+euclidean_norm <- cargo::rust_fn(x, '
+    let ss = x.slice_double().unwrap().iter().fold(0.0, |s,&z| s + z*z);
+    Rval::new(ss.sqrt(), pc)
 ')
 
-sum.of.squares(rnorm(10))
+euclidean_norm(rnorm(10))
 ```
 ```
 [1] 3.29764
 ```
 
-Notice that if you redefine the `sum.of.squares` function, the second complication is much faster.
+Notice that if you redefine the `euclidean_norm` function, the second
+complication is much faster.
 
 Again, for full details, please read the paper
-[*Writing R Extensions in Rust*]( https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
+[*Writing R Extensions in Rust*](https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
 
 ## Citation
 

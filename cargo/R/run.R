@@ -66,7 +66,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
       return(101)
     }
     gsub("\\s*([^ ]+)\\s*","\\1",y)
-  } else minimum_version
+  } else if ( minimum_version == "." ) "1.31.0" else minimum_version
   check_candidate <- function(cargo_home, rustup_home, can_install=FALSE, can_update=FALSE) {
     vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
     cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
