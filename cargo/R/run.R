@@ -30,6 +30,8 @@
 #'   [base::packageStartupMessage()]?
 #' @param must_be_silent Should all messages be suppressed (regardless of the
 #'   value of \code{use_packageStartupMessage})?
+#' @param stdout See argument of the same name in [base::system2()].
+#' @param stderr See argument of the same name in [base::system2()].
 #'
 #' @return The same value and behavior as the [base::system2()] function, except
 #'   a non-zero exit code will be given in Cargo is not found.

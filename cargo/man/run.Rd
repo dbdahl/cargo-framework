@@ -50,6 +50,10 @@ unchanged.}
 
 \item{must_be_silent}{Should all messages be suppressed (regardless of the
 value of \code{use_packageStartupMessage})?}
+
+\item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
+
+\item{stderr}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
 }
 \value{
 The same value and behavior as the \code{\link[base:system2]{base::system2()}} function, except
