@@ -8,7 +8,7 @@
 #' @param ... Rust code is taken as a string from the last unnamed argument, and
 #'   variable names come for all other unnamed arguments.  See example.
 #' @param dependencies A character vector of crate dependencies, e.g.,
-#'   \code{c('rand = "0.8.4"','rand_pcg = "0.3.1"')}.
+#'   \code{c('rand = "0.8.5"','rand_pcg = "0.3.1"')}.
 #' @param verbose If \code{TRUE}, Cargo prints compilation details.  If
 #'   \code{FALSE}, Cargo is run in quiet mode, except for the first time this
 #'   function is run.  If \code{"never"}, Cargo is always run in quiet mode.
@@ -68,10 +68,10 @@ rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", ve
   unlink(list.files(r_code_directory, full.names=TRUE))
   # Build the shared library
   cwd <- getwd()
-  setwd(rustlib_directory)
   on.exit(add=TRUE, {
     setwd(cwd)
   })
+  setwd(rustlib_directory)
   options <- if ( ! isTRUE(verbose) ) "--quiet" else character(0)
   if ( run(options, "build", "--release", minimum_version=minimum_version, methods="cache", environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, must_be_silent=!isTRUE(verbose)) != 0 ) stop("Couldn't build Rust code.")
   # Load the shared library

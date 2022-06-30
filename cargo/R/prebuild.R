@@ -18,16 +18,23 @@
 #' @param what A character vector indicating the desired action. If it contains
 #'   \code{"register_calls"}, the function (re)generates Rust code. If it
 #'   contains \code{"documentation"}, the function (re)generates documentation.
+#'   If it contains \code{"vendor"}, the Rust dependencies are (re)vendored.
 #'
 #' @return \code{NULL}, invisibly.
+#' @importFrom utils tar
 #' @export
 #'
-prebuild <- function(pkgroot=".", what=c("register_calls", "documentation")) {
+prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "vendor")[1:2]) {
+  description_file <- file.path(pkgroot, "DESCRIPTION")
+  r_dir <- file.path(pkgroot, "R")
+  src_rust_dir <- file.path(pkgroot, "src", "rust")
+  if ( ! file.exists(description_file) || ! dir.exists(r_dir) || ! dir.exists(src_rust_dir) ) {
+    stop(sprintf("Oops, '%s' does not appear to be a package root directory.", pkgroot))
+  }
   if ( "register_calls" %in% what ) {
     register_calls(pkgroot)
   }
   if ( "documentation" %in% what ) {
-    description_file <- file.path(pkgroot, "DESCRIPTION")
     using_roxygen2 <- tryCatch({
       x <- read.dcf(description_file)[,'RoxygenNote']
       !is.na(x)
@@ -35,6 +42,19 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation")) {
     if ( using_roxygen2 && requireNamespace("roxygen2", quietly=TRUE) ) {
       roxygen2::roxygenize(pkgroot)
     }
+  }
+  if ( "vendor" %in% what ) {
+    original_dir <- getwd()
+    on.exit({
+      setwd(original_dir)
+    })
+    setwd(src_rust_dir)
+    config_file <- file.path(".cargo", "config.toml")
+    if ( file.exists(config_file) ) unlink(config_file, expand=FALSE)
+    cargo::run("update")
+    dir.create(".cargo", showWarnings=FALSE)
+    cargo::run("vendor", stdout=config_file)
+    utils::tar("vendor.tar.xz", c("vendor",".cargo"), compression="xz", tar="internal")
   }
   invisible(NULL)
 }

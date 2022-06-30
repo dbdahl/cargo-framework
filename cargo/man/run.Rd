@@ -11,7 +11,9 @@ run(
   environment_variables = list(),
   rustflags = NULL,
   use_packageStartupMessage = FALSE,
-  must_be_silent = FALSE
+  must_be_silent = FALSE,
+  stdout = "",
+  stderr = ""
 )
 }
 \arguments{
@@ -50,9 +52,8 @@ unchanged.}
 value of \code{use_packageStartupMessage})?}
 }
 \value{
-A logical equaling \code{TRUE} if and only if the minimum version is
-available and the exit status of the command is zero (indicating success).
-The function is designed to never throw a warning or error.
+The same value and behavior as the \code{\link[base:system2]{base::system2()}} function, except
+a non-zero exit code will be given in Cargo is not found.
 }
 \description{
 This function runs Cargo (Rust's package manager) with the \code{...}
@@ -60,7 +61,7 @@ arguments passed as command line arguments.
 }
 \examples{
 if ( run("--version", must_be_silent=TRUE) != 0 ) {
-    cat("Cargo is not installed. Please run cargo::install() in an interactive session.")
+    message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 }
 
 }

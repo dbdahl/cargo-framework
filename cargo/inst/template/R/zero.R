@@ -24,5 +24,5 @@ zero <- function(f, guesses, tol = 1e-7) {
     if(!is.numeric(x)) stop("Need a numeric result")
     as.double(x)
   }
-  .Call(.zero,  body(f.check), as.double(guesses), as.double(tol), new.env())
+  .Call(.zero, body(f.check), as.double(guesses), as.double(tol), new.env())
 }

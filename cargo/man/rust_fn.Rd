@@ -19,7 +19,7 @@ rust_fn(
 variable names come for all other unnamed arguments.  See example.}
 
 \item{dependencies}{A character vector of crate dependencies, e.g.,
-\code{c('rand = "0.8.4"','rand_pcg = "0.3.1"')}.}
+\code{c('rand = "0.8.5"','rand_pcg = "0.3.1"')}.}
 
 \item{minimum_version}{A character string representing the minimum version of
 Rust that is needed. Or a path to the root of a package (i.e., the

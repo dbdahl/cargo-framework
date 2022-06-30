@@ -149,6 +149,10 @@ fn roxido_fn(options: Vec<syn::NestedMeta>, item_fn: syn::ItemFn) -> TokenStream
             extern "C" fn #name(#args) #output {
                 let result: Result<Rval,_> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
+                    #[allow(unused_macros)]
+                    macro_rules! rval {
+                        ($val:expr) => { Rval::new($val, pc) }
+                    }
                     #body
                 });
                 match result {
@@ -180,6 +184,10 @@ fn roxido_fn(options: Vec<syn::NestedMeta>, item_fn: syn::ItemFn) -> TokenStream
             extern "C" fn #name(#args) #output {
                 let result: Result<Rval,_> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
+                    #[allow(unused_macros)]
+                    macro_rules! rval {
+                        ($val:expr) => { Rval::new($val, pc) }
+                    }
                     #body
                 });
                 match result {

@@ -69,7 +69,7 @@ load_library <- function(libname, pkgname, must_be_silent) {
         unlink(target_dir, recursive=TRUE, force=TRUE, expand=FALSE)
     })
     setwd(target_dir)
-    utils::untar("vendor.tar.gz", tar="internal")
+    utils::untar("vendor.tar.xz", tar="internal")
     quiet_args <- if ( use_packageStartupMessage ) "--quiet" else character(0)
     is_windows <- .Platform$OS.type=="windows"
     is_mac <- ( ! is_windows ) && identical(as.vector(Sys.info()["sysname"]),"Darwin")

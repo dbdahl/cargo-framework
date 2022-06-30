@@ -1,4 +1,8 @@
-0.2.7 (2022-XX-XX)
+0.2.8 (2022-06-30)
+  * Added rval! macro to roxido API.
+  * Added helper functionality via cargo::prebuild(what="vendor").
+  * Restored api_documentation() function to launch web browser to show the API
+    for the Cargo Framework.
   * Use message() instead of cat() in cargo::run().
 
 0.2.6 (2022-06-22)
@@ -26,10 +30,10 @@
   * Added cross_compile function to compile static libraries for all targets
     used by CRAN build machines.
   * Added api_documentation function to launch web browser to show the API
-    for the cargo framework.
+    for the Cargo Framework.
 
 0.1.37 (2021-08-14)
-  * Expanded the functionality of the 'cargo' framework for Rust-based package
+  * Expanded the functionality of the Cargo Framework for Rust-based package
     development, beyond its foundation in release 0.1.30.
   * Added the rust_fn function to embed Rust code directly in an R script.
 

@@ -38,21 +38,20 @@ fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
     let (mut x0, mut x1, tol) = (slice[0], slice[1], stol.as_f64());
     if tol <= 0.0 { panic!("non-positive tol value"); }
     let symbol = Rval::new_symbol("x", pc);
-    let feval = |x: f64| {
-        let pc = &mut Pc::new();
-        symbol.assign(Rval::new(x, pc), rho);
+    let mut feval = |x: f64| {
+        symbol.assign(rval!(x), rho);
         f.eval(rho, pc).unwrap().as_f64()
     };
     let mut f0 = feval(x0);
-    if f0 == 0.0 { return Rval::new(x0, pc); }
+    if f0 == 0.0 { return rval!(x0); }
     let f1 = feval(x1);
-    if f1 == 0.0 { return Rval::new(x1, pc); }
+    if f1 == 0.0 { return rval!(x1); }
     if f0 * f1 > 0.0 { panic!("x[0] and x[1] have the same sign"); }
     loop {
         let xc = 0.5 * (x0 + x1);
-        if (x0 - x1).abs() < tol { return Rval::new(xc, pc); }
+        if (x0 - x1).abs() < tol { return rval!(xc); }
         let fc = feval(xc);
-        if fc == 0.0 { return Rval::new(xc, pc); }
+        if fc == 0.0 { return rval!(xc); }
         if f0 * fc > 0.0 { x0 = xc; f0 = fc; } else { x1 = xc; }
     }
 }

@@ -4,14 +4,18 @@
 \alias{prebuild}
 \title{Prepare for Building the Package Source}
 \usage{
-prebuild(pkgroot = ".", what = c("register_calls", "documentation"))
+prebuild(
+  pkgroot = ".",
+  what = c("register_calls", "documentation", "vendor")[1:2]
+)
 }
 \arguments{
 \item{pkgroot}{The root directory of the package.}
 
 \item{what}{A character vector indicating the desired action. If it contains
 \code{"register_calls"}, the function (re)generates Rust code. If it
-contains \code{"documentation"}, the function (re)generates documentation.}
+contains \code{"documentation"}, the function (re)generates documentation.
+If it contains \code{"vendor"}, the Rust dependencies are (re)vendored.}
 }
 \value{
 \code{NULL}, invisibly.

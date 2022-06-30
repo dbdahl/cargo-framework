@@ -31,9 +31,8 @@
 #' @param must_be_silent Should all messages be suppressed (regardless of the
 #'   value of \code{use_packageStartupMessage})?
 #'
-#' @return A logical equaling \code{TRUE} if and only if the minimum version is
-#'   available and the exit status of the command is zero (indicating success).
-#'   The function is designed to never throw a warning or error.
+#' @return The same value and behavior as the [base::system2()] function, except
+#'   a non-zero exit code will be given in Cargo is not found.
 #'
 #' @export
 #'
@@ -42,7 +41,7 @@
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE) {
+run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
     if ( must_be_silent ) return()
@@ -127,7 +126,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
         cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
         msg(sprintf("Cargo found at: %s\n", cargo_cmd))
         vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
-        return(system3(cargo_cmd, args, env=vars))
+        return(system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr))
       } else {
         msg("Method failed.\n")
       }
