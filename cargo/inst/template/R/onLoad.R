@@ -85,5 +85,5 @@ compile_library <- function(libname, pkgname, no_prompting, one_time_message=TRU
   status <- cargo::run("--quiet", "build", "--offline", "--release", minimum_version=file.path(libname, pkgname), rustflags=rustflags, use_packageStartupMessage=TRUE, no_prompting=no_prompting)
   if ( status != 0 ) return(FALSE)
   libname <- if ( is_windows ) "rust.dll" else if ( is_mac ) "librust.dylib" else "librust.so"
-  cargo::shlib_set(pkgname, file.path("target","release",libname), FALSE, use_packageStartupMessage, no_prompting=no_prompting)
+  cargo::shlib_set(pkgname, file.path("target","release",libname), FALSE, use_packageStartupMessage=TRUE, no_prompting=no_prompting)
 }

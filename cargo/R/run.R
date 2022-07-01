@@ -28,6 +28,8 @@
 #'   unchanged.
 #' @param use_packageStartupMessage Should essential messages be displayed using
 #'   [base::packageStartupMessage()]?
+#' @param must_be_silent Should all messages be suppressed (regardless of the
+#'   value of \code{use_packageStartupMessage})?
 #' @param no_prompting Prohibit prompting the user?
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
@@ -42,9 +44,10 @@
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, no_prompting=FALSE, stdout="", stderr="") {
+run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE, no_prompting=FALSE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
+    if ( must_be_silent ) return()
     if ( use_packageStartupMessage ) {
       packageStartupMessage(..., appendLF=FALSE)
     } else {
