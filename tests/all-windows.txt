@@ -30,16 +30,16 @@ Installing package into 'C:/Users/dahl/AppData/Local/R/win-library/4.2'
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Condition not met.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
+Cargo version '1.62.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
    Compiling proc-macro2 v1.0.40
    Compiling unicode-ident v1.0.1
    Compiling quote v1.0.20
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido)
+   Compiling roxido_macro v0.5.1 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.1 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust\roxido)
    Compiling rust v0.1.0 (C:\Users\dahl\cargo-framework\tests\testpkg\src\rust)
-    Finished release [optimized] target(s) in 16.74s
+    Finished release [optimized] target(s) in 19.04s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -64,7 +64,7 @@ R CMD INSTALL testpkg
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Condition not met.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
+Cargo version '1.62.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
     Finished release [optimized] target(s) in 0.03s
 Built Rust static library.
@@ -140,7 +140,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... OK
+* checking R code for possible problems ... NOTE
+compile_library: no visible binding for global variable
+  'use_packageStartupMessage'
+Undefined global functions or variables:
+  use_packageStartupMessage
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -166,7 +170,7 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 2 NOTEs
+Status: 3 NOTEs
 See
   'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
@@ -186,10 +190,10 @@ Cargo found at: C:\Users\dahl\AppData\Local/R/cache/R/cargo/cargo/bin/cargo.exe
    Compiling unicode-ident v1.0.1
    Compiling quote v1.0.20
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpEdGLLg\R.INSTALL4803e677de\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpEdGLLg\R.INSTALL4803e677de\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpEdGLLg\R.INSTALL4803e677de\testpkg\src\rust)
-    Finished release [optimized] target(s) in 25.92s
+   Compiling roxido_macro v0.5.1 (C:\Users\dahl\AppData\Local\Temp\RtmpWoyWLW\R.INSTALL4c4b4949b1\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.1 (C:\Users\dahl\AppData\Local\Temp\RtmpWoyWLW\R.INSTALL4c4b4949b1\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpWoyWLW\R.INSTALL4c4b4949b1\testpkg\src\rust)
+    Finished release [optimized] target(s) in 16.49s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -254,7 +258,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... OK
+* checking R code for possible problems ... NOTE
+compile_library: no visible binding for global variable
+  'use_packageStartupMessage'
+Undefined global functions or variables:
+  use_packageStartupMessage
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -280,7 +288,7 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 2 NOTEs
+Status: 3 NOTEs
 See
   'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
@@ -292,16 +300,16 @@ for details.
 Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
 Method bypassed by R_CARGO_RUN_ENVIR environment variable.
 Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
-Cargo version '1.61.0' is installed, which satisfies the need for '1.61'.
+Cargo version '1.62.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: C:\Users\dahl/.cargo/bin/cargo.exe
    Compiling proc-macro2 v1.0.40
-   Compiling quote v1.0.20
    Compiling unicode-ident v1.0.1
+   Compiling quote v1.0.20
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpmmhqLW\R.INSTALLe042b54ae7\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpmmhqLW\R.INSTALLe042b54ae7\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpmmhqLW\R.INSTALLe042b54ae7\testpkg\src\rust)
-    Finished release [optimized] target(s) in 18.14s
+   Compiling roxido_macro v0.5.1 (C:\Users\dahl\AppData\Local\Temp\RtmpKEEkGa\R.INSTALL11d02a69624c\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.1 (C:\Users\dahl\AppData\Local\Temp\RtmpKEEkGa\R.INSTALL11d02a69624c\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpKEEkGa\R.INSTALL11d02a69624c\testpkg\src\rust)
+    Finished release [optimized] target(s) in 15.78s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -366,7 +374,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... OK
+* checking R code for possible problems ... NOTE
+compile_library: no visible binding for global variable
+  'use_packageStartupMessage'
+Undefined global functions or variables:
+  use_packageStartupMessage
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -392,7 +404,7 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 2 NOTEs
+Status: 3 NOTEs
 See
   'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
@@ -408,10 +420,10 @@ Cargo found at: C:/Users/dahl/AppData/Local/R/cache/R/cargo/cargo/bin/cargo.exe
    Compiling quote v1.0.20
    Compiling unicode-ident v1.0.1
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpIhEyxm\R.INSTALLbc1f746c51\testpkg\src\rust\roxido_macro)
-   Compiling roxido v0.5.0 (C:\Users\dahl\AppData\Local\Temp\RtmpIhEyxm\R.INSTALLbc1f746c51\testpkg\src\rust\roxido)
-   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpIhEyxm\R.INSTALLbc1f746c51\testpkg\src\rust)
-    Finished release [optimized] target(s) in 15.70s
+   Compiling roxido_macro v0.5.1 (C:\Users\dahl\AppData\Local\Temp\RtmpULJpAg\R.INSTALL3d82de321a6\testpkg\src\rust\roxido_macro)
+   Compiling roxido v0.5.1 (C:\Users\dahl\AppData\Local\Temp\RtmpULJpAg\R.INSTALL3d82de321a6\testpkg\src\rust\roxido)
+   Compiling rust v0.1.0 (C:\Users\dahl\AppData\Local\Temp\RtmpULJpAg\R.INSTALL3d82de321a6\testpkg\src\rust)
+    Finished release [optimized] target(s) in 14.85s
 Built Rust static library.
 ** libs
 Warning: this package has a non-empty 'configure.win' file,
@@ -476,7 +488,11 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... OK
+* checking R code for possible problems ... NOTE
+compile_library: no visible binding for global variable
+  'use_packageStartupMessage'
+Undefined global functions or variables:
+  use_packageStartupMessage
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -493,7 +509,7 @@ Authors@R field gives persons with invalid ORCID identifiers:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 2 NOTEs
+Status: 3 NOTEs
 See
   'C:/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log'
 for details.
@@ -523,13 +539,39 @@ The package's Rust code can be compiled by the end user when Cargo is installed.
 * MD5 sums
 packaged installation of 'testpkg' as testpkg_0.1.0.zip
 * DONE (testpkg)
+
+Compiling library. This is one-time only. Please be patient.
+
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Method bypassed by R_CARGO_RUN environment variable.
+Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
+Method bypassed by R_CARGO_RUN environment variable.
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Method bypassed by R_CARGO_RUN environment variable.
+Cargo not found.
 Error in .Call(.myrnorm, n, mean, sd) : 
-  Cargo was not found. Did you run cargo::install() and then restart R?
+  Cargo was not found. Please run cargo::install() and then restart R.
 Calls: <Anonymous> -> .Call
 Execution halted
+
+Compiling library. This is one-time only. Please be patient.
+
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Cargo version '1.62.0' is installed, which satisfies the need for '1.61'.
+Cargo found at: C:/Users/dahl/AppData/Local/R/cache/R/cargo/cargo/bin/cargo.exe
 [1]  0.6607697 -2.0529830 -1.4992061
 [1]  0.6607697 -2.0529830 -1.4992061
+
+Compiling library. This is one-time only. Please be patient.
+
+Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.
+Method bypassed by R_CARGO_RUN_ENVIR environment variable.
+Trying to find a suitable Cargo at %USERPROFILE%/.cargo and %USERPROFILE%/.rustup.
+Method bypassed by R_CARGO_RUN_PATH environment variable.
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Method bypassed by R_CARGO_RUN_CACHE environment variable.
+Cargo not found.
 Error in .Call(.myrnorm, n, mean, sd) : 
-  Cargo was not found. Did you run cargo::install() and then restart R?
+  Cargo was not found. Please run cargo::install() and then restart R.
 Calls: <Anonymous> -> .Call
 Execution halted
