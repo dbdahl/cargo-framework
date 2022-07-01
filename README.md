@@ -104,8 +104,7 @@ foo
 You can browse the documentation of the API for the cargo framework:
 
 ```r
-setwd("foo/src/rust/roxido")
-cargo::run("doc", "--open")
+cargo::api_documentation("foo")
 ```
 
 And, you can extend the framework by editing `foo/src/rust/roxido/src/r.rs`.
