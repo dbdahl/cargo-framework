@@ -39,7 +39,7 @@ Cargo found at: /Users/dahl/.cargo/bin/cargo
    Compiling roxido_macro v0.5.1 (/Users/dahl/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.5.1 (/Users/dahl/cargo-framework/tests/testpkg/src/rust/roxido)
    Compiling rust v0.1.0 (/Users/dahl/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 3.96s
+    Finished release [optimized] target(s) in 3.95s
 Built Rust static library.
 ** libs
 clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/opt/R/arm64/include   -fPIC  -falign-functions=64 -Wall -g -O2  -c shim.c -o shim.o
@@ -141,11 +141,7 @@ manual.
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... NOTE
-compile_library: no visible binding for global variable
-  ‘use_packageStartupMessage’
-Undefined global functions or variables:
-  use_packageStartupMessage
+* checking R code for possible problems ... OK
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -171,7 +167,7 @@ Undefined global functions or variables:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 1 WARNING, 3 NOTEs
+Status: 1 WARNING, 2 NOTEs
 See
   ‘/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
@@ -191,10 +187,10 @@ Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/car
    Compiling quote v1.0.20
    Compiling unicode-ident v1.0.1
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp6wtF1k/R.INSTALL4c1e15aaa627/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp6wtF1k/R.INSTALL4c1e15aaa627/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmp6wtF1k/R.INSTALL4c1e15aaa627/testpkg/src/rust)
-    Finished release [optimized] target(s) in 3.94s
+   Compiling roxido_macro v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpjmf9eE/R.INSTALL582033f79312/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpjmf9eE/R.INSTALL582033f79312/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/Rtmpjmf9eE/R.INSTALL582033f79312/testpkg/src/rust)
+    Finished release [optimized] target(s) in 3.95s
 Built Rust static library.
 ** libs
 clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/opt/R/arm64/include   -fPIC  -falign-functions=64 -Wall -g -O2  -c shim.c -o shim.o
@@ -263,11 +259,7 @@ manual.
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... NOTE
-compile_library: no visible binding for global variable
-  ‘use_packageStartupMessage’
-Undefined global functions or variables:
-  use_packageStartupMessage
+* checking R code for possible problems ... OK
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -293,7 +285,7 @@ Undefined global functions or variables:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 1 WARNING, 3 NOTEs
+Status: 1 WARNING, 2 NOTEs
 See
   ‘/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
@@ -311,9 +303,9 @@ Cargo found at: /Users/dahl/.cargo/bin/cargo
    Compiling unicode-ident v1.0.1
    Compiling quote v1.0.20
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpZykRuK/R.INSTALL4e415f47149e/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpZykRuK/R.INSTALL4e415f47149e/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpZykRuK/R.INSTALL4e415f47149e/testpkg/src/rust)
+   Compiling roxido_macro v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpT6hFIX/R.INSTALL5a312ed71bd2/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpT6hFIX/R.INSTALL5a312ed71bd2/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpT6hFIX/R.INSTALL5a312ed71bd2/testpkg/src/rust)
     Finished release [optimized] target(s) in 3.87s
 Built Rust static library.
 ** libs
@@ -383,11 +375,7 @@ manual.
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... NOTE
-compile_library: no visible binding for global variable
-  ‘use_packageStartupMessage’
-Undefined global functions or variables:
-  use_packageStartupMessage
+* checking R code for possible problems ... OK
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -413,7 +401,7 @@ Undefined global functions or variables:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 1 WARNING, 3 NOTEs
+Status: 1 WARNING, 2 NOTEs
 See
   ‘/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
@@ -426,13 +414,13 @@ Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment
 Cargo version '1.62.0' is installed, which satisfies the need for '1.61'.
 Cargo found at: /Users/dahl/Library/Caches/org.R-project.R/R/cargo/cargo/bin/cargo
    Compiling proc-macro2 v1.0.40
-   Compiling unicode-ident v1.0.1
    Compiling quote v1.0.20
+   Compiling unicode-ident v1.0.1
    Compiling syn v1.0.98
-   Compiling roxido_macro v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpwHKPeu/R.INSTALL5059483f33e5/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpwHKPeu/R.INSTALL5059483f33e5/testpkg/src/rust/roxido)
-   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpwHKPeu/R.INSTALL5059483f33e5/testpkg/src/rust)
-    Finished release [optimized] target(s) in 3.89s
+   Compiling roxido_macro v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpFWvzB8/R.INSTALL5c3f1ec755c4/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.1 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpFWvzB8/R.INSTALL5c3f1ec755c4/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/private/var/folders/08/8wzxlynx1nx0h7b19w63w74c0000gq/T/RtmpFWvzB8/R.INSTALL5c3f1ec755c4/testpkg/src/rust)
+    Finished release [optimized] target(s) in 3.95s
 Built Rust static library.
 ** libs
 clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I/opt/R/arm64/include   -fPIC  -falign-functions=64 -Wall -g -O2  -c shim.c -o shim.o
@@ -501,11 +489,7 @@ manual.
 * checking S3 generic/method consistency ... OK
 * checking replacement functions ... OK
 * checking foreign function calls ... OK
-* checking R code for possible problems ... NOTE
-compile_library: no visible binding for global variable
-  ‘use_packageStartupMessage’
-Undefined global functions or variables:
-  use_packageStartupMessage
+* checking R code for possible problems ... OK
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
@@ -522,7 +506,7 @@ Undefined global functions or variables:
 * checking for detritus in the temp directory ... OK
 * DONE
 
-Status: 1 WARNING, 3 NOTEs
+Status: 1 WARNING, 2 NOTEs
 See
   ‘/Users/dahl/cargo-framework/tests/testpkg.Rcheck/00check.log’
 for details.
