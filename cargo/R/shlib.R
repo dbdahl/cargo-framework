@@ -15,13 +15,12 @@
 #' @examples
 #' shlib_set("my_package","/some/path/to/a/shared_library.so")
 #'
-shlib_set <- function(pkgname, path, force=FALSE, use_packageStartupMessage=FALSE, must_be_silent=FALSE) {
+shlib_set <- function(pkgname, path, force=FALSE, use_packageStartupMessage=FALSE, no_prompting=FALSE) {
   cat <- function(...) {
-    if ( must_be_silent ) return()
     if ( isTRUE(use_packageStartupMessage) ) {
       packageStartupMessage(..., appendLF=FALSE)
     } else {
-      base::cat(...)
+      base::message(..., appendLF=FALSE)
     }
   }
   if ( ! file.exists(path) ) return(FALSE)
@@ -35,7 +34,8 @@ This directory will then be used to: 1. cache shared libraries for R packages
 based on Rust and 2. enable cached compilation for the cargo::rust_fn function.
 You can revoke this permission at any time by deleting the directory.\n', cache_dir)
     if ( isFALSE(force) ) {
-      if ( must_be_silent || use_packageStartupMessage || ! interactive() ) {
+      if ( no_prompting ) return(invisible(FALSE))
+      if ( ! interactive() ) {
         cat("Please try again in an interactive session or use 'cargo::shlib_set(..., force=TRUE)'.\n")
         return(invisible(FALSE))
       }

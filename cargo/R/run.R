@@ -28,8 +28,7 @@
 #'   unchanged.
 #' @param use_packageStartupMessage Should essential messages be displayed using
 #'   [base::packageStartupMessage()]?
-#' @param must_be_silent Should all messages be suppressed (regardless of the
-#'   value of \code{use_packageStartupMessage})?
+#' @param no_prompting Prohibit prompting the user?
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
 #'
@@ -43,10 +42,9 @@
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE, stdout="", stderr="") {
+run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, no_prompting=FALSE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
-    if ( must_be_silent ) return()
     if ( use_packageStartupMessage ) {
       packageStartupMessage(..., appendLF=FALSE)
     } else {
@@ -73,7 +71,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
     cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
     if ( ! file.exists(cargo_cmd) ) {
       if ( ! can_install ) return(201)
-      if ( ! install_engine(FALSE, use_packageStartupMessage, must_be_silent) ) {
+      if ( ! install_engine(FALSE, use_packageStartupMessage, no_prompting) ) {
         return(202)
       }
     }

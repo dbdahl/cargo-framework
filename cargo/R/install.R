@@ -15,9 +15,8 @@ install <- function(force=FALSE) {
   install_engine(force, FALSE, FALSE)
 }
 
-install_engine <- function(force, use_packageStartupMessage, must_be_silent) {
+install_engine <- function(force, use_packageStartupMessage, no_prompting) {
   msg <- function(...) {
-    if ( must_be_silent ) return()
     if ( isTRUE(use_packageStartupMessage) ) {
       packageStartupMessage(..., appendLF=FALSE)
     } else {
@@ -39,7 +38,8 @@ frequency by modifying the last line of the "%s" file in that
 directory. You can revoke permission at any time by deleting that directory.\n\n',
     cache_dir, days_until_next_purge, basename(last_purge_filename))
   if ( isFALSE(force) ) {
-    if ( must_be_silent || use_packageStartupMessage || ! interactive() ) {
+    if ( no_prompting ) return(invisible(FALSE))
+    if ( ! interactive() ) {
       msg("Please try again in an interactive session or use 'cargo::install(force=TRUE)'.\n")
       return(invisible(FALSE))
     }

@@ -1,12 +1,20 @@
 .onLoad <- function(libname, pkgname) {
-    if ( ! load_library(libname, pkgname, TRUE) ) {
-        scall <- \(...) stop("Cargo was not found. Did you run cargo::install() and then restart R?")
+  okay <- load_library(libname, pkgname)
+  assign("_library_okay_", okay, envir=pkg_envir)
+  if ( ! okay ) {
+        scall <- \(...) stop("Cargo was not found. Please run cargo::install() and then restart R.")
         assign(".Call", scall, envir=pkg_envir)
     }
 }
 
 .onAttach <- function(libname, pkgname) {
-    load_library(libname, pkgname, TRUE)
+  if ( ! get("_library_okay_", envir=pkg_envir) ) {
+    if ( compile_library(libname, pkgname, FALSE, FALSE) ) {
+      packageStartupMessage(sprintf("\nThe %s package is now ready, but you must first restart R.\n\n",pkgname), appendLF=FALSE)
+    } else {
+      packageStartupMessage(sprintf("\nThe %s package requires Cargo. Please run cargo::install() and then restart R.\n\n",pkgname), appendLF=FALSE)
+    }
+  }
 }
 
 .onUnload <- function(libpath) {
@@ -24,11 +32,8 @@ pkg_envir <- environment()
 
 #' @importFrom cargo run shlib_set shlib_get
 #' @importFrom utils untar
-load_library <- function(libname, pkgname, must_be_silent) {
+load_library <- function(libname, pkgname) {
     if ( any(dir.exists(file.path(libname, pkgname, c("libs", "src")))) ) {
-        return(TRUE)
-    }
-    if ( exists("_library_path_", envir=pkg_envir) ) {
         return(TRUE)
     }
     use_cache <- function() {
@@ -36,25 +41,22 @@ load_library <- function(libname, pkgname, must_be_silent) {
         if ( is.null(path) ) return(FALSE)
         info <- tryCatch(dyn.load(path), error=function(e) e)
         if ( inherits(info, "DLLInfo") ) {
-            if ( ! environmentIsLocked(pkg_envir) ) {
                 assign("_library_path_", info[['path']], envir=pkg_envir)
                 reg <- getDLLRegisteredRoutines(info, addNames=FALSE)
                 lapply(reg[['.Call']], \(f) assign(f$name, f, envir=pkg_envir))
-            } else {
-                if ( ! must_be_silent ) {
-                    packageStartupMessage(sprintf("\nThe %s package is now ready. Please restart R and try again.\n\n",pkgname), appendLF=FALSE)
-                }
-            }
             TRUE
         } else {
             FALSE
         }
     }
     if ( use_cache() ) return(TRUE)
-    use_packageStartupMessage <- must_be_silent || local({
-        calls <- sys.calls()
-        "suppressPackageStartupMessages" %in% sapply(seq_len(sys.nframe()), \(i) as.character(calls[[i]])[1])
-    })
+  if ( compile_library(libname, pkgname, TRUE, TRUE) ) use_cache() else FALSE
+}
+
+compile_library <- function(libname, pkgname, no_prompting, one_time_message=TRUE) {
+  if ( one_time_message ) {
+    packageStartupMessage("\nCompiling library. This is one-time only. Please be patient.\n\n", appendLF=FALSE)
+  }
     temp_dir <- tempdir(check=TRUE)
     target_dir <- tempfile(pattern="rust-", tmpdir=temp_dir)
     dir.create(target_dir, showWarnings=FALSE)
@@ -70,7 +72,6 @@ load_library <- function(libname, pkgname, must_be_silent) {
     })
     setwd(target_dir)
     utils::untar("vendor.tar.xz", tar="internal")
-    quiet_args <- if ( use_packageStartupMessage ) "--quiet" else character(0)
     is_windows <- .Platform$OS.type=="windows"
     is_mac <- ( ! is_windows ) && identical(as.vector(Sys.info()["sysname"]),"Darwin")
     rustflags <- if ( is_windows ) {
@@ -80,9 +81,8 @@ load_library <- function(libname, pkgname, must_be_silent) {
     } else {
         c('-C', 'target-cpu=native')
     }
-    status <- cargo::run(quiet_args, "build", "--offline", "--release", minimum_version=file.path(libname, pkgname), rustflags=rustflags, use_packageStartupMessage=use_packageStartupMessage, must_be_silent=must_be_silent)
+  status <- cargo::run("--quiet", "build", "--offline", "--release", minimum_version=file.path(libname, pkgname), rustflags=rustflags, use_packageStartupMessage=TRUE, no_prompting=no_prompting)
     if ( status != 0 ) return(FALSE)
     libname <- if ( is_windows ) "rust.dll" else if ( is_mac ) "librust.dylib" else "librust.so"
-    cargo::shlib_set(pkgname, file.path("target","release",libname), FALSE, use_packageStartupMessage, must_be_silent)
-    use_cache()
+  cargo::shlib_set(pkgname, file.path("target","release",libname), FALSE, use_packageStartupMessage, no_prompting=no_prompting)
 }

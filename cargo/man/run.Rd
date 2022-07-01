@@ -11,7 +11,7 @@ run(
   environment_variables = list(),
   rustflags = NULL,
   use_packageStartupMessage = FALSE,
-  must_be_silent = FALSE,
+  no_prompting = FALSE,
   stdout = "",
   stderr = ""
 )
@@ -48,8 +48,7 @@ unchanged.}
 \item{use_packageStartupMessage}{Should essential messages be displayed using
 \code{\link[base:message]{base::packageStartupMessage()}}?}
 
-\item{must_be_silent}{Should all messages be suppressed (regardless of the
-value of \code{use_packageStartupMessage})?}
+\item{no_prompting}{Prohibit prompting the user?}
 
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
 

@@ -9,7 +9,7 @@ shlib_set(
   path,
   force = FALSE,
   use_packageStartupMessage = FALSE,
-  must_be_silent = FALSE
+  no_prompting = FALSE
 )
 }
 \arguments{
@@ -23,8 +23,7 @@ confirmation.}
 \item{use_packageStartupMessage}{Should essential messages be displayed using
 \code{\link[base:message]{base::packageStartupMessage()}}?}
 
-\item{must_be_silent}{Should all messages be suppressed (regardless of the
-value of \code{use_packageStartupMessage})?}
+\item{no_prompting}{Prohibit prompting the user?}
 }
 \value{
 A logical indicating whether the library was successfully cached.
