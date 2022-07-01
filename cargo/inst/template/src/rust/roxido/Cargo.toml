@@ -1,6 +1,6 @@
 [package]
 name = "roxido"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["David B. Dahl <dahl@stat.byu.edu>"]
 edition = "2021"
 description = "A framework is provided to transparently develop R packages using Rust with minimal overhead, and more wrappers are easily added."
