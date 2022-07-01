@@ -1,8 +1,9 @@
-0.2.10 (2022-06-30)
+0.2.10 (2022-07-01)
   * Added rval! macro to roxido API.
   * Added helper functionality via cargo::prebuild(what="vendor").
   * Restored api_documentation() function to launch web browser to show the API
     for the Cargo Framework.
+  * Better .onLoad() function for packages.
   * Use message() instead of cat() in cargo::run().
 
 0.2.6 (2022-06-22)
