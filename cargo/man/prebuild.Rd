@@ -6,7 +6,7 @@
 \usage{
 prebuild(
   pkgroot = ".",
-  what = c("register_calls", "documentation", "vendor")[1:2]
+  what = c("register_calls", "documentation", "vendor", "contributors")[1:2]
 )
 }
 \arguments{

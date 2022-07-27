@@ -13,6 +13,7 @@ run(
   use_packageStartupMessage = FALSE,
   must_be_silent = FALSE,
   no_prompting = FALSE,
+  offer_install = TRUE,
   stdout = "",
   stderr = ""
 )
@@ -53,6 +54,8 @@ unchanged.}
 value of \code{use_packageStartupMessage})?}
 
 \item{no_prompting}{Prohibit prompting the user?}
+
+\item{offer_install}{Can offer to install Cargo if needed?}
 
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
 

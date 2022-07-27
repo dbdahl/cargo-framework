@@ -31,6 +31,7 @@
 #' @param must_be_silent Should all messages be suppressed (regardless of the
 #'   value of \code{use_packageStartupMessage})?
 #' @param no_prompting Prohibit prompting the user?
+#' @param offer_install Can offer to install Cargo if needed?
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
 #'
@@ -44,7 +45,7 @@
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE, no_prompting=FALSE, stdout="", stderr="") {
+run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE, no_prompting=FALSE, offer_install=TRUE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
     if ( must_be_silent ) return()
@@ -160,7 +161,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
       msg("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
       status <- run_engine(
         "R_CARGO_RUN_CACHE",
-        TRUE,
+        offer_install,
         file.path(prefix_dir, "cargo"), file.path(prefix_dir, "rustup"), TRUE, TRUE)
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     }
