@@ -145,7 +145,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
         "R_CARGO_RUN_ENVIR",
         ( Sys.getenv("CARGO_HOME","<unset>") != "<unset>" ) && ( Sys.getenv("RUSTUP_HOME","<unset>") != "<unset>" ),
         Sys.getenv("CARGO_HOME"), Sys.getenv("RUSTUP_HOME"), FALSE, FALSE)
-      if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
+      if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     } else if ( method == "path" ) {
       prefix <- ifelse(windows,"%USERPROFILE%","$HOME")
       msg(sprintf("Trying to find a suitable Cargo at %s/.cargo and %s/.rustup.\n", prefix, prefix))
@@ -154,7 +154,7 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
         "R_CARGO_RUN_PATH",
         Sys.getenv(ifelse(windows,"USERPROFILE","HOME"),"<unset>") != "<unset>",
         file.path(prefix_dir, ".cargo"), file.path(prefix_dir, ".rustup"), FALSE, FALSE)
-      if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
+      if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     } else if ( method == "cache" ) {
       prefix_dir <- tools::R_user_dir("cargo", "cache")
       msg("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
@@ -162,9 +162,46 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
         "R_CARGO_RUN_CACHE",
         TRUE,
         file.path(prefix_dir, "cargo"), file.path(prefix_dir, "rustup"), TRUE, TRUE)
-      if ( ( ! is.null(status) ) && ( status == 0 ) ) return(status)
+      if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     }
   }
   msg("Cargo not found.\n")
   100
+}
+
+# An enhancement of the system2 function which sets environment variables better.
+system3 <- function(..., env=character()) {
+  if ( length(env) > 0 ) {
+    names <- names(env)
+    original_env <- sapply(names, function(x) Sys.getenv(x,"<unset>"))
+    tmp <- original_env != "<unset>"
+    to_restore <- original_env[tmp]
+    to_unset <- names(original_env[!tmp])
+    tmp <- ! is.na(env)
+    if ( sum(tmp) > 0 ) do.call(Sys.setenv, as.list(env[tmp]))
+    if ( sum(!tmp) > 0 ) Sys.unsetenv(names(env[!tmp]))
+    on.exit({
+      if ( length(to_restore) > 0 ) do.call(Sys.setenv, as.list(to_restore))
+      Sys.unsetenv(to_unset)
+    })
+  }
+  system2(...)
+}
+
+get_homes <- function(cargo_home, rustup_home) {
+  c(CARGO_HOME=normalizePath(cargo_home, mustWork=FALSE),
+    RUSTUP_HOME=normalizePath(rustup_home, mustWork=FALSE))
+}
+
+mk_rustflags <- function(...) {
+  args <- c(...)
+  if ( is.null(args) ) list()
+  else {
+    x <- if ( any(is.na(args)) || (length(args) == 0) ) {
+      NA
+    } else {
+      paste(args, collapse=rawToChar(as.raw(strtoi("1f",base=16L))))
+    }
+    list(CARGO_ENCODED_RUSTFLAGS=x)
+  }
 }

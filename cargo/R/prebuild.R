@@ -24,26 +24,27 @@
 #' @importFrom utils tar
 #' @export
 #'
-prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "vendor")[1:2]) {
+prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "vendor", "contributors")[1:2]) {
   description_file <- file.path(pkgroot, "DESCRIPTION")
   r_dir <- file.path(pkgroot, "R")
   src_rust_dir <- file.path(pkgroot, "src", "rust")
   if ( ! file.exists(description_file) || ! dir.exists(r_dir) || ! dir.exists(src_rust_dir) ) {
     stop(sprintf("Oops, '%s' does not appear to be a package root directory.", pkgroot))
   }
+  desc <- read.dcf(description_file)
   if ( "register_calls" %in% what ) {
     register_calls(pkgroot)
   }
   if ( "documentation" %in% what ) {
     using_roxygen2 <- tryCatch({
-      x <- read.dcf(description_file)[,'RoxygenNote']
+      x <- desc[,'RoxygenNote']
       !is.na(x)
     }, error=\(x) FALSE)
     if ( using_roxygen2 && requireNamespace("roxygen2", quietly=TRUE) ) {
       roxygen2::roxygenize(pkgroot)
     }
   }
-  if ( "vendor" %in% what ) {
+  vendor_engine <- function() {
     original_dir <- getwd()
     on.exit({
       setwd(original_dir)
@@ -56,6 +57,68 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
     cargo::run("vendor", stdout=config_file)
     utils::tar("vendor.tar.xz", c("vendor",".cargo"), compression="xz", tar="internal")
   }
+  if ( "vendor" %in% what ) vendor_engine()
+  contributors_engine <- function() {
+    # Authors
+    # Requires "cargo install cargo-authors"
+    authors_crates <- function() {
+      original_dir <- getwd()
+      on.exit({
+        setwd(original_dir)
+      })
+      setwd(src_rust_dir)
+      cargo::run("authors", "--by-crate", stdout=TRUE)
+    }
+    original_dir <- getwd()
+    on.exit({
+      setwd(original_dir)
+    })
+    setwd(pkgroot)
+    if ( 'Authors@R' %in% colnames(desc) ) {
+      authors_crates <- authors_crates()
+      dir.create("inst", showWarnings=FALSE)
+      authors_file <- file.path("inst","AUTHORS")
+      authors_con <- file(authors_file, open="wt")
+      authors_package <- paste0("    ",as.character(eval(parse(text=desc[,'Authors@R']))))
+      writeLines(c("The R package authors are:", "", authors_package,'',
+      "The Rust crates upon which this package depends are included in the package",
+      "source in the 'src/rust' directory, most of which are in the archive",
+      "'vendor.tar.xz'.  The depending Rust crate names and authors are as follows:",
+      authors_crates[-1]), authors_con)
+      close(authors_con)
+    }
+    license_crates <- function() {
+      original_dir <- getwd()
+      on.exit({
+        setwd(original_dir)
+      })
+      setwd(src_rust_dir)
+      cargo::run("license", stdout=TRUE)
+    }
+    # License
+    # Requires "cargo install cargo-license"
+    license_crates <- license_crates()
+    dir.create("inst", showWarnings=FALSE)
+    license_file <- file.path("inst","LICENSE.note")
+    license_con <- file(license_file, open="wt")
+    writeLines(c("This R package itself is licensed as indicated in the DESCRIPTION file, but the",
+    "package depends on Rust crates which have their own licenses. The Rust crates",
+    "upon which this package depends are included in the package source in the",
+    "'src/rust' directory, most of which are in the archive 'vendor.tar.xz'.  The",
+    "depending Rust crate names and licenses are as follows:","",license_crates), license_con)
+    close(license_con)
+    # Copyright
+    dir.create("inst", showWarnings=FALSE)
+    copyright_file <- file.path("inst","COPYRIGHT")
+    copyright_con <- file(copyright_file, open="wt")
+    writeLines(c(
+    "This R package itself is copyrighted by the authors, but the package depends on",
+    "Rust crates, which have their own copyrights. For specifics, please see the",
+    "Rust crates included in the package source in the 'src/rust' directory, most of",
+    "which are in the archive 'vendor.tar.xz'."), copyright_con)
+    close(copyright_con)
+  }
+  if ( "contributors" %in% what ) contributors_engine()
   invisible(NULL)
 }
 
