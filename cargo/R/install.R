@@ -31,11 +31,7 @@ install_engine <- function(force, use_packageStartupMessage, no_prompting) {
 official website of the Rust project) and then install Rust into the directory:
     %s
 That directory will then be used to keep the Rust installation up-to-date. It
-will also be used to: 1. cache shared libraries for R packages based on Rust
-and 2. enable cached compilation for the cargo::rust_fn function. The cargo
-package purges unused cache items every %s days, but you can change the
-frequency by modifying the last line of the "%s" file in that
-directory. You can revoke permission at any time by deleting that directory.\n\n',
+will also be used to enable cached compilation for the cargo::rust_fn function.\n\n',
     cache_dir, days_until_next_purge, basename(last_purge_filename))
   if ( isFALSE(force) ) {
     if ( no_prompting ) return(invisible(FALSE))
@@ -98,3 +94,9 @@ directory. You can revoke permission at any time by deleting that directory.\n\n
   msg("Installation was successfull.\n")
   invisible(TRUE)
 }
+
+get_homes <- function(cargo_home, rustup_home) {
+  c(CARGO_HOME=normalizePath(cargo_home, mustWork=FALSE),
+    RUSTUP_HOME=normalizePath(rustup_home, mustWork=FALSE))
+}
+

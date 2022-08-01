@@ -8,30 +8,33 @@
 #' @param minimum_version A character string representing the minimum version of
 #'   Rust that is needed. Or a path to the root of a package (i.e., the
 #'   directory containing the DESCRIPTION file), in which case the value is
-#'   found from the field: \code{SystemRequirements: Cargo (>= XXXX)}.
-#' @param methods A character vector potentially containing values
-#'   \code{"envir"}, \code{"path"}, and \code{"cache"}. This indicates the
+#'   found from the field: \code{SystemRequirements: Cargo (>= XXXX)}. For the
+#'   \code{search_methods} being \code{"cache"}, the shell command \code{rustup}
+#'   is used to upgrade the Cargo installation if needed.
+#' @param search_methods A character vector potentially containing values
+#'   \code{"path"}, \code{"convention"}, and \code{"cache"}. This indicates the
 #'   methods to use (and their order) when searching for a suitable Cargo
-#'   installation. \code{"envir"} indicates to try to use the values of the
-#'   \code{CARGO_HOME} and \code{RUSTUP_HOME} environment variables.
-#'   \code{"path"} indicates to try to use the directories \code{.cargo} and
-#'   \code{.rustup} in the user's home directory. \code{"cache"} indicates to
-#'   try to use the directories from the cargo package's own installation as
-#'   given by the \code{tools::R_user_dir('cargo', 'cache')}.
+#'   installation. \code{"path"} indicates to try to use [base::Sys.which()].
+#'   \code{"convention"} indicates to try to use the directories \code{.cargo}
+#'   in the user's home directory. \code{"cache"} indicates to try to use the
+#'   directory from the cargo package's own installation as given by the
+#'   \code{tools::R_user_dir('cargo', 'cache')}.
+#' @param cargo_home_method A string equal to \code{"default"}, \code{"cache"},
+#'   or \code{"tempdir"}. If \code{"default"}, the \code{CARGO_HOME} environment
+#'   variable is not set. If \code{"cache"}, the \code{CARGO_HOME} environment
+#'   variable is set to the subdirectory from the cargo package's own
+#'   installation as given by the \code{tools::R_user_dir('cargo', 'cache')}. If
+#'   \code{"tempdir"}, the \code{CARGO_HOME} environment variable is set to a
+#'   temporary directory that is subsequently deleted.
 #' @param environment_variables A named character vector providing environment
 #'   variables which should be temporarily set while running Cargo.  Note that
-#'   \code{RUSTUP_HOME} and \code{CARGO_HOME} are automatically set by this
-#'   function.
+#'   the \code{CARGO_HOME} environment variable is automatically set when
+#'   \code{cargo_home_method != "default"} so if you want to explicitly set it
+#'   here, use \code{cargo_home_method = "default"}.
 #' @param rustflags A character vector from which the
 #'   \code{CARGO_ENCODED_RUSTFLAGS} environment variables is constructed and
 #'   then temporarily set. Or, if \code{NULL}, this environment variable is left
 #'   unchanged.
-#' @param use_packageStartupMessage Should essential messages be displayed using
-#'   [base::packageStartupMessage()]?
-#' @param must_be_silent Should all messages be suppressed (regardless of the
-#'   value of \code{use_packageStartupMessage})?
-#' @param no_prompting Prohibit prompting the user?
-#' @param offer_install Can offer to install Cargo if needed?
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
 #'
@@ -41,19 +44,14 @@
 #' @export
 #'
 #' @examples
-#' if ( run("--version", must_be_silent=TRUE) != 0 ) {
+#' if ( run("--version") != 0 ) {
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", methods=c("envir","path","cache"), environment_variables=list(), rustflags=NULL, use_packageStartupMessage=FALSE, must_be_silent=FALSE, no_prompting=FALSE, offer_install=TRUE, stdout="", stderr="") {
+run <- function(..., minimum_version=".", search_methods=c("path","convention","cache"), cargo_home_method=c("default","cache","tempdir")[1], environment_variables=list(), rustflags=NULL, verbose=TRUE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
-    if ( must_be_silent ) return()
-    if ( use_packageStartupMessage ) {
-      packageStartupMessage(..., appendLF=FALSE)
-    } else {
-      base::message(..., appendLF=FALSE)
-    }
+    if ( verbose ) base::message(..., appendLF=FALSE)
   }
   desc_file <- file.path(minimum_version, "DESCRIPTION")
   msrv <- if ( file.exists(desc_file) ) {
@@ -70,51 +68,62 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
     }
     gsub("\\s*([^ ]+)\\s*","\\1",y)
   } else if ( minimum_version == "." ) "1.31.0" else minimum_version
-  check_candidate <- function(cargo_home, rustup_home, can_install=FALSE, can_update=FALSE) {
-    vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
-    cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
+  check_candidate <- function(cargo_cmd, vars, can_update=FALSE) {
+    msg(sprintf("Trying to use Cargo at: %s\n", cargo_cmd))
     if ( ! file.exists(cargo_cmd) ) {
-      if ( ! can_install ) return(201)
-      if ( ! install_engine(FALSE, use_packageStartupMessage, no_prompting) ) {
-        return(202)
-      }
+      msg("Not found.\n")
+      return(201)
     }
     output <- system3(cargo_cmd, "--version", stdout=TRUE, env=vars)
     if ( ! is.null(attr(output,"status")) ) {
-      msg("Cargo is installed, but broken.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
-      return(203)
+      msg("Cargo is installed, but broken.\nPlease try again after running 'cargo::install()' in an interactive session.\n")
+      return(202)
     }
     version <- tryCatch({
       version <- strsplit(output," ",fixed=TRUE)[[1]][2]
       if ( is.na(version) ) {
-        msg(sprintf("Problem parsing Cargo version string: '%s'.\nPlease try again by running 'cargo::install()' in an interactive session.\n",paste(output,collapse=",")))
-        return(204)
+        msg(sprintf("Problem parsing Cargo version string: '%s'.\nPlease try again after running 'cargo::install()' in an interactive session.\n",paste(output,collapse=",")))
+        return(203)
       }
       if ( utils::compareVersion(version, msrv) < 0 ) {
-        msg(sprintf("Cargo version '%s' is installed, but '%s' is needed. Trying to update...\n",version,msrv))
+        msg(sprintf("Cargo version '%s' is available, but '%s' is needed.\n",version,msrv))
         if ( ! can_update ) {
-          msg("Upgrading this version is not permitted.\n")
-          return(205)
+          msg("Cannot upgrade this Cargo installation.\n")
+          return(204)
+        } else {
+          msg("Trying to upgrade this Cargo installation.\n")
         }
-        rustup_cmd <- file.path(cargo_home, "bin", paste0("rustup", ifelse(windows,".exe","")))
-        exit_status <- system3(rustup_cmd, "update", env=vars)
+        rustup_cmd <- file.path(dirname(cargo_cmd), paste0("rustup", ifelse(windows,".exe","")))
+        exit_status <- system3(rustup_cmd, "update", env=c(RUSTUP_HOME=file.path(dirname(dirname(dirname(cargo_cmd))),"rustup"), vars))
         if ( exit_status != 0 ) {
           msg("Upgrade failed.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
           return(exit_status)
         }
+        return(Recall(cargo_cmd, vars, FALSE))
       } else {
-        msg(sprintf("Cargo version '%s' is installed, which satisfies the need for '%s'.\n",version,msrv))
+        msg(sprintf("Cargo version '%s' is available, which satisfies the need for '%s'.\n",version,msrv))
       }
       version
     }, warning=identity, error=identity)
     if ( inherits(version,"warning") || inherits(version,"error") ) {
-      msg(sprintf("Problem parsing Cargo version string '%s', comparing it against '%s', or running 'rustup update'.\nPlease try again by running 'cargo::install()' in an interactive session.\n",paste(output,collapse=","),msrv))
-      return(206)
+      msg(sprintf("Problem parsing Cargo version string '%s', comparing it against '%s', or running 'rustup update'.\nPlease try again after running 'cargo::install()' in an interactive session.\n",paste(output,collapse=","),msrv))
+      return(205)
     }
     0
   }
   windows <- .Platform$OS.type=="windows"
-  run_engine <- function(bypass_env_var, condition, cargo_home, rustup_home, can_install, can_update) {
+  cargo_home_env <- if ( cargo_home_method == "cache" ) {
+    prefix_dir <- Sys.getenv(ifelse(windows,"USERPROFILE","HOME"))
+    file.path(prefix_dir, ".cargo")
+  } else if ( cargo_home_method == "tempdir" ) {
+    temp_dir <- tempdir(check=TRUE)
+    target_dir <- tempfile(pattern="rust-", tmpdir=temp_dir)
+    on.exit({
+      unlink(target_dir, recursive=TRUE, force=TRUE, expand=FALSE)
+    })
+    target_dir
+  }
+  run_engine <- function(bypass_env_var, condition, cargo_cmd, can_update) {
     general_bypass_env_var <- "R_CARGO_RUN"
     if ( toupper(Sys.getenv(general_bypass_env_var, "TRUE")) == "FALSE" ) {
       msg(sprintf("Method bypassed by %s environment variable.\n", general_bypass_env_var))
@@ -125,49 +134,49 @@ run <- function(..., minimum_version=".", methods=c("envir","path","cache"), env
       return(NULL)
     }
     if ( condition ) {
-      status <- check_candidate(cargo_home, rustup_home, can_install, can_update)
+      cargo_cmd <- normalizePath(cargo_cmd, mustWork=FALSE)
+      vars <- c(CARGO_HOME=cargo_home_env, mk_rustflags(rustflags), environment_variables)
+      status <- check_candidate(cargo_cmd, vars, can_update)
       if ( status == 0 ) {
-        cargo_cmd <- file.path(cargo_home, "bin", paste0("cargo", ifelse(windows,".exe","")))
-        msg(sprintf("Cargo found at: %s\n", cargo_cmd))
-        vars <- c(get_homes(cargo_home, rustup_home), mk_rustflags(rustflags), environment_variables)
-        return(system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr))
+        result <- system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
+        msg("---\n")
+        return(result)
       } else {
         msg("Method failed.\n")
       }
     } else {
-      msg("Condition not met.\n")
+      msg("Condition not met for method.\n")
     }
+    msg("---\n")
     NULL
   }
-  for ( method in methods ) {
-    if ( method == "envir" ) {
-      msg("Trying to find a suitable Cargo using the CARGO_HOME and RUSTUP_HOME environment variables.\n")
-      status <- run_engine(
-        "R_CARGO_RUN_ENVIR",
-        ( Sys.getenv("CARGO_HOME","<unset>") != "<unset>" ) && ( Sys.getenv("RUSTUP_HOME","<unset>") != "<unset>" ),
-        Sys.getenv("CARGO_HOME"), Sys.getenv("RUSTUP_HOME"), FALSE, FALSE)
+  msg("---\n")
+  for ( method in search_methods ) {
+    if ( method == "path" ) {
+      msg("Trying to find a suitable Cargo using the system path.\n")
+      status <- run_engine("R_CARGO_RUN_PATH", TRUE, Sys.which("cargo"), FALSE)
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
-    } else if ( method == "path" ) {
+    } else if ( method == "convention" ) {
       prefix <- ifelse(windows,"%USERPROFILE%","$HOME")
-      msg(sprintf("Trying to find a suitable Cargo at %s/.cargo and %s/.rustup.\n", prefix, prefix))
+      msg(sprintf("Trying to find a suitable Cargo at: %s/.cargo\n", prefix))
       prefix_dir <- Sys.getenv(ifelse(windows,"USERPROFILE","HOME"))
       status <- run_engine(
-        "R_CARGO_RUN_PATH",
+        "R_CARGO_RUN_CONVENTION",
         Sys.getenv(ifelse(windows,"USERPROFILE","HOME"),"<unset>") != "<unset>",
-        file.path(prefix_dir, ".cargo"), file.path(prefix_dir, ".rustup"), FALSE, FALSE)
+        file.path(prefix_dir, ".cargo", "bin", paste0("cargo", ifelse(windows,".exe",""))), FALSE)
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     } else if ( method == "cache" ) {
       prefix_dir <- tools::R_user_dir("cargo", "cache")
       msg("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
       status <- run_engine(
         "R_CARGO_RUN_CACHE",
-        offer_install,
-        file.path(prefix_dir, "cargo"), file.path(prefix_dir, "rustup"), TRUE, TRUE)
+        TRUE,
+        file.path(prefix_dir, "cargo", "bin", paste0("cargo", ifelse(windows,".exe",""))), TRUE)
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     }
   }
-  msg("Cargo not found.\n")
-  100
+  msg("No suitable version of Cargo was found.\nPlease try again after running 'cargo::install()' in an interactive session.\n---\n")
+  1
 }
 
 # An enhancement of the system2 function which sets environment variables better.
@@ -187,11 +196,6 @@ system3 <- function(..., env=character()) {
     })
   }
   system2(...)
-}
-
-get_homes <- function(cargo_home, rustup_home) {
-  c(CARGO_HOME=normalizePath(cargo_home, mustWork=FALSE),
-    RUSTUP_HOME=normalizePath(rustup_home, mustWork=FALSE))
 }
 
 mk_rustflags <- function(...) {

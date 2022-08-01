@@ -7,13 +7,11 @@
 run(
   ...,
   minimum_version = ".",
-  methods = c("envir", "path", "cache"),
+  search_methods = c("path", "convention", "cache"),
+  cargo_home_method = c("default", "cache", "tempdir")[1],
   environment_variables = list(),
   rustflags = NULL,
-  use_packageStartupMessage = FALSE,
-  must_be_silent = FALSE,
-  no_prompting = FALSE,
-  offer_install = TRUE,
+  verbose = TRUE,
   stdout = "",
   stderr = ""
 )
@@ -25,37 +23,37 @@ run(
 \item{minimum_version}{A character string representing the minimum version of
 Rust that is needed. Or a path to the root of a package (i.e., the
 directory containing the DESCRIPTION file), in which case the value is
-found from the field: \code{SystemRequirements: Cargo (>= XXXX)}.}
+found from the field: \code{SystemRequirements: Cargo (>= XXXX)}. For the
+\code{search_methods} being \code{"cache"}, the shell command \code{rustup}
+is used to upgrade the Cargo installation if needed.}
 
-\item{methods}{A character vector potentially containing values
-\code{"envir"}, \code{"path"}, and \code{"cache"}. This indicates the
+\item{search_methods}{A character vector potentially containing values
+\code{"path"}, \code{"convention"}, and \code{"cache"}. This indicates the
 methods to use (and their order) when searching for a suitable Cargo
-installation. \code{"envir"} indicates to try to use the values of the
-\code{CARGO_HOME} and \code{RUSTUP_HOME} environment variables.
-\code{"path"} indicates to try to use the directories \code{.cargo} and
-\code{.rustup} in the user's home directory. \code{"cache"} indicates to
-try to use the directories from the cargo package's own installation as
-given by the \code{tools::R_user_dir('cargo', 'cache')}.}
+installation. \code{"path"} indicates to try to use \code{\link[base:Sys.which]{base::Sys.which()}}.
+\code{"convention"} indicates to try to use the directories \code{.cargo}
+in the user's home directory. \code{"cache"} indicates to try to use the
+directory from the cargo package's own installation as given by the
+\code{tools::R_user_dir('cargo', 'cache')}.}
+
+\item{cargo_home_method}{A string equal to \code{"default"}, \code{"cache"},
+or \code{"tempdir"}. If \code{"default"}, the \code{CARGO_HOME} environment
+variable is not set. If \code{"cache"}, the \code{CARGO_HOME} environment
+variable is set to the subdirectory from the cargo package's own
+installation as given by the \code{tools::R_user_dir('cargo', 'cache')}. If
+\code{"tempdir"}, the \code{CARGO_HOME} environment variable is set to a
+temporary directory that is subsequently deleted.}
 
 \item{environment_variables}{A named character vector providing environment
 variables which should be temporarily set while running Cargo.  Note that
-\code{RUSTUP_HOME} and \code{CARGO_HOME} are automatically set by this
-function.}
+the \code{CARGO_HOME} environment variable is automatically set when
+\code{cargo_home_method != "default"} so if you want to explicitly set it
+here, use \code{cargo_home_method = "default"}.}
 
 \item{rustflags}{A character vector from which the
 \code{CARGO_ENCODED_RUSTFLAGS} environment variables is constructed and
 then temporarily set. Or, if \code{NULL}, this environment variable is left
 unchanged.}
-
-\item{use_packageStartupMessage}{Should essential messages be displayed using
-\code{\link[base:message]{base::packageStartupMessage()}}?}
-
-\item{must_be_silent}{Should all messages be suppressed (regardless of the
-value of \code{use_packageStartupMessage})?}
-
-\item{no_prompting}{Prohibit prompting the user?}
-
-\item{offer_install}{Can offer to install Cargo if needed?}
 
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
 
@@ -70,7 +68,7 @@ This function runs Cargo (Rust's package manager) with the \code{...}
 arguments passed as command line arguments.
 }
 \examples{
-if ( run("--version", must_be_silent=TRUE) != 0 ) {
+if ( run("--version") != 0 ) {
     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 }
 

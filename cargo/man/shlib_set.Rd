@@ -19,11 +19,6 @@ shlib_set(
 
 \item{force}{If \code{TRUE}, installation proceeds without asking for user
 confirmation.}
-
-\item{use_packageStartupMessage}{Should essential messages be displayed using
-\code{\link[base:message]{base::packageStartupMessage()}}?}
-
-\item{no_prompting}{Prohibit prompting the user?}
 }
 \value{
 A logical indicating whether the library was successfully cached.

@@ -24,7 +24,9 @@ variable names come for all other unnamed arguments.  See example.}
 \item{minimum_version}{A character string representing the minimum version of
 Rust that is needed. Or a path to the root of a package (i.e., the
 directory containing the DESCRIPTION file), in which case the value is
-found from the field: \code{SystemRequirements: Cargo (>= XXXX)}.}
+found from the field: \code{SystemRequirements: Cargo (>= XXXX)}. For the
+\code{search_methods} being \code{"cache"}, the shell command \code{rustup}
+is used to upgrade the Cargo installation if needed.}
 
 \item{verbose}{If \code{TRUE}, Cargo prints compilation details.  If
 \code{FALSE}, Cargo is run in quiet mode, except for the first time this
