@@ -88,8 +88,14 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
       if ( utils::compareVersion(version, msrv) < 0 ) {
         msg(sprintf("Cargo version '%s' is available, but '%s' is needed.\n",version,msrv))
         if ( ! can_update ) {
-          msg("Cannot upgrade this Cargo installation.\n")
-          return(204)
+          rustup_path <- Sys.which("rustup")
+          if ( rustup_path != "" ) {
+            msg(sprintf("Try running '%s' to update the Cargo installation.\n", rustup_path))
+            return(204)
+          } else {
+            msg("Cannot upgrade this Cargo installation.\n")
+            return(205)
+          }
         } else {
           msg("Trying to upgrade this Cargo installation.\n")
         }
@@ -107,7 +113,7 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
     }, warning=identity, error=identity)
     if ( inherits(version,"warning") || inherits(version,"error") ) {
       msg(sprintf("Problem parsing Cargo version string '%s', comparing it against '%s', or running 'rustup update'.\nPlease try again after running 'cargo::install()' in an interactive session.\n",paste(output,collapse=","),msrv))
-      return(205)
+      return(206)
     }
     0
   }

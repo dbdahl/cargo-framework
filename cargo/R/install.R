@@ -27,11 +27,14 @@ install_engine <- function(force, use_packageStartupMessage, no_prompting) {
   days_until_next_purge <- 91
   last_purge_filename <- file.path(cache_dir,"last-purge")
   message <- sprintf(
-    '\nThe cargo package would like to download Rust from https://rustup.rs/ (an
+'\nThe cargo package would like to download Rust from https://rustup.rs/ (an
 official website of the Rust project) and then install Rust into the directory:
     %s
 That directory will then be used to keep the Rust installation up-to-date. It
-will also be used to enable cached compilation for the cargo::rust_fn function.\n\n',
+will also be used to enable cached compilation for the cargo::rust_fn function.
+The cargo package purges unused cache items every %s days, but you can change
+the frequency by modifying the last line of the "%s" file in that
+directory. You can revoke permission at any time by deleting that directory.\n\n',
     cache_dir, days_until_next_purge, basename(last_purge_filename))
   if ( isFALSE(force) ) {
     if ( no_prompting ) return(invisible(FALSE))

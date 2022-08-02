@@ -1,15 +1,7 @@
 .onLoad <- function(libname, pkgname) {
   cache_dir <- tools::R_user_dir("cargo", "cache")
   if ( ! dir.exists(cache_dir) ) return()
-  package_cache_dir <- file.path(cache_dir, "packages")
-  if ( ! dir.exists(package_cache_dir) ) return()
-  # Delete cached shared libraries for packages that are no longer installed.
-  for ( package in list.files(package_cache_dir) ) {
-    if ( identical(system.file(package=package),"") ) {
-      unlink(file.path(package_cache_dir,package),recursive=TRUE,expand=FALSE)
-    }
-  }
-  # Periodically delete other cached material
+  # Periodically delete cached material
   last_purge_file <- file.path(cache_dir,"last-purge")
   if ( ! file.exists(last_purge_file) ) return()
   details <- readLines(last_purge_file)
