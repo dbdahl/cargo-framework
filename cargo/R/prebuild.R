@@ -83,7 +83,7 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
       writeLines(c("The R package authors are:", "", authors_package,'',
       "The Rust crates upon which this package depends are included in the package",
       "source in the 'src/rust' directory, most of which are in the archive",
-      "'vendor.tar.xz'.  The depending Rust crate names and authors are as follows:",
+      "'vendor.tar.xz'.  The names and authors are as follows:",
       authors_crates[-1]), authors_con)
       close(authors_con)
     }
@@ -93,30 +93,20 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
         setwd(original_dir)
       })
       setwd(src_rust_dir)
-      cargo::run("license", stdout=TRUE)
+      cargo::run("license", "--do-not-bundle", stdout=TRUE)
     }
     # License
     # Requires "cargo install cargo-license"
     license_crates <- license_crates()
     dir.create("inst", showWarnings=FALSE)
-    license_file <- file.path("inst","LICENSE.note")
+    license_file <- file.path("LICENSE.note")
     license_con <- file(license_file, open="wt")
-    writeLines(c("This R package itself is licensed as indicated in the DESCRIPTION file, but the",
-    "package depends on Rust crates which have their own licenses. The Rust crates",
-    "upon which this package depends are included in the package source in the",
-    "'src/rust' directory, most of which are in the archive 'vendor.tar.xz'.  The",
-    "depending Rust crate names and licenses are as follows:","",license_crates), license_con)
+    writeLines(c("The Rust crates upon which this package depends are licensed individually.",
+    "These crates are included in the package source in the 'src/rust' directory,",
+    "most of which are in the archive 'vendor.tar.xz'.  The names, versions, and",
+    "licenses are as follows:", "",
+    license_crates), license_con)
     close(license_con)
-    # Copyright
-    dir.create("inst", showWarnings=FALSE)
-    copyright_file <- file.path("inst","COPYRIGHT")
-    copyright_con <- file(copyright_file, open="wt")
-    writeLines(c(
-    "This R package itself is copyrighted by the authors, but the package depends on",
-    "Rust crates, which have their own copyrights. For specifics, please see the",
-    "Rust crates included in the package source in the 'src/rust' directory, most of",
-    "which are in the archive 'vendor.tar.xz'."), copyright_con)
-    close(copyright_con)
   }
   if ( "contributors" %in% what ) contributors_engine()
   invisible(NULL)
