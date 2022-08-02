@@ -1,3 +1,6 @@
+0.3.0 (2022-08-05)
+  * Also find cargo using the PATH environment variable.
+
 0.2.15 (2022-07-01)
   * Added rval! macro to roxido API.
   * Added helper functionality via cargo::prebuild(what="vendor").
