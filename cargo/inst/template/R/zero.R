@@ -13,11 +13,7 @@
 #' @export
 #' @examples
 #' cube1 <- function(x) (x^2 + 1) * (x - 1.5)
-#' # R_CARGO \dontrun{
-#' # R_CARGO # Example disabled since Cargo was not found when installing from source package.
-#' # R_CARGO # You can still run the example if you install Cargo. Hint: cargo::install().
 #' zero(cube1, c(-2, 11.5))
-#' # R_CARGO }
 zero <- function(f, guesses, tol = 1e-7) {
   f.check <- function(x) {
     x <- f(x)

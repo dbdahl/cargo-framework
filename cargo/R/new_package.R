@@ -18,13 +18,10 @@ new_package <- function(path, ...) {
   file.copy(list.files(system.file(file.path("template"), package="cargo"), all.files=TRUE, no..=TRUE, full.names=TRUE), path, recursive=TRUE)
   file.rename(file.path(path, "DOTRbuildignore"), file.path(path, ".Rbuildignore"))
   file.rename(file.path(path, "DOTgitignore"), file.path(path, ".gitignore"))
-  file.rename(file.path(path, "HASHSRCHASH"), file.path(path, "#SRC#"))
   sed("X@X", pkgname, file.path(path,"DESCRIPTION"))
   sed("X@X", pkgname, file.path(path,"NAMESPACE"))
   sed("X@X", pkgname, file.path(path,"R","useDynLib.R"))
   sed("X@X", pkgname, file.path(path,"src","shim.c"))
-  cargoVersion <- as.character(packageVersion("cargo"))
-  sed("V@V", cargoVersion, file.path(path,"DESCRIPTION"))
   register_calls(path)
   install.packages(path, repos=NULL, type="source")
 }

@@ -1,0 +1,12 @@
+The Rust crates upon which this package depends are licensed individually.
+These crates are included in the package source in the 'src/rust' directory,
+most of which are in the archive 'vendor.tar.xz'.  The names, versions, and
+licenses are as follows:
+
+proc-macro2: 1.0.40, "Apache-2.0 OR MIT",
+quote: 1.0.20, "Apache-2.0 OR MIT",
+roxido: 0.5.1, "Apache-2.0 OR MIT",
+roxido_macro: 0.5.1, "Apache-2.0 OR MIT",
+rust: 0.1.0, "Apache-2.0 OR MIT",
+syn: 1.0.98, "Apache-2.0 OR MIT",
+unicode-ident: 1.0.1, "Apache-2.0 OR MIT",

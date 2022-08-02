@@ -25,6 +25,7 @@
 #' @export
 #'
 prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "vendor", "contributors")[1:2]) {
+  pkgroot <- normalizePath(pkgroot)
   description_file <- file.path(pkgroot, "DESCRIPTION")
   r_dir <- file.path(pkgroot, "R")
   src_rust_dir <- file.path(pkgroot, "src", "rust")
@@ -59,6 +60,11 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
   }
   if ( "vendor" %in% what ) vendor_engine()
   contributors_engine <- function() {
+    original_dir <- getwd()
+    on.exit({
+      setwd(original_dir)
+    })
+    setwd(pkgroot)
     # Authors
     # Requires "cargo install cargo-authors"
     authors_crates <- function() {
@@ -66,14 +72,11 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
       on.exit({
         setwd(original_dir)
       })
+      print(getwd())
+      print(src_rust_dir)
       setwd(src_rust_dir)
       cargo::run("authors", "--by-crate", stdout=TRUE)
     }
-    original_dir <- getwd()
-    on.exit({
-      setwd(original_dir)
-    })
-    setwd(pkgroot)
     if ( 'Authors@R' %in% colnames(desc) ) {
       authors_crates <- authors_crates()
       dir.create("inst", showWarnings=FALSE)
@@ -188,15 +191,6 @@ extern "C" fn R_init_XXX_rust(info: *mut rbindings::DllInfo) {
   }
   cat(footer,file=outfile)
   cat("\n",file=outfile)
-  close(outfile)
-  tools_dir <- file.path(pkgroot,"tools")
-  dir.create(tools_dir, showWarnings=FALSE)
-  outfilename <- file.path(tools_dir, "registration.R")
-  outfile <- file(outfilename, open="w")
-  cat(".Call <- base::.Call\n", file=outfile)
-  if ( length(map) > 0 ) {
-    cat(paste0(".", names(map), " <- NULL",sep="",collapse="\n"), "\n", sep="", file=outfile)
-  }
   close(outfile)
   invisible()
 }
