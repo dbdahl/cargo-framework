@@ -51,7 +51,8 @@
 run <- function(..., minimum_version=".", search_methods=c("path","convention","cache"), cargo_home_method=c("default","cache","tempdir")[1], environment_variables=list(), rustflags=NULL, verbose=TRUE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
-    if ( verbose ) base::message(..., appendLF=FALSE)
+    if ( ! isFALSE(verbose) ) base::message(..., appendLF=FALSE)
+    if ( inherits(verbose,"connection") ) writeLines(c(...), con=verbose, sep="")
   }
   desc_file <- file.path(minimum_version, "DESCRIPTION")
   msrv <- if ( file.exists(desc_file) ) {

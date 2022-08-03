@@ -7,7 +7,8 @@ source("tools/cargo_run.R")
 setwd("src/rust")
 if ( ! dir.exists("vendor") ) untar("vendor.tar.xz", tar="internal")
 
-if ( run('build', '--offline', '--release', '--jobs', '2', minimum_version='../..', cargo_home_method="tempdir") == 0 ) {
+con <- file("../../inst/cargo.log", "w")
+if ( run('build', '--offline', '--release', '--jobs', '2', minimum_version='../..', cargo_home_method="tempdir", verbose=con) == 0 ) {
 
     file.copy("target/release/librust.a", "..", overwrite=TRUE)
     message("Built Rust static library.")
@@ -17,5 +18,6 @@ if ( run('build', '--offline', '--release', '--jobs', '2', minimum_version='../.
     message("No suitable version of Cargo was found.\nOne solution is to run 'install()' from the 'cargo' package.")
 
 }
+close(con)
 
 EOF
