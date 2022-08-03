@@ -72,8 +72,6 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
       on.exit({
         setwd(original_dir)
       })
-      print(getwd())
-      print(src_rust_dir)
       setwd(src_rust_dir)
       cargo::run("authors", "--by-crate", stdout=TRUE)
     }
