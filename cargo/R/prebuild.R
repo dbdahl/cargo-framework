@@ -73,7 +73,11 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
         setwd(original_dir)
       })
       setwd(src_rust_dir)
-      cargo::run("authors", "--by-crate", stdout=TRUE)
+      x <- cargo::run("authors", "--by-crate", stdout=TRUE)
+      if ( ! is.null(attr(x,"status")) && attr(x,"status") != 0 ) {
+        stop("Could not run 'cargo authors'. Install it with 'cargo::run(\"install\",\"cargo-authors\")'")
+      }
+      x
     }
     if ( 'Authors@R' %in% colnames(desc) ) {
       authors_crates <- authors_crates()
@@ -94,7 +98,11 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
         setwd(original_dir)
       })
       setwd(src_rust_dir)
-      cargo::run("license", "--do-not-bundle", stdout=TRUE)
+      x <- cargo::run("license", "--do-not-bundle", stdout=TRUE)
+      if ( ! is.null(attr(x,"status")) && attr(x,"status") != 0 ) {
+        stop("Could not run 'cargo license'. Install it with 'cargo::run(\"install\",\"cargo-license\")'")
+      }
+      x
     }
     # License
     # Requires "cargo install cargo-license"
