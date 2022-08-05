@@ -35,6 +35,9 @@
 #'   \code{CARGO_ENCODED_RUSTFLAGS} environment variables is constructed and
 #'   then temporarily set. Or, if \code{NULL}, this environment variable is left
 #'   unchanged.
+#' @param verbose If \code{TRUE}, details of the search for Cargo are shown.
+#'   If \code{FALSE}, no details are shown.  If it is a connection, then details
+#'   are shown and also written to the connection.
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
 #'

@@ -55,6 +55,10 @@ here, use \code{cargo_home_method = "default"}.}
 then temporarily set. Or, if \code{NULL}, this environment variable is left
 unchanged.}
 
+\item{verbose}{If \code{TRUE}, details of the search for Cargo are shown.
+If \code{FALSE}, no details are shown.  If it is a connection, then details
+are shown and also written to the connection.}
+
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
 
 \item{stderr}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
