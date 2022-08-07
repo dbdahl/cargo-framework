@@ -57,14 +57,13 @@ for full details but, to get a taste, consider the follow...
 Setting up your environment is easy.
 
 ```r
-library(cargo)
 cargo::install()
 ```
 
 Make a new package named, for example, `foo`:
 
 ```r
-new_package("foo")
+cargo::new_package("foo")
 ```
 
 Install your new package and try out its `myrnorm` function:
