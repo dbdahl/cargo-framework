@@ -23,15 +23,7 @@ This repository hosts the source of the
 
 ## Installation
 
-Install the released version of the
-[cargo](https://cran.r-project.org/package=cargo) package from
-[CRAN](https://cran.r-project.org/):
-
-```r
-install.packages("cargo")
-```
-
-You can also install the development version using the
+Install using the 
 [remotes](https://cran.r-project.org/package=remotes) package:
 
 ```r
