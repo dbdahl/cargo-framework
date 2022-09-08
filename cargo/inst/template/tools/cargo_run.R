@@ -146,7 +146,8 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
     }
     if ( condition ) {
       cargo_cmd <- normalizePath(cargo_cmd, mustWork=FALSE)
-      vars <- c(CARGO_HOME=cargo_home_env, mk_rustflags(rustflags), environment_variables)
+      vars <- c(PATH=paste0(Sys.getenv("PATH"),.Platform$path.sep,paste0(dirname(cargo_cmd))),
+                CARGO_HOME=cargo_home_env, mk_rustflags(rustflags), environment_variables)
       status <- check_candidate(cargo_cmd, vars, can_update)
       if ( status == 0 ) {
         result <- system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
