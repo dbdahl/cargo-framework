@@ -23,6 +23,7 @@ install_engine <- function(force, use_packageStartupMessage, no_prompting) {
       base::message(..., appendLF=FALSE)
     }
   }
+  windows <- .Platform$OS.type=="windows"
   cache_dir <- tools::R_user_dir("cargo", "cache")
   days_until_next_purge <- 91
   last_purge_filename <- file.path(cache_dir,"last-purge")
@@ -44,7 +45,7 @@ directory. You can revoke permission at any time by deleting that directory.\n\n
     }
     while ( TRUE ) {
       msg(message)
-      msg("Do you agree? [y/N] ")
+      msg(paste0("Do you agree? [y/N]",if (windows) "\n" else " "))
       response <- toupper(trimws(readline()))
       if ( response %in% c("N","") ) return(invisible(FALSE))
       if ( response %in% c("Y") ) break
@@ -64,7 +65,6 @@ directory. You can revoke permission at any time by deleting that directory.\n\n
     return(invisible(FALSE))
   }
   dir.create(cache_dir, showWarnings=FALSE, recursive=TRUE)
-  windows <- .Platform$OS.type=="windows"
   rustup_init <- file.path(cache_dir, sprintf("rustup-init.%s",ifelse(windows,"exe","sh")))
   URL <- ifelse(windows,"https://win.rustup.rs/x86_64","https://sh.rustup.rs")
   if ( tryCatch(utils::download.file(URL, rustup_init, mode="wb", quiet=use_packageStartupMessage), warning=function(e) 1, error=function(e) 1) != 0 ) {
