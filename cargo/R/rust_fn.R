@@ -11,8 +11,8 @@
 #'   \code{c('rand = "0.8.5"','rand_pcg = "0.3.1"')}.
 #' @param verbose If \code{TRUE}, Cargo prints compilation details.  If
 #'   \code{FALSE}, Cargo is run in quiet mode, except for the first time this
-#'   function is run.  If \code{"never"}, Cargo is always run in quiet mode.
-#'   In any case, errors in code are always shown.
+#'   function is run.  If \code{"never"}, Cargo is always run in quiet mode. In
+#'   any case, errors in code are always shown.
 #' @param cached Should Cargo use previously compiled artifacts?
 #' @param longjmp Should the compiled function use the faster (but experimental)
 #'   longjmp functionality when Rust code panics?
@@ -73,7 +73,7 @@ rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", ve
   })
   setwd(rustlib_directory)
   options <- if ( ! isTRUE(verbose) ) "--quiet" else character(0)
-  if ( run(options, "build", "--release", minimum_version=minimum_version, methods="cache", environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, must_be_silent=!isTRUE(verbose)) != 0 ) stop("Couldn't build Rust code.")
+  if ( run(options, "build", "--release", minimum_version=minimum_version, search_methods="cache", leave_no_trace=FALSE, environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, verbose=isTRUE(verbose)) ) stop("Couldn't build Rust code.")
   # Load the shared library
   dynlib.base <- if ( !is_windows ) paste0("lib",libname) else libname
   dynlib.ext <- if ( is_mac ) ".dylib" else .Platform$dynlib.ext
