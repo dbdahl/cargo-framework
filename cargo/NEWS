@@ -1,4 +1,4 @@
-0.3.0 (2022-08-05)
+0.3.1 (2022-09-24)
   * Also find cargo using the PATH environment variable.
 
 0.2.15 (2022-07-01)
