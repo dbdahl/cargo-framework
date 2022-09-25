@@ -117,7 +117,7 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
           rustup_cmd <- normalizePath(file.path(dirname(cargo_cmd), paste0("rustup", ifelse(windows,".exe",""))), mustWork=FALSE)
           if ( ! can_update ) {
             if ( file.exists(rustup_cmd) ) {
-              msg(sprintf("Hint: You can run '%s' to update the Cargo installation.\n", rustup_path))
+              msg(sprintf("Hint: You can run '%s' to update the Cargo installation.\n", rustup_cmd))
               return(204)
             }
             return(205)
