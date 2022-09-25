@@ -60,6 +60,7 @@ any time by deleting the directory.\n\n', cache_dir, days_until_next_purge, base
   unlink(rustup_init_stdout)
   unlink(rustup_init_stderr)
   purge_cache(TRUE)
+  copy_from_template()
   msg("Installation was successfull.\n\n")
   invisible(TRUE)
 }

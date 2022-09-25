@@ -187,7 +187,7 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     }
   }
-  msg("No suitable version of Cargo was found.\nOne solution is to run 'install()' from the 'cargo' package.\n---\n")
+  msg("No suitable version of Cargo was found.\nOne solution is to run 'cargo::install()'.\n---\n")
   1
 }
 
