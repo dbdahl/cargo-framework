@@ -24,6 +24,7 @@ purge_cache <- function(last_purge_filename_only) {
     unlink(file.path(cache_dir,"cargo","registry"), recursive=TRUE, expand=FALSE)
     unlink(file.path(cache_dir,"rust_fn"), recursive=TRUE, expand=FALSE)
   }
+  dir.create(cache_dir, showWarnings=FALSE, recursive=TRUE)
   writeLines(c("1", as.character(Sys.Date()), days_until_next_purge), last_purge_filename())
 }
 

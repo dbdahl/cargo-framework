@@ -1,5 +1,12 @@
 skip_on_cran()
 
+test_that("force", {
+  f <- rust_fn(a, '
+      Rval::new(i32::from(a), pc)
+  ', force=TRUE)
+  expect_equal(f(7), 7)
+})
+
 test_that("printing", {
   f <- rust_fn('
       rprintln!();

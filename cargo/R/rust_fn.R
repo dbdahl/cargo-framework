@@ -76,7 +76,11 @@ rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", ve
   })
   setwd(rustlib_directory)
   options <- if ( ! isTRUE(verbose) ) "--quiet" else character(0)
-  if ( run(options, "build", "--release", minimum_version=minimum_version, leave_no_trace=FALSE, environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, verbose=isTRUE(verbose)) ) stop("Couldn't build Rust code.")
+  run_result <- run(options, "build", "--release", minimum_version=minimum_version, leave_no_trace=FALSE,
+                    environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, verbose=isTRUE(verbose))
+  if ( run_result != 0 ) {
+    stop("Couldn't build Rust code.")
+  }
   # Load the shared library
   dynlib.base <- if ( !is_windows ) paste0("lib",libname) else libname
   dynlib.ext <- if ( is_mac ) ".dylib" else .Platform$dynlib.ext
