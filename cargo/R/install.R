@@ -12,11 +12,15 @@
 #' @export
 #'
 install <- function(force=FALSE) {
-  cache_dir <- tools::R_user_dir("cargo", "cache")
+  cache_dir <- cache_dir()
   message <- sprintf('\nThis function will download the Rust toolchain from https://rustup.rs
 (an official Rust website) and install it into the directory:
     %s
-This directory will then be used to keep the Rust installation up-to-date.\n\n', cache_dir)
+The directory will then be used to keep the Rust installation up-to-date
+and to cache compilation artifacts.  The cargo package purges cache items
+every %s days, but you can change the frequency by modifying the last line
+of the "%s" file in the directory. You can revoke permission at
+any time by deleting the directory.\n\n', cache_dir, days_until_next_purge, basename(last_purge_filename()))
   suggestion <- "Please try again in an interactive session or use 'cargo::install(force=TRUE)'.\n"
   if ( ! get_permission(message, suggestion, force) ) return(invisible(FALSE))
   windows <- .Platform$OS.type=="windows"
@@ -55,6 +59,7 @@ This directory will then be used to keep the Rust installation up-to-date.\n\n',
   unlink(rustup_init)
   unlink(rustup_init_stdout)
   unlink(rustup_init_stderr)
+  purge_cache(TRUE)
   msg("Installation was successfull.\n\n")
   invisible(TRUE)
 }

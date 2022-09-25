@@ -8,7 +8,7 @@ run(
   ...,
   minimum_version = ".",
   search_methods = c("path", "convention", "cache"),
-  cargo_home_method = c("default", "cache", "tempdir")[1],
+  leave_no_trace = FALSE,
   environment_variables = list(),
   rustflags = NULL,
   verbose = TRUE,
@@ -36,27 +36,23 @@ in the user's home directory. \code{"cache"} indicates to try to use the
 directory from the cargo package's own installation as given by the
 \code{tools::R_user_dir('cargo', 'cache')}.}
 
-\item{cargo_home_method}{A string equal to \code{"default"}, \code{"cache"},
-or \code{"tempdir"}. If \code{"default"}, the \code{CARGO_HOME} environment
-variable is not set. If \code{"cache"}, the \code{CARGO_HOME} environment
-variable is set to the subdirectory from the cargo package's own
-installation as given by the \code{tools::R_user_dir('cargo', 'cache')}. If
-\code{"tempdir"}, the \code{CARGO_HOME} environment variable is set to a
-temporary directory that is subsequently deleted.}
+\item{leave_no_trace}{If \code{TRUE}, the \code{CARGO_HOME} environment
+variable is set to a temporary directory that is subsequently deleted.}
 
 \item{environment_variables}{A named character vector providing environment
 variables which should be temporarily set while running Cargo.  Note that
-the \code{CARGO_HOME} environment variable is automatically set when
-\code{cargo_home_method != "default"} so if you want to explicitly set it
-here, use \code{cargo_home_method = "default"}.}
+the \code{CARGO_HOME} and \code{RUSTUP_HOME} environment variables are
+automatically set when using the \code{"cache"} search method.  Also, the
+\code{CARGO_HOME} environment variable is also set when
+\code{leave_no_trace == TRUE}.}
 
 \item{rustflags}{A character vector from which the
 \code{CARGO_ENCODED_RUSTFLAGS} environment variables is constructed and
 then temporarily set. Or, if \code{NULL}, this environment variable is left
 unchanged.}
 
-\item{verbose}{If \code{TRUE}, details of the search for Cargo are shown.
-If \code{FALSE}, no details are shown.  If it is a connection, then details
+\item{verbose}{If \code{TRUE}, details of the search for Cargo are shown. If
+\code{FALSE}, no details are shown.  If it is a connection, then details
 are shown and also written to the connection.}
 
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}

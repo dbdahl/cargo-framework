@@ -17,13 +17,15 @@
 #' @param longjmp Should the compiled function use the faster (but experimental)
 #'   longjmp functionality when Rust code panics?
 #' @param invisible Should the compiled function return values invisibly?
+#' @param force If \code{TRUE}, write to cache directory on first usage without
+#'   asking for user confirmation.
 #'
 #' @return An R function implemented with the supplied Rust code.
 #'
 #' @importFrom utils packageDate packageVersion
 #' @export
 #'
-rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", verbose=FALSE, cached=TRUE, longjmp=TRUE, invisible=FALSE) {
+rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", verbose=FALSE, cached=TRUE, longjmp=TRUE, invisible=FALSE, force=FALSE) {
   # Parse arguments
   mc <- match.call(expand.dots = FALSE)
   args <- mc[['...']]
@@ -33,7 +35,8 @@ rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", ve
   all_args <- paste0(args_with_type, collapse=", ")
   code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) -> Rval { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse="\n"))
   # Set-up directories
-  path_info <- get_lib_path(verbose, cached)
+  path_info <- get_lib_path(verbose, cached, force)
+  if ( is.null(path_info) ) return(invisible())
   if ( path_info[['success']] ) {
     on.exit(add=TRUE, unlink(path_info[['lock']], recursive=TRUE, force=TRUE))
   }
@@ -73,7 +76,7 @@ rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", ve
   })
   setwd(rustlib_directory)
   options <- if ( ! isTRUE(verbose) ) "--quiet" else character(0)
-  if ( run(options, "build", "--release", minimum_version=minimum_version, search_methods="cache", leave_no_trace=FALSE, environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, verbose=isTRUE(verbose)) ) stop("Couldn't build Rust code.")
+  if ( run(options, "build", "--release", minimum_version=minimum_version, leave_no_trace=FALSE, environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, verbose=isTRUE(verbose)) ) stop("Couldn't build Rust code.")
   # Load the shared library
   dynlib.base <- if ( !is_windows ) paste0("lib",libname) else libname
   dynlib.ext <- if ( is_mac ) ".dylib" else .Platform$dynlib.ext
@@ -96,9 +99,21 @@ rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", ve
   get(name, envir=parent.frame)
 }
 
-get_lib_path <- function(verbose, cached) {
-  parent <- tools::R_user_dir("cargo", "cache")
+get_lib_path <- function(verbose, cached, force) {
+  parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
+  if ( ! dir.exists(path) ) {
+    message <- sprintf('\nThis function needs to cache files in the directory:
+    %s
+The cargo package purges cache items every %s days, but you can change
+the frequency by modifying the last line of the "%s" file in
+the directory.  You can revoke permission at any time by deleting the
+directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
+    if ( ! get_permission(message, NULL, force) ) {
+      return(NULL)
+    }
+    purge_cache(TRUE)
+  }
   lock <- paste0(path,".lock")
   success <- TRUE
   if ( ! dir.exists(parent) ) {  # Check if it exists.

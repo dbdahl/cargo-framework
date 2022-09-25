@@ -174,7 +174,7 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     } else if ( method == "cache" ) {
       msg("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
-      prefix_dir <- tools::R_user_dir("cargo", "cache")
+      prefix_dir <- cache_dir()
       cargo_home <- file.path(prefix_dir, "cargo")
       cargo_bin_dir <- file.path(cargo_home, "bin")
       cargo_cmd <- file.path(cargo_bin_dir, paste0("cargo", ifelse(windows,".exe","")))
