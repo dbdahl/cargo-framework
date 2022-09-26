@@ -152,6 +152,7 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
 copy_from_template <- function() {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
+  unlink(path, recursive=TRUE, force=TRUE)
   dir.create(path, showWarnings=FALSE)
   saveRDS(packageVersion("cargo"), file=file.path(path, "stamp"))
   dir.create(file.path(path,"R"), showWarnings=FALSE)

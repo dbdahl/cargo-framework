@@ -548,6 +548,7 @@ test_that("verbose", {
   expect_silent(rust_fn(a,'a',verbose=FALSE))
   expect_output(rust_fn(a,'a',verbose=TRUE))
   expect_silent(rust_fn(a,'a',verbose="never"))
-  expect_silent(rust_fn(a,'a',cached=FALSE,verbose="never"))
   expect_output(rust_fn(a,'a',cached=FALSE,verbose=FALSE))
+  expect_output(rust_fn(a,'a',cached=FALSE,verbose=TRUE))
+  expect_silent(rust_fn(a,'a',cached=FALSE,verbose="never"))
 })
