@@ -134,12 +134,22 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
   }
   stamp_file <- file.path(path, "stamp")
   if ( ! isTRUE(cached) || ! file.exists(stamp_file) || packageVersion("cargo") > readRDS(stamp_file) ) {
-    verbose <- copy_from_template(verbose)
+    copy_from_template()
+  }
+  verbose <- if ( isTRUE(verbose) ) {
+    TRUE
+  } else if ( identical("never", verbose) ) {
+    FALSE
+  } else {
+    if ( length(list.files(file.path(path,"R"))) == 0 ) {
+      msg("Showing compilation details on first call to 'rust_fn' in this session.\nSuppress this with 'verbose=\"never\"'.\n")
+      TRUE
+    } else FALSE
   }
   list(path=path, lock=lock, success=success, verbose=verbose)
 }
 
-copy_from_template <- function(verbose=NULL) {
+copy_from_template <- function() {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
   dir.create(path, showWarnings=FALSE)
@@ -150,7 +160,6 @@ copy_from_template <- function(verbose=NULL) {
   file.copy(system.file(file.path("template","src","rust","roxido"), package="cargo"), rustlib_directory, recursive=TRUE)
   file.copy(system.file(file.path("template","src","rust","roxido_macro"), package="cargo"), rustlib_directory, recursive=TRUE)
   unlink(file.path(path, "rust", "target"), recursive=TRUE, force=TRUE)
-  !identical("never", verbose)
 }
 
 globals <- new.env(parent=emptyenv())

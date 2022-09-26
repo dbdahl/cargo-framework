@@ -89,15 +89,3 @@ get_permission <- function(message, suggestion=NULL, force=FALSE) {
 
 msg <- function(...) base::message(..., appendLF=FALSE)
 
-#
-#   days_until_next_purge <- 91
-# last_purge_filename <- file.path(cache_dir,"last-purge")
-#
-#   writeLines(c("1",as.character(Sys.Date()),days_until_next_purge), last_purge_filename)
-#
-
-# It
-# will also be used to enable cached compilation for the cargo::rust_fn function.
-# The cargo package purges unused cache items every %s days, but you can change
-# the frequency by modifying the last line of the "%s" file in that
-# directory. You can revoke permission at any time by deleting that directory.

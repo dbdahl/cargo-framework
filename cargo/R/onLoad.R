@@ -12,8 +12,11 @@
       next_purge_threshold <- as.Date(details['date']) + days
       if ( Sys.Date() >= next_purge_threshold ) purge_cache(FALSE)
     }
+    if ( interactive() ) {
+      unlink(list.files(file.path(cache_dir, "rust_fn", "R"), full.names=TRUE), recursive=FALSE, force=TRUE)
+    }
   } else {
-    unlink(cache_dir,  recursive=TRUE, force=TRUE)
+    unlink(cache_dir, recursive=TRUE, force=TRUE)
   }
 }
 
