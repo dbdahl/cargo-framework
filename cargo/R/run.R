@@ -222,3 +222,5 @@ mk_rustflags <- function(...) {
     list(CARGO_ENCODED_RUSTFLAGS=x)
   }
 }
+
+cache_dir <- function() tools::R_user_dir("cargo", "cache")

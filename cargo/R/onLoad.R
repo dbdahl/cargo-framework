@@ -32,5 +32,4 @@ purge_cache <- function(last_purge_filename_only) {
 }
 
 days_until_next_purge <- 91
-cache_dir <- function() tools::R_user_dir("cargo", "cache")
 last_purge_filename <- function() file.path(cache_dir(), "last-purge")
