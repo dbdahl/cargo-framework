@@ -168,8 +168,11 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
       msg("Trying to find a suitable Cargo using the conventional location.\n")
       prefix_dir <- Sys.getenv(ifelse(windows,"USERPROFILE","HOME"),"<unset>")
       if ( prefix_dir %in% c("<unset>","") ) next
-      cargo_cmd <- file.path(prefix_dir, ".cargo", "bin", paste0("cargo", ifelse(windows,".exe","")))
-      vars <- environment_variables
+      cargo_bin_dir <- file.path(prefix_dir, ".cargo", "bin")
+      if ( ! dir.exists(cargo_bin_dir) ) next
+      cargo_cmd <- file.path(cargo_bin_dir, paste0("cargo", ifelse(windows,".exe","")))
+      vars <- c(environment_variables,
+                PATH=paste0(Sys.getenv("PATH"), .Platform$path.sep, cargo_bin_dir))
       status <- run_engine("R_CARGO_RUN_CONVENTION", cargo_cmd, vars, FALSE)
       if ( ( ! is.null(status) ) && ( ! is.numeric(status) || ( status == 0 ) ) ) return(status)
     } else if ( method == "cache" ) {
@@ -177,6 +180,7 @@ run <- function(..., minimum_version=".", search_methods=c("path","convention","
       prefix_dir <- cache_dir()
       cargo_home <- file.path(prefix_dir, "cargo")
       cargo_bin_dir <- file.path(cargo_home, "bin")
+      if ( ! dir.exists(cargo_bin_dir) ) next
       cargo_cmd <- file.path(cargo_bin_dir, paste0("cargo", ifelse(windows,".exe","")))
       rustup_home <- cargo_home <- file.path(prefix_dir, "rustup")
       vars <- c(environment_variables,
