@@ -1,12 +1,8 @@
 export NOT_CRAN := "true"
-cache_dir := `Rscript -e "library(tools); cat(normalizePath(R_user_dir('cargo','cache'),mustWork=FALSE,winslash='/'))"`
 
-all: rust_fn FFT FTF TFF FFF
+all: rust_fn package
 
-install:
-    Rscript -e "cargo::install(TRUE)"
-
-rust_fn: install
+rust_fn:
     cd ../cargo/tests; R CMD BATCH testthat.R
     mv ../cargo/tests/testthat.Rout rust_fn.Rout
 
@@ -15,65 +11,6 @@ package:
     Rscript -e "cargo::new_package('testpkg')"
     R CMD INSTALL testpkg
     Rscript -e "cargo::prebuild('testpkg')"
-    Rscript -e "cargo::prebuild('testpkg')"
     R CMD build testpkg
-
-FFT: package
-    #!/bin/sh
-    echo "------------- FFT -------------"
-    rm -rf {{cache_dir}}/packages
-    export R_CARGO_RUN_ENVIR=FALSE
-    export R_CARGO_RUN_PATH=FALSE
-    export R_CARGO_RUN_CACHE=TRUE
     R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
-    rm -f testpkg_0.1.0.zip
-    R CMD INSTALL --build testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
-
-FTF: package
-    #!/bin/sh
-    echo "------------- FTF -------------"
-    rm -rf {{cache_dir}}/packages
-    export R_CARGO_RUN_ENVIR=FALSE
-    export R_CARGO_RUN_PATH=TRUE
-    export R_CARGO_RUN_CACHE=FALSE
-    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
-    rm -f testpkg_0.1.0.zip
-    R CMD INSTALL --build testpkg_0.1.0.tar.gz
-    Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
-
-TFF: package
-    #!/bin/sh
-    echo "------------- TFF -------------"
-    rm -rf {{cache_dir}}/packages
-    export CARGO_HOME={{cache_dir}}/cargo
-    export RUSTUP_HOME={{cache_dir}}/rustup
-    export R_CARGO_RUN_ENVIR=TRUE
-    export R_CARGO_RUN_PATH=FALSE
-    export R_CARGO_RUN_CACHE=FALSE
-    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
-    rm -f testpkg_0.1.0.zip
-    R CMD INSTALL --build testpkg_0.1.0.tar.gz
-    Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
-
-FFF: package
-    #!/bin/sh
-    echo "------------- FFF -------------"
-    rm -rf {{cache_dir}}/packages
-    export R_CARGO_RUN=FALSE
-    R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
-    rm -f testpkg_0.1.0.zip
-    R CMD INSTALL --build testpkg_0.1.0.tar.gz
-    Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)" || true
-    export CARGO_HOME={{cache_dir}}/cargo
-    export RUSTUP_HOME={{cache_dir}}/rustup
-    export R_CARGO_RUN=TRUE
-    export R_CARGO_RUN_PATH=FALSE
-    export R_CARGO_RUN_CACHE=FALSE
-    export R_CARGO_RUN_ENVIR=TRUE
-    Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
-    export R_CARGO_RUN_ENVIR=FALSE
-    Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
-    rm -rf {{cache_dir}}/packages
-    Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)" || true
-
