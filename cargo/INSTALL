@@ -1,8 +1,8 @@
 This R package relies on Cargo, the Rust package manager. Cargo can be provided in a number of way.
 Any of the following methods should work:
 
-1. Install the "cargo" package on CRAN and run "cargo::install()".  This will install Cargo in
-   the directory given by "tools::R_user_dir('cargo', 'cache')".
+1. Install the 'cargo' package on CRAN and run 'cargo::install()'.  This will install Cargo in
+   the directory given by 'tools::R_user_dir("cargo", "cache")'.
 
 OR
 
@@ -13,7 +13,7 @@ OR
    Ubuntu:  sudo apt install cargo
    Fedora:  sudo dnf install cargo
 
-   Note that package managers for MacOS and Windows are *not* recommended.  'brew install rust'
+   Note that package managers for MacOS and Windows are *not* recommended.  Homebrew's Rust
    may yield static libraries with a higher minimum macOS version than that used by the compiler
    for R.  Likewise Msys2 may be unsuitable since, "One should only be installing packages from
    'msys' sub-repository of Msys2, mixing other sub-repositories with the toolchain may cause
@@ -24,13 +24,14 @@ OR
 3. Install from https://rustup.rs, an official Rust website, e.g.:
 
    Linux / MacOS:
-     * Run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh --no-modify-path -y
+   * Run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path -y
 
    Windows:
-     * Download rustup-init.exe from https://rustup.rs
-     * Open the terminal in the directory in which rustup-init.exe was downloaded
-     * Run: .\rustup-init.exe --no-modify-path -y --default-host x86_64-pc-windows-gnu
+   * Download rustup-init.exe from https://rustup.rs
+   * Open the terminal in the directory in which rustup-init.exe was downloaded
+   * Run: .\rustup-init.exe --no-modify-path -y --default-host x86_64-pc-windows-gnu
 
    If you do not mind having the script modify your PATH environment variable, remove the
-   "--no-modify-path" argument.  This is not necessarily, however, as the R package will
-   still be able to find the "cargo" executable in the $HOME/.cargo directory.
+   "--no-modify-path" argument.  Having Cargo's bin directory in your PATH environment variable is
+   *not* necessarily, however, as the R package will still be able to find the 'cargo' executable
+   in the $HOME/.cargo directory.
