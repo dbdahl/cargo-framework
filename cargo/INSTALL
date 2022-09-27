@@ -6,12 +6,18 @@ Any of the following methods should work:
 
 OR
 
-2. Install from a package manager and let it by found from the $PATH environment variable, e.g.:
+2. Install from a package manager and let 'cargo' by found using the $PATH environment variable,
+   e.g.:
 
    Debian:  sudo apt install cargo
    Ubuntu:  sudo apt install cargo
    Fedora:  sudo dnf install cargo
-   MacOS:   brew install rust
+
+   Note that package managers for MacOS and Windows are *not* recommended.  'brew install rust'
+   may yield static libraries with a higher minimum macOS version than that used by the compiler
+   for R.  Likewise Msys2 may be unsuitable since, "One should only be installing packages from
+   'msys' sub-repository of Msys2, mixing other sub-repositories with the toolchain may cause
+   trouble." (https://cran.r-project.org/bin/windows/base/howto-R-devel.html)
 
 OR
 
@@ -26,5 +32,5 @@ OR
      * Run: .\rustup-init.exe --no-modify-path -y --default-host x86_64-pc-windows-gnu
 
    If you do not mind having the script modify your PATH environment variable, remove the
-   "--no-modify-path" argument.  This is not necessarily, however, as the R package should
+   "--no-modify-path" argument.  This is not necessarily, however, as the R package will
    still be able to find the "cargo" executable in the $HOME/.cargo directory.
