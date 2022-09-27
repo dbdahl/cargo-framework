@@ -1,10 +1,7 @@
-export NOT_CRAN := "true"
-
 all: rust_fn package
 
 rust_fn:
-    cd ../cargo/tests; R CMD BATCH testthat.R
-    mv ../cargo/tests/testthat.Rout rust_fn.Rout
+    Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
 
 package:
     rm -rf testpkg

@@ -1,4 +1,5 @@
-skip_on_cran()
+library(cargo)
+# skip_on_cran()
 
 test_that("force", {
   f <- rust_fn(a, '
