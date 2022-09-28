@@ -1,0 +1,219 @@
+Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
+Error in file 'src/lib.rs' at line 3, column 35 : called `Result::unwrap()` on an `Err` value: "Logical value is NA"
+Error in file 'src/lib.rs' at line 3, column 35 : called `Result::unwrap()` on an `Err` value: "Logical value is NA"
+Error in file 'src/lib.rs' at line 3, column 40 : called `Result::unwrap()` on an `Err` value: TryFromIntError(())
+Error in file 'src/lib.rs' at line 3, column 36 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 3, column 36 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 5, column 9 : Oops, not a double vector
+Error in file 'src/lib.rs' at line 5, column 9 : Oops, not a double vector
+Error in file 'src/lib.rs' at line 3, column 37 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 3, column 37 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 2, column 34 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 2, column 34 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 3, column 36 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 3, column 36 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 5, column 11 : Oops, not an integer vector
+Error in file 'src/lib.rs' at line 5, column 11 : Oops, not an integer vector
+Error in file 'src/lib.rs' at line 3, column 37 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 3, column 37 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 2, column 35 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'src/lib.rs' at line 2, column 35 : called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"
+Error in file 'roxido/src/r.rs' at line 568, column 13 : Index 1 is out of bounds for vector of length 1
+Error in file 'roxido/src/r.rs' at line 608, column 13 : Index 1 is out of bounds for list of length 1
+Error in file 'roxido/src/r.rs' at line 664, column 13 : 'names' is not the same length as vector
+Error in file 'roxido/src/r.rs' at line 661, column 13 : Not a vector
+Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a character vector
+Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a character vector
+Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a character vector
+Error in (function ()  : An error was thrown!
+   Compiling roxido86 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+    Finished release [optimized] target(s) in 0.81s
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.44
+   Compiling unicode-ident v1.0.4
+   Compiling quote v1.0.21
+   Compiling syn v1.0.101
+   Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling roxido88 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+    Finished release [optimized] target(s) in 27.65s
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.44
+   Compiling quote v1.0.21
+   Compiling unicode-ident v1.0.4
+   Compiling syn v1.0.101
+   Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+    Finished release [optimized] target(s) in 20.50s
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 310 ]
+rm -rf testpkg
+Rscript -e "cargo::new_package('testpkg')"
+Installing package into ‘/home/dahl/R/x86_64-redhat-linux-gnu-library/4.2’
+(as ‘lib’ is unspecified)
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+---
+Trying to find a suitable Cargo using the PATH environment variable.
+Trying to find a suitable Cargo using the conventional location.
+Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
+Cargo version '1.64.0' is available, which satisfies the need for '1.56'.
+   Compiling proc-macro2 v1.0.40
+   Compiling unicode-ident v1.0.1
+   Compiling quote v1.0.20
+   Compiling syn v1.0.98
+   Compiling roxido_macro v0.5.1 (/home/dahl/tmp/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.1 (/home/dahl/tmp/testpkg/src/rust/roxido)
+   Compiling rust v0.1.0 (/home/dahl/tmp/testpkg/src/rust)
+    Finished release [optimized] target(s) in 13.30s
+---
+Built Rust static library.
+** libs
+gcc -I"/usr/include/R" -DNDEBUG   -I/usr/local/include   -fpic  -O2  -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -fstack-protector-strong -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1  -m64  -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection  -c shim.c -o shim.o
+gcc -shared -L/usr/lib64/R/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1 -Wl,--build-id=sha1 -o testpkg.so shim.o -L. -lrust -L/usr/lib64/R/lib -lR
+installing to /home/dahl/R/x86_64-redhat-linux-gnu-library/4.2/00LOCK-testpkg/00new/testpkg/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+  converting help for package ‘testpkg’
+    finding HTML links ... done
+    convolve2                               html  
+    myrnorm                                 html  
+    zero                                    html  
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (testpkg)
+R CMD INSTALL testpkg
+* installing to library ‘/home/dahl/R/x86_64-redhat-linux-gnu-library/4.2’
+* installing *source* package ‘testpkg’ ...
+** using staged installation
+---
+Trying to find a suitable Cargo using the PATH environment variable.
+Trying to find a suitable Cargo using the conventional location.
+Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
+Cargo version '1.64.0' is available, which satisfies the need for '1.56'.
+    Finished release [optimized] target(s) in 0.01s
+---
+Built Rust static library.
+** libs
+gcc -shared -L/usr/lib64/R/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1 -Wl,--build-id=sha1 -o testpkg.so shim.o -L. -lrust -L/usr/lib64/R/lib -lR
+installing to /home/dahl/R/x86_64-redhat-linux-gnu-library/4.2/00LOCK-testpkg/00new/testpkg/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+  converting help for package ‘testpkg’
+    finding HTML links ... done
+    convolve2                               html  
+    myrnorm                                 html  
+    zero                                    html  
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (testpkg)
+Rscript -e "cargo::prebuild('testpkg')"
+Setting `RoxygenNote` to "7.2.1"
+ℹ Loading testpkg
+R CMD build testpkg
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* preparing ‘testpkg’:
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+Removed empty directory ‘testpkg/src/rust/vendor’
+* building ‘testpkg_0.1.0.tar.gz’
+
+R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
+* using log directory ‘/home/dahl/tmp/testpkg.Rcheck’
+* using R version 4.2.1 (2022-06-23)
+* using platform: x86_64-redhat-linux-gnu (64-bit)
+* using session charset: UTF-8
+* using options ‘--no-manual --as-cran’
+* checking for file ‘testpkg/DESCRIPTION’ ... OK
+* this is package ‘testpkg’ version ‘0.1.0’
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘First Last <name@gmail.com>’
+
+New submission
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘testpkg’ can be installed ... OK
+* checking installed package size ... NOTE
+  installed size is  5.4Mb
+  sub-directories of 1Mb or more:
+    libs   5.3Mb
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Authors@R field gives persons with invalid ORCID identifiers:
+  First Last <name@gmail.com> [aut, cre] (ORCID-ID)
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in shell scripts ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... OK
+* checking for GNU extensions in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking use of PKG_*FLAGS in Makefiles ... OK
+* checking use of SHLIB_OPENMP_*FLAGS in Makefiles ... OK
+* checking pragmas in C/C++ headers and code ... OK
+* checking compilation flags used ... NOTE
+Compilation used the following non-portable flag(s):
+  ‘-Werror=format-security’ ‘-Wp,-D_FORTIFY_SOURCE=2’
+  ‘-Wp,-D_GLIBCXX_ASSERTIONS’
+* checking compiled code ... OK
+* checking examples ... OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+
+Status: 4 NOTEs
+See
+  ‘/home/dahl/tmp/testpkg.Rcheck/00check.log’
+for details.
+
+
+Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
+[1]  0.6607697 -2.0529830 -1.4992061
