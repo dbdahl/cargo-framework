@@ -8,7 +8,7 @@ Build directory: /home/dahl/.cache/R/cargo/rust_fn
    Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 5.85s
+    Finished release [optimized] target(s) in 4.26s
 Error in file 'src/lib.rs' at line 3, column 35 : called `Result::unwrap()` on an `Err` value: "Logical value is NA"
 Error in file 'src/lib.rs' at line 3, column 35 : called `Result::unwrap()` on an `Err` value: "Logical value is NA"
 Error in file 'src/lib.rs' at line 3, column 40 : called `Result::unwrap()` on an `Err` value: TryFromIntError(())
@@ -37,16 +37,16 @@ Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a charac
 Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a character vector
 Error in (function ()  : An error was thrown!
    Compiling roxido86 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.19s
+    Finished release [optimized] target(s) in 0.17s
     Updating crates.io index
    Compiling proc-macro2 v1.0.44
-   Compiling unicode-ident v1.0.4
    Compiling quote v1.0.21
+   Compiling unicode-ident v1.0.4
    Compiling syn v1.0.101
    Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido88 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 5.76s
+    Finished release [optimized] target(s) in 4.26s
     Updating crates.io index
    Compiling proc-macro2 v1.0.44
    Compiling unicode-ident v1.0.4
@@ -55,7 +55,7 @@ Error in (function ()  : An error was thrown!
    Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 5.81s
+    Finished release [optimized] target(s) in 4.37s
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 310 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
@@ -65,20 +65,20 @@ Rscript -e "cargo::new_package('testpkg')"
 Trying to find a suitable Cargo using the PATH environment variable.
 Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
 Cargo version '1.64.0' is available, which satisfies the need for '1.56'.
-   Compiling proc-macro2 v1.0.40
-   Compiling unicode-ident v1.0.1
-   Compiling quote v1.0.20
-   Compiling syn v1.0.98
+   Compiling proc-macro2 v1.0.44
+   Compiling quote v1.0.21
+   Compiling unicode-ident v1.0.4
+   Compiling syn v1.0.101
    Compiling roxido_macro v0.5.1 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.5.1 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 7.94s
+    Finished release [optimized] target(s) in 5.00s
 ---
 Built Rust static library.
 ** libs
-gcc -I"/home/dahl/.local/R/4.2.1-latest/lib/R/include" -DNDEBUG   -I/usr/local/include   -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/.local/R/4.2.1-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.2.1-latest/lib/R/lib -lR
-installing to /home/dahl/.local/R/4.2.1-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+gcc -I"/home/dahl/.local/R/4.3.0-devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
+gcc -shared -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -lR
+installing to /home/dahl/.local/R/4.3.0-devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** inst
 ** byte-compile and prepare package for lazy loading
@@ -91,7 +91,7 @@ installing to /home/dahl/.local/R/4.2.1-latest/lib/R/library/00LOCK-testpkg/00ne
 ** testing if installed package keeps a record of temporary installation path
 * DONE (testpkg)
 R CMD INSTALL testpkg
-* installing to library ‘/home/dahl/.local/R/4.2.1-latest/lib/R/library’
+* installing to library ‘/home/dahl/.local/R/4.3.0-devel/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 ---
@@ -102,8 +102,8 @@ Cargo version '1.64.0' is available, which satisfies the need for '1.56'.
 ---
 Built Rust static library.
 ** libs
-gcc -shared -L/home/dahl/.local/R/4.2.1-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.2.1-latest/lib/R/lib -lR
-installing to /home/dahl/.local/R/4.2.1-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+gcc -shared -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -lR
+installing to /home/dahl/.local/R/4.3.0-devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** inst
 ** byte-compile and prepare package for lazy loading
@@ -130,14 +130,15 @@ Removed empty directory ‘testpkg/src/rust/vendor’
 
 R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
-* using R version 4.2.1 (2022-06-23)
+* using R Under development (unstable) (2022-09-27 r82928)
 * using platform: x86_64-pc-linux-gnu (64-bit)
 * using session charset: UTF-8
 * using options ‘--no-manual --as-cran’
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... NOTE
+* checking CRAN incoming feasibility ...Warning in max(pos) : no non-missing arguments to max; returning -Inf
+ [3s/13s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
