@@ -1,7 +1,7 @@
 scp_dest := "dahl:public"  # Change this to match the 'configure' script.
 
 build:
-  rm *.tar.gz
+  rm -f *.tar.gz
   R CMD build .
   R CMD INSTALL *.tar.gz
 
