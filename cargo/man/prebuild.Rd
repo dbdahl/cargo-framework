@@ -6,33 +6,40 @@
 \usage{
 prebuild(
   pkgroot = ".",
-  what = c("register_calls", "documentation", "vendor", "contributors")[1:2]
+  what = c("vendor", "contributors", "register_calls", "cross_compile", "documentation",
+    "all")[5]
 )
 }
 \arguments{
 \item{pkgroot}{The root directory of the package.}
 
 \item{what}{A character vector indicating the desired action. If it contains
-\code{"register_calls"}, the function (re)generates Rust code. If it
-contains \code{"documentation"}, the function (re)generates documentation.
-If it contains \code{"vendor"}, the Rust dependencies are (re)vendored.}
+\code{"vendor"}, the Rust dependencies are (re)vendored. If it contains
+\code{"contributors"}, the authors and licenses of the Rust dependencies
+are extracted. If it contains \code{"register_calls"}, the function
+(re)generates Rust code. If it contains \code{"cross_compile"}, the
+function cross compiles the static library and creates the file
+\sQuote{src/rust/r_cargo_cross_compile.tar}. If it contains
+\code{"documentation"}, the function (re)generates documentation. Finally,
+if it contains \code{"all"}, all of the previous actions are taken.}
 }
 \value{
 \code{NULL}, invisibly.
 }
 \description{
-This function generates documentation and/or Rust registration code,
-depending on the value of \code{what}.
+This function provides many tools to be used before building an R package
+based on the Cargo Framework.
 }
 \details{
-If a package's usage of \code{\link[base:CallExternal]{base::.Call()}} changes, rerun this function to
-update the \code{src/rust/src/registration.rs} file.
-
-Likewise, if a package's documentation changes, run this function to generate
-documentation using \code{\link[roxygen2:roxygenize]{roxygen2::roxygenise()}} and then automatically move it
-from \code{man} to \code{man}. When the source package is installed,
-examples in the documentation are adjusted according based on whether the
-Rust can be compiled at that time. Lines in the examples that start with
-\verb{#' # R_CARGO} are deleted if Rust can be compiled, otherwise, the line
-is preserved (with \verb{# R_CARGO} itself removed).
+If a package's Rust code changes a dependency, rerun this function with
+\code{what=c("contributors","vendor")} to update the files
+\code{src/rust/vendor.tar.xz}, \code{LICENSE.note}, and \code{inst/AUTHORS}.
+If a package's usage of \code{\link[base:CallExternal]{base::.Call()}} changes, rerun this function with
+\code{what="register_calls"} to update the
+\code{src/rust/src/registration.rs} file. Once you are ready to distribution
+your package, if you want to allow users to avoid having Cargo installed when
+installing from source, rerun this function with \code{what="cross_compile"}
+to update the \sQuote{src/rust/r_cargo_cross_compile.tar} file and deploy its
+contents to your web server. If you update the \code{roxygen2} documentation,
+rerun this function to update the \code{*.Rd} files.
 }

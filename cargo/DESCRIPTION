@@ -1,6 +1,6 @@
 Package: cargo
 Title: Develop R Packages using Rust
-Version: 0.3.12
+Version: 0.3.13
 Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu",comment=c(ORCID="0000-0002-8173-1547")))
 Description: A framework is provided to develop R packages using 'Rust' <https://www.rust-lang.org/> with
  minimal overhead, and more wrappers are easily added. Help is provided to run 'Cargo' <https://doc.rust-lang.org/cargo/> in a manner

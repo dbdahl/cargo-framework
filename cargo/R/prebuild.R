@@ -1,30 +1,37 @@
 #' Prepare for Building the Package Source
 #'
-#' This function generates documentation and/or Rust registration code,
-#' depending on the value of \code{what}.
+#' This function provides many tools to be used before building an R package
+#' based on the Cargo Framework.
 #'
-#' If a package's usage of [base::.Call()] changes, rerun this function to
-#' update the \code{src/rust/src/registration.rs} file.
-#'
-#' Likewise, if a package's documentation changes, run this function to generate
-#' documentation using [roxygen2::roxygenise()] and then automatically move it
-#' from \code{man} to \code{man}. When the source package is installed,
-#' examples in the documentation are adjusted according based on whether the
-#' Rust can be compiled at that time. Lines in the examples that start with
-#' \verb{#' # R_CARGO} are deleted if Rust can be compiled, otherwise, the line
-#' is preserved (with \verb{# R_CARGO} itself removed).
+#' If a package's Rust code changes a dependency, rerun this function with
+#' \code{what=c("contributors","vendor")} to update the files
+#' \code{src/rust/vendor.tar.xz}, \code{LICENSE.note}, and \code{inst/AUTHORS}.
+#' If a package's usage of [base::.Call()] changes, rerun this function with
+#' \code{what="register_calls"} to update the
+#' \code{src/rust/src/registration.rs} file. Once you are ready to distribution
+#' your package, if you want to allow users to avoid having Cargo installed when
+#' installing from source, rerun this function with \code{what="cross_compile"}
+#' to update the \sQuote{src/rust/r_cargo_cross_compile.tar} file and deploy its
+#' contents to your web server. If you update the \code{roxygen2} documentation,
+#' rerun this function to update the \code{*.Rd} files.
 #'
 #' @param pkgroot The root directory of the package.
 #' @param what A character vector indicating the desired action. If it contains
-#'   \code{"register_calls"}, the function (re)generates Rust code. If it
-#'   contains \code{"documentation"}, the function (re)generates documentation.
-#'   If it contains \code{"vendor"}, the Rust dependencies are (re)vendored.
+#'   \code{"vendor"}, the Rust dependencies are (re)vendored. If it contains
+#'   \code{"contributors"}, the authors and licenses of the Rust dependencies
+#'   are extracted. If it contains \code{"register_calls"}, the function
+#'   (re)generates Rust code. If it contains \code{"cross_compile"}, the
+#'   function cross compiles the static library and creates the file
+#'   \sQuote{src/rust/r_cargo_cross_compile.tar}. If it contains
+#'   \code{"documentation"}, the function (re)generates documentation. Finally,
+#'   if it contains \code{"all"}, all of the previous actions are taken.
 #'
 #' @return \code{NULL}, invisibly.
 #' @importFrom utils tar
 #' @export
 #'
-prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "vendor", "contributors")[1:2]) {
+prebuild <- function(pkgroot=".", what=c("vendor", "contributors", "register_calls", "cross_compile", "documentation", "all")[5]) {
+  if ( "all" %in% what ) what <- c("vendor", "contributors", "register_calls", "cross_compile", "documentation")
   pkgroot <- normalizePath(pkgroot)
   description_file <- file.path(pkgroot, "DESCRIPTION")
   r_dir <- file.path(pkgroot, "R")
@@ -33,18 +40,7 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
     stop(sprintf("Oops, '%s' does not appear to be a package root directory.", pkgroot))
   }
   desc <- read.dcf(description_file)
-  if ( "register_calls" %in% what ) {
-    register_calls(pkgroot)
-  }
-  if ( "documentation" %in% what ) {
-    using_roxygen2 <- tryCatch({
-      x <- desc[,'RoxygenNote']
-      !is.na(x)
-    }, error=\(x) FALSE)
-    if ( using_roxygen2 && requireNamespace("roxygen2", quietly=TRUE) ) {
-      roxygen2::roxygenize(pkgroot)
-    }
-  }
+  # vendor
   vendor_engine <- function() {
     original_dir <- getwd()
     on.exit({
@@ -59,6 +55,7 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
     utils::tar("vendor.tar.xz", c("vendor",".cargo"), compression="xz", tar="internal")
   }
   if ( "vendor" %in% what ) vendor_engine()
+  # contributors
   contributors_engine <- function() {
     original_dir <- getwd()
     on.exit({
@@ -86,10 +83,10 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
       authors_con <- file(authors_file, open="wt")
       authors_package <- paste0("    ",as.character(eval(parse(text=desc[,'Authors@R']))))
       writeLines(c("The R package authors are:", "", authors_package,'',
-      "The Rust crates upon which this package depends are included in the package",
-      "source in the 'src/rust' directory, most of which are in the archive",
-      "'vendor.tar.xz'.  The names and authors are as follows:",
-      authors_crates[-1]), authors_con)
+                   "The Rust crates upon which this package depends are included in the package",
+                   "source in the 'src/rust' directory, most of which are in the archive",
+                   "'vendor.tar.xz'.  The names and authors are as follows:",
+                   authors_crates[-1]), authors_con)
       close(authors_con)
     }
     license_crates <- function() {
@@ -111,13 +108,53 @@ prebuild <- function(pkgroot=".", what=c("register_calls", "documentation", "ven
     license_file <- file.path("LICENSE.note")
     license_con <- file(license_file, open="wt")
     writeLines(c("The Rust crates upon which this package depends are licensed individually.",
-    "These crates are included in the package source in the 'src/rust' directory,",
-    "most of which are in the archive 'vendor.tar.xz'.  The names, versions, and",
-    "licenses are as follows:", "",
-    license_crates), license_con)
+                 "These crates are included in the package source in the 'src/rust' directory,",
+                 "most of which are in the archive 'vendor.tar.xz'.  The names, versions, and",
+                 "licenses are as follows:", "",
+                 license_crates), license_con)
     close(license_con)
   }
   if ( "contributors" %in% what ) contributors_engine()
+  # register_class
+  if ( "register_calls" %in% what ) {
+    register_calls(pkgroot)
+  }
+  # cross_compile
+  cross_compile_engine <- function() {
+    original_dir <- getwd()
+    on.exit({
+      setwd(original_dir)
+    })
+    setwd(src_rust_dir)
+    # R_PLATFORM
+    cross_compile_dir <- "r_cargo_cross_compile"
+    unlink(cross_compile_dir, recursive=TRUE, force=TRUE, expand=FALSE)
+    deploy_dir <- file.path(cross_compile_dir, desc[,"Package"], desc[,"Version"])
+    lapply(file.path(deploy_dir, targets()), \(x) dir.create(x, showWarnings=FALSE, recursive=TRUE))
+    for ( target in targets() ) {
+      if ( cargo::run("build", "--release", "--target", target) != 0 ) {
+        stop("Could not build.  Perhaps to you need to add the targets using 'rustup', e.g.,\n    rustup target add ", paste0(targets(),sep=" "))
+      }
+      file.copy(file.path("target", target, "release", "librust.a"), file.path(deploy_dir, target, "librust.a"), overwrite=TRUE)
+    }
+    utils::tar(paste0(cross_compile_dir,".tar"), cross_compile_dir, tar="internal")
+  }
+  if ( "cross_compile" %in% what ) {
+    cross_compile_engine()
+    if ( Sys.which("just") == "" ) {
+      message("Could not find 'just'. Install it with 'cargo::run(\"install\",\"just\")'")
+    }
+  }
+  # documentation
+  if ( "documentation" %in% what ) {
+    using_roxygen2 <- tryCatch({
+      x <- desc[,'RoxygenNote']
+      !is.na(x)
+    }, error=\(x) FALSE)
+    if ( using_roxygen2 && requireNamespace("roxygen2", quietly=TRUE) ) {
+      roxygen2::roxygenize(pkgroot)
+    }
+  }
   invisible(NULL)
 }
 

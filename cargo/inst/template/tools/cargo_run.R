@@ -228,3 +228,28 @@ mk_rustflags <- function(...) {
 }
 
 cache_dir <- function() tools::R_user_dir("cargo", "cache")
+
+target <- function(sysname = Sys.info()[["sysname"]], arch = R.version$arch) {
+  if ( sysname == "Linux" ) {
+    if ( arch == "aarch64" ) {
+      "aarch64-unknown-linux-gnu"
+    } else if ( arch == "x86_64" ) {
+      "x86_64-unknown-linux-gnu"
+    } else stop("Cannot determine target.")
+  } else if ( sysname == "Darwin" ) {
+    if ( arch == "aarch64" ) {
+      "aarch64-apple-darwin"
+    } else if ( arch == "x86_64" ) {
+      "x86_64-apple-darwin"
+    } else stop("Cannot determine target.")
+  } else if ( sysname == "Windows" ) {
+    if ( arch == "x86_64" ) "x86_64-pc-windows-gnu"
+    else stop("Cannot determine target.")
+  } else stop("Cannot determine target.")
+}
+
+targets <- function() {
+  c(target("Linux", "aarch64"), target("Linux", "x86_64"),
+    target("Darwin", "aarch64"), target("Darwin", "x86_64"),
+    target("Windows", "x86_64"))
+}

@@ -1,5 +1,9 @@
+justfile
+^.*[.]tar[.]gz
 ^src/librust.a
 ^src/rust/(.*/)*target
+^src/rust/r_cargo_cross_compile/
+^src/rust/r_cargo_cross_compile.tar
 ^src/rust/vendor/
 ^src/rust/[.]cargo
 ^src/rust/(.*/)*[.]idea

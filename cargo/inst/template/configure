@@ -15,7 +15,23 @@ if ( run('build', '--offline', '--release', '--jobs', '2', minimum_version='../.
 
 } else {
 
-    message("No suitable version of Cargo was found.\nOne solution is to run 'install()' from the 'cargo' package.")
+    message("No suitable version of Cargo was found.\n")
+    if ( ( Sys.getenv("MY_UNIVERSE","<unset>") == "<unset>" ) && ( Sys.getenv("NOT_CRAN","<unset>") == "<unset>" ) ) {
+        message("Please run 'install()' from the 'cargo' package, or set the environment variable 'NOT_CRAN'.\n")
+    } else {
+	## If you want to allow for the installation of the package without having Cargo installed,
+        ## you need to host static libraries on a web server.  First, delete the next line and
+        ## uncomment the other lines, changing as needed (especially the "url_base" variable).  You
+        ## can run 'cargo::prebuild(what="cross_compile")' to build the static libraries and then
+        ## host the contents of the 'src/rust/r_cargo_cross_compile.tar' file on a web server.
+        ##
+	message("Please run 'install()' from the 'cargo' package, or set the environment variable 'NOT_CRAN'.\n")
+        # message("Downloading prebuild static library.\n")
+        # desc <- read.dcf("../../DESCRIPTION")
+        # url_base <- "https://dahl.byu.edu/public"
+        # url <- file.path(url_base, "r_cargo_cross_compile", desc[,"Package"], desc[,"Version"], target(), "librust.a")
+        # download.file(url, "../librust.a")
+    }
 
 }
 close(con)
