@@ -5,14 +5,14 @@
 \title{Prepare for Building the Package Source}
 \usage{
 prebuild(
-  pkgroot = ".",
-  what = c("register_calls", "document", "vendor", "authors", "all")[5]
+  what = c("register_calls", "document", "vendor", "authors", "all")[5],
+  pkgroot = "."
 )
 }
 \arguments{
-\item{pkgroot}{The root directory of the package.}
-
 \item{what}{A character vector indicating the desired action.}
+
+\item{pkgroot}{The root directory of the package.}
 }
 \value{
 \code{NULL}, invisibly.

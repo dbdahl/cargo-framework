@@ -7,7 +7,7 @@
 run(
   ...,
   minimum_version = ".",
-  search_methods = c("path", "convention", "cache"),
+  search_methods = c("cache", "convention", "path"),
   leave_no_trace = FALSE,
   environment_variables = list(),
   rustflags = NULL,
