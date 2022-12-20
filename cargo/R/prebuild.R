@@ -18,7 +18,7 @@
 #' @param pkgroot The root directory of the package.
 #'
 #' @return \code{NULL}, invisibly.
-#' @importFrom utils tar
+#' @importFrom utils tar as.person
 #' @export
 #'
 prebuild <- function(what=c("register_calls", "document", "vendor", "authors", "all")[5], pkgroot=".") {

@@ -1,4 +1,4 @@
-0.4.1 (2022-12-20)
+0.4.2 (2022-12-20)
   * Detect system installation of 'cargo'.
   * Report failure when 'cargo' is not found.
 
