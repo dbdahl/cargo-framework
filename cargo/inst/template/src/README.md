@@ -1,6 +1,6 @@
 # The Cargo Framework
 
-The paper [*Writing R Extensions in Rust*](https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf)
+The package
 complements [*Writing R Extensions*](https://cran.r-project.org/doc/manuals/R-exts.html)
 (the official guide for writing R extensions) for those interested in developing
 [R](https://www.r-project.org/) packages using [Rust](https://www.rust-lang.org/).

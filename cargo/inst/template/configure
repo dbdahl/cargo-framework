@@ -7,33 +7,24 @@ source("tools/cargo_run.R")
 setwd("src/rust")
 if ( ! dir.exists("vendor") ) untar("vendor.tar.xz", tar="internal")
 
-con <- file("../../inst/cargo.log", "w")
-if ( run('build', '--offline', '--release', '--jobs', '2', minimum_version='../..', leave_no_trace=TRUE, verbose=con) == 0 ) {
+triple <- target()
 
-    file.copy("target/release/librust.a", "..", overwrite=TRUE)
+inst_dir <- "../../inst"
+dir.create(inst_dir, showWarnings = FALSE)
+con <- file(file.path(inst_dir, "cargo.log"), "w")
+okay <- run('build', '--offline', '--release', '--target', triple, '--jobs', '2', minimum_version='../..', leave_no_trace=TRUE, verbose=con) == 0
+close(con)
+
+if ( okay ) {
+
+    file.copy(paste0("target/",triple,"/release/librust.a"), "..", overwrite=TRUE)
     message("Built Rust static library.")
 
 } else {
 
     message("No suitable version of Cargo was found.\n")
-    if ( ( Sys.getenv("MY_UNIVERSE","<unset>") == "<unset>" ) && ( Sys.getenv("NOT_CRAN","<unset>") == "<unset>" ) ) {
-        message("Please run 'install()' from the 'cargo' package, or set the environment variable 'NOT_CRAN'.\n")
-    } else {
-	## If you want to allow for the installation of the package without having Cargo installed,
-        ## you need to host static libraries on a web server.  First, delete the next line and
-        ## uncomment the other lines, changing as needed (especially the "url_base" variable).  You
-        ## can run 'cargo::prebuild(what="cross_compile")' to build the static libraries and then
-        ## host the contents of the 'src/rust/r_cargo_cross_compile.tar' file on a web server.
-        ##
-	message("Please run 'install()' from the 'cargo' package, or set the environment variable 'NOT_CRAN'.\n")
-        # message("Downloading prebuild static library.\n")
-        # desc <- read.dcf("../../DESCRIPTION")
-        # url_base <- "https://dahl.byu.edu/public"
-        # url <- file.path(url_base, "r_cargo_cross_compile", desc[,"Package"], desc[,"Version"], target(), "librust.a")
-        # download.file(url, "../librust.a")
-    }
+    message(paste0(readLines("../../INSTALL"), collapse="\n"))
 
 }
-close(con)
 
 EOF

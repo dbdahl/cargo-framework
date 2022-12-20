@@ -1,5 +1,3 @@
-scp_dest := "dahl:public"  # Change this to match the 'configure' script.
-
 build:
   rm -f *.tar.gz
   R CMD build .
@@ -7,5 +5,4 @@ build:
 
 prebuild:
   Rscript -e 'cargo::prebuild(what="all")'
-  scp -r src/rust/r_cargo_cross_compile {{scp_dest}}
   
