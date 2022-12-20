@@ -6,22 +6,13 @@
 \usage{
 prebuild(
   pkgroot = ".",
-  what = c("vendor", "contributors", "register_calls", "cross_compile", "documentation",
-    "all")[5]
+  what = c("register_calls", "document", "vendor", "authors", "all")[5]
 )
 }
 \arguments{
 \item{pkgroot}{The root directory of the package.}
 
-\item{what}{A character vector indicating the desired action. If it contains
-\code{"vendor"}, the Rust dependencies are (re)vendored. If it contains
-\code{"contributors"}, the authors and licenses of the Rust dependencies
-are extracted. If it contains \code{"register_calls"}, the function
-(re)generates Rust code. If it contains \code{"cross_compile"}, the
-function cross compiles the static library and creates the file
-\sQuote{src/rust/r_cargo_cross_compile.tar}. If it contains
-\code{"documentation"}, the function (re)generates documentation. Finally,
-if it contains \code{"all"}, all of the previous actions are taken.}
+\item{what}{A character vector indicating the desired action.}
 }
 \value{
 \code{NULL}, invisibly.
@@ -31,15 +22,14 @@ This function provides many tools to be used before building an R package
 based on the Cargo Framework.
 }
 \details{
-If a package's Rust code changes a dependency, rerun this function with
-\code{what=c("contributors","vendor")} to update the files
-\code{src/rust/vendor.tar.xz}, \code{LICENSE.note}, and \code{inst/AUTHORS}.
 If a package's usage of \code{\link[base:CallExternal]{base::.Call()}} changes, rerun this function with
 \code{what="register_calls"} to update the
-\code{src/rust/src/registration.rs} file. Once you are ready to distribution
-your package, if you want to allow users to avoid having Cargo installed when
-installing from source, rerun this function with \code{what="cross_compile"}
-to update the \sQuote{src/rust/r_cargo_cross_compile.tar} file and deploy its
-contents to your web server. If you update the \code{roxygen2} documentation,
-rerun this function to update the \code{*.Rd} files.
+\code{src/rust/src/registration.rs} file. If you update the \code{roxygen2}
+documentation, rerun this function with \code{what="document"} to update the
+\code{*.Rd} files. If a package's Rust code changes a dependency, rerun this
+function with \code{what=c("authors","vendor")} to update the files
+\code{src/rust/vendor.tar.xz} and to generate the file
+\code{authors-scratch.txt} (which will need to be manually incorporated into
+the \code{DESCRIPTION} file and then deleted). To perform all of these
+actions, use \code{what="all"}.
 }

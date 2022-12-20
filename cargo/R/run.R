@@ -47,7 +47,7 @@
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", search_methods=c("path","convention","cache"), leave_no_trace=FALSE, environment_variables=list(), rustflags=NULL, verbose=TRUE, stdout="", stderr="") {
+run <- function(..., minimum_version=".", search_methods=c("cache","convention","path"), leave_no_trace=FALSE, environment_variables=list(), rustflags=NULL, verbose=TRUE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
     if ( ! isFALSE(verbose) ) base::message(..., appendLF=FALSE)
