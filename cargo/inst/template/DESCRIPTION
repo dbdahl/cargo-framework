@@ -10,7 +10,7 @@ Authors@R: c(person(given = "First", family = "Last", role = c("aut", "cre"), em
 Description: One paragraph description of what the package does.
 License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 4.2.0)
-SystemRequirements: Cargo (>= 1.56) for installation from source: see INSTALL file
+SystemRequirements: Cargo (>= 1.63) for installation from source: see INSTALL file
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3

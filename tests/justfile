@@ -6,8 +6,6 @@ rust_fn:
 package:
     rm -rf testpkg
     Rscript -e "cargo::new_package('testpkg')"
-    R CMD INSTALL testpkg
-    Rscript -e "cargo::prebuild('testpkg')"
     R CMD build testpkg
     R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"

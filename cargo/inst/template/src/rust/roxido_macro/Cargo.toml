@@ -1,6 +1,6 @@
 [package]
 name = "roxido_macro"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["David B. Dahl <dahl@stat.byu.edu>"]
 edition = "2021"
 description = "Macros to support the roxido crate"
@@ -12,5 +12,5 @@ publish = false
 proc-macro = true
 
 [dependencies]
-syn = { version = "1.0", features = ["full"] }
+syn = { version = "2.0", features = ["full"] }
 quote = "1.0"

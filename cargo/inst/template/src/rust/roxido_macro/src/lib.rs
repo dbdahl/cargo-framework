@@ -23,6 +23,9 @@ use quote::quote;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use syn::ext::IdentExt;
+use syn::parse::Parser;
+use syn::Token;
 
 // See https://doc.rust-lang.org/nomicon/unwinding.html
 //
@@ -30,14 +33,29 @@ use std::path::Path;
 
 #[proc_macro_attribute]
 pub fn roxido(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let options = syn::parse_macro_input!(attr as syn::AttributeArgs);
+    let options: Vec<_> = syn::punctuated::Punctuated::<NestedMeta, Token![,]>::parse_terminated
+        .parse(attr)
+        .map(|punctuated| punctuated.into_iter().collect())
+        .unwrap();
     match syn::parse_macro_input!(item as syn::Item) {
         syn::Item::Fn(item_fn) => roxido_fn(options, item_fn),
         _ => panic!("The 'roxido' attribute can only be added to a function."),
     }
 }
 
-fn roxido_fn(options: Vec<syn::NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
+struct NestedMeta(syn::Meta);
+
+impl syn::parse::Parse for NestedMeta {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        if input.peek(syn::Ident::peek_any) {
+            input.parse().map(NestedMeta)
+        } else {
+            Err(input.error("Parse error"))
+        }
+    }
+}
+
+fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
     let r_function_directory = match std::env::var("ROXIDO_R_FUNC_DIR") {
         Ok(x) if !x.is_empty() => {
             let path = Path::new(&x).to_owned();
@@ -51,25 +69,34 @@ fn roxido_fn(options: Vec<syn::NestedMeta>, item_fn: syn::ItemFn) -> TokenStream
     };
     let mut longjmp = true;
     let mut invisible = false;
-    for option in options {
-        let option_string = quote!(#option).to_string();
-        match option {
-            syn::NestedMeta::Meta(syn::Meta::NameValue(name_value)) => {
-                let path = name_value.path;
-                let name = quote!(#path).to_string();
-                match name.as_str() {
-                    "longjmp" => match name_value.lit {
-                        syn::Lit::Bool(x) => longjmp = x.value,
-                        _ => panic!("Unsupported option '{}'.", option_string),
+    for meta in options {
+        let meta = meta.0;
+        let meta_string = quote!(#meta).to_string();
+        match meta {
+            syn::Meta::NameValue(x) => {
+                let name = x.path;
+                let value = x.value;
+                let name_string = quote!(#name).to_string();
+                let value_string = quote!(#value).to_string();
+                match name_string.as_str() {
+                    "longjmp" => match value_string.as_str() {
+                        "true" => longjmp = true,
+                        "false" => longjmp = false,
+                        _ => {
+                            panic!("Unsupported value '{value_string}' for {name_string}.")
+                        }
                     },
-                    "invisible" => match name_value.lit {
-                        syn::Lit::Bool(x) => invisible = x.value,
-                        _ => panic!("Unsupported option '{}'.", option_string),
+                    "invisible" => match value_string.as_str() {
+                        "true" => invisible = true,
+                        "false" => invisible = false,
+                        _ => {
+                            panic!("Unsupported value '{value_string}' for {name_string}.")
+                        }
                     },
-                    _ => panic!("Unsupported option '{}'.", option_string),
+                    _ => panic!("Unsupported option '{name_string}'."),
                 }
             }
-            _ => panic!("Unsupported option '{}'.", option_string),
+            _ => panic!("Unsupported option '{meta_string}'."),
         }
     }
     let name = item_fn.sig.ident;

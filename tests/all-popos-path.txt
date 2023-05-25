@@ -1,14 +1,4 @@
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
-Build directory: /home/dahl/.cache/R/cargo/rust_fn
-    Updating crates.io index
-   Compiling proc-macro2 v1.0.46
-   Compiling unicode-ident v1.0.4
-   Compiling quote v1.0.21
-   Compiling syn v1.0.102
-   Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
-   Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 5.04s
 Error in file 'src/lib.rs' at line 3, column 35 : called `Result::unwrap()` on an `Err` value: "Logical value is NA"
 Error in file 'src/lib.rs' at line 3, column 35 : called `Result::unwrap()` on an `Err` value: "Logical value is NA"
 Error in file 'src/lib.rs' at line 3, column 40 : called `Result::unwrap()` on an `Err` value: TryFromIntError(())
@@ -37,73 +27,95 @@ Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a charac
 Error in file 'roxido/src/r.rs' at line 677, column 13 : 'value' is not a character vector
 Error in (function ()  : An error was thrown!
    Compiling roxido86 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.18s
+    Finished release [optimized] target(s) in 0.19s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.46
-   Compiling quote v1.0.21
-   Compiling unicode-ident v1.0.4
-   Compiling syn v1.0.102
-   Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling proc-macro2 v1.0.58
+   Compiling unicode-ident v1.0.9
+   Compiling quote v1.0.27
+   Compiling syn v2.0.16
+   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido88 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 4.85s
+    Finished release [optimized] target(s) in 4.35s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.46
-   Compiling quote v1.0.21
-   Compiling unicode-ident v1.0.4
-   Compiling syn v1.0.102
-   Compiling roxido_macro v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling proc-macro2 v1.0.58
+   Compiling unicode-ident v1.0.9
+   Compiling quote v1.0.27
+   Compiling syn v2.0.16
+   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 4.81s
+    Finished release [optimized] target(s) in 3.96s
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 310 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
+---
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Trying to find a suitable Cargo using the conventional location.
+Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
+Cargo version '1.69.0' is available, which satisfies the need for '1.31.0'.
+    Updating crates.io index
+    Updating roxido v0.5.1 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido) -> v0.5.2
+---
+---
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Trying to find a suitable Cargo using the conventional location.
+Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
+Cargo version '1.69.0' is available, which satisfies the need for '1.31.0'.
+   Vendoring proc-macro2 v1.0.58 (/home/dahl/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.58) to vendor/proc-macro2
+   Vendoring quote v1.0.27 (/home/dahl/.cargo/registry/src/github.com-1ecc6299db9ec823/quote-1.0.27) to vendor/quote
+   Vendoring syn v2.0.16 (/home/dahl/.cargo/registry/src/github.com-1ecc6299db9ec823/syn-2.0.16) to vendor/syn
+   Vendoring unicode-ident v1.0.9 (/home/dahl/.cargo/registry/src/github.com-1ecc6299db9ec823/unicode-ident-1.0.9) to vendor/unicode-ident
+To use vendored sources, add this to your .cargo/config.toml for this project:
+
+---
+---
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Trying to find a suitable Cargo using the conventional location.
+Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
+Cargo version '1.69.0' is available, which satisfies the need for '1.31.0'.
+---
+ℹ Loading testpkg
+ℹ Re-compiling testpkg (debug build)
+── R CMD INSTALL ───────────────────────────────────────────────────────────────
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 ---
-Trying to find a suitable Cargo using the PATH environment variable.
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Trying to find a suitable Cargo using the conventional location.
 Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
-Cargo version '1.64.0' is available, which satisfies the need for '1.56'.
-   Compiling proc-macro2 v1.0.46
-   Compiling quote v1.0.21
-   Compiling unicode-ident v1.0.4
-   Compiling syn v1.0.102
-   Compiling roxido_macro v0.5.1 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.1 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
+Cargo version '1.69.0' is available, which satisfies the need for '1.63'.
+   Compiling proc-macro2 v1.0.58
+   Compiling unicode-ident v1.0.9
+   Compiling quote v1.0.27
+   Compiling syn v2.0.16
+   Compiling roxido_macro v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 5.31s
+    Finished release [optimized] target(s) in 4.20s
 ---
 Built Rust static library.
 ** libs
-gcc -I"/home/dahl/.local/R/4.3.0-devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -lR
-installing to /home/dahl/.local/R/4.3.0-devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
-** R
-** inst
-** byte-compile and prepare package for lazy loading
-** help
-*** installing help indices
-** building package indices
-** testing if installed package can be loaded from temporary location
+using C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
+gcc -I"/home/dahl/.local/R/4.4.0-devel/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -UNDEBUG -Wall -pedantic -g -O0 -c shim.c -o shim.o
+gcc -shared -L/home/dahl/.local/R/4.4.0-devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.4.0-devel/lib/R/lib -lR
+installing to /tmp/RtmpAGxIWT/devtools_install_1fdf04b3e6e50/00LOCK-testpkg/00new/testpkg/libs
 ** checking absolute paths in shared objects and dynamic libraries
-** testing if installed package can be loaded from final location
-** testing if installed package keeps a record of temporary installation path
 * DONE (testpkg)
-R CMD INSTALL testpkg
-* installing to library ‘/home/dahl/.local/R/4.3.0-devel/lib/R/library’
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 ---
-Trying to find a suitable Cargo using the PATH environment variable.
+Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
+Trying to find a suitable Cargo using the conventional location.
 Trying to use Cargo at: /home/dahl/.cargo/bin/cargo
-Cargo version '1.64.0' is available, which satisfies the need for '1.56'.
+Cargo version '1.69.0' is available, which satisfies the need for '1.63'.
     Finished release [optimized] target(s) in 0.00s
 ---
 Built Rust static library.
 ** libs
-gcc -shared -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.0-devel/lib/R/lib -lR
-installing to /home/dahl/.local/R/4.3.0-devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
+using C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
+gcc -shared -L/home/dahl/.local/R/4.4.0-devel/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.4.0-devel/lib/R/lib -lR
+installing to /home/dahl/.local/R/4.4.0-devel/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** inst
 ** byte-compile and prepare package for lazy loading
@@ -115,9 +127,6 @@ installing to /home/dahl/.local/R/4.3.0-devel/lib/R/library/00LOCK-testpkg/00new
 ** testing if installed package can be loaded from final location
 ** testing if installed package keeps a record of temporary installation path
 * DONE (testpkg)
-Rscript -e "cargo::prebuild('testpkg')"
-Setting `RoxygenNote` to "7.2.1"
-ℹ Loading testpkg
 R CMD build testpkg
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * preparing ‘testpkg’:
@@ -130,15 +139,18 @@ Removed empty directory ‘testpkg/src/rust/vendor’
 
 R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
-* using R Under development (unstable) (2022-09-27 r82928)
-* using platform: x86_64-pc-linux-gnu (64-bit)
+* using R Under development (unstable) (2023-05-19 r84451)
+* using platform: x86_64-pc-linux-gnu
+* R was compiled by
+    gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0
+    GNU Fortran (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0
+* running under: Pop!_OS 22.04 LTS
 * using session charset: UTF-8
 * using options ‘--no-manual --as-cran’
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ...Warning in max(pos) : no non-missing arguments to max; returning -Inf
- NOTE
+* checking CRAN incoming feasibility ... [3s/12s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
@@ -151,10 +163,11 @@ New submission
 * checking for portable file names ... OK
 * checking for sufficient/correct file permissions ... OK
 * checking whether package ‘testpkg’ can be installed ... OK
+* used C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
 * checking installed package size ... NOTE
-  installed size is  5.4Mb
+  installed size is  5.8Mb
   sub-directories of 1Mb or more:
-    libs   5.3Mb
+    libs   5.7Mb
 * checking package directory ... OK
 * checking for future file timestamps ... OK
 * checking DESCRIPTION meta-information ... NOTE

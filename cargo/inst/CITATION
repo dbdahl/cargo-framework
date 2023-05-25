@@ -1,15 +1,13 @@
-citHeader("To cite in publications, please use")
-
-citEntry(entry  = "misc",
+bibentry(
+  bibtype       = "misc",
   title         = "Writing R Extensions in Rust",
   author        = "David B. Dahl",
   year          = "2021",
   eprint        = "2108.07179",
   archivePrefix = "arXiv",
   primaryClass  = "cs.PL",
-
-  textVersion  =
-  paste("David B. Dahl (2021),",
+  textVersion   = paste(
+        "David B. Dahl (2021),",
         "Writing R Extensions in Rust,",
         "arXiv:2108.07179 [cs.PL],",
         "URL https://arxiv.org/abs/2108.07179.")
