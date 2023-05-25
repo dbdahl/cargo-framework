@@ -22,7 +22,7 @@ dependencies = [
 
 [[package]]
 name = "roxido"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "roxido_macro",
 ]
