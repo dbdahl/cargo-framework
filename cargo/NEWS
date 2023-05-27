@@ -1,3 +1,9 @@
+0.4.3 (2023-05-30)
+  * Generate bindings from R 4.3.
+  * Bump SystemRequirements for generated packages to Cargo (>= 1.63).
+  * Transparent to developer: Use bibentry instead of citEntry and
+    upgrade to version 2 of syn crate.
+
 0.4.2 (2022-12-20)
   * Detect system installation of 'cargo'.
   * Report failure when 'cargo' is not found.
