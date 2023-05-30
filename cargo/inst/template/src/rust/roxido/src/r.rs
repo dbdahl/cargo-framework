@@ -832,7 +832,6 @@ impl Rval {
         Self::slice(self, RAWSXP, |x| unsafe { RAW(x) })
     }
 
-
     fn slice_mut<T>(
         rval: Self,
         code: u32,
