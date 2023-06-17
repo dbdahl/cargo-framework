@@ -4,6 +4,7 @@
 .RData
 .Ruserdata
 *.Rcheck
-/*_*.tar.gz
-.idea
+*_*.tar.gz
+target
+Cargo.lock
 /README.html

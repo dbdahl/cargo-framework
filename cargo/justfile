@@ -1,0 +1,10 @@
+install: build
+  R CMD INSTALL *.tar.gz
+
+build:
+  rm -f *.tar.gz
+  R CMD build .
+
+reinstall:
+  R CMD INSTALL .
+

@@ -75,7 +75,7 @@ prebuild <- function(what=c("register_calls", "document", "vendor", "authors", "
       authors_crates <- unlist(lapply(strsplit(authors_crates, ":"), \(x) { x <- trimws(x); y <- list(strsplit(x[2],", ")[[1]]); names(y) <- x[1]; y }), recursive=FALSE)
       crates <- cbind(names(authors_crates), sapply(authors_crates, \(x) {
         ss <- if ( length(x) > 1 ) "s" else ""
-        sprintf(', role = "cph", comment = "Rust crate%s: %s. See AUTHORS file.")', ss, paste(x,collapse=", "))
+        sprintf(', role = "cph", comment = "Rust crate%s: %s.")', ss, paste(x,collapse=", "))
       }))
       authors_file <- file.path("authors-scratch.txt")
       authors_con <- file(authors_file, open="wt")

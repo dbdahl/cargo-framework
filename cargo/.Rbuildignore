@@ -1,3 +1,4 @@
+justfile
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .RData

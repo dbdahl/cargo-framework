@@ -1,4 +1,5 @@
-0.4.3 (2023-05-30)
+0.4.4 (2023-05-30)
+  * Added optional support for matrices from faer crate.
   * Generate bindings from R 4.3.
   * Bump SystemRequirements for generated packages to Cargo (>= 1.63).
   * Transparent to developer: Use bibentry instead of citEntry and

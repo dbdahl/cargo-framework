@@ -10,4 +10,5 @@ crate-type = ["staticlib"]
 
 [dependencies]
 roxido = { path="roxido" }
+# roxido_faer = { path="roxido_faer" }
 
