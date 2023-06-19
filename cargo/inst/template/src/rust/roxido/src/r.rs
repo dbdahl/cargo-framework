@@ -52,8 +52,8 @@ impl R {
     }
 
     /// Throw an R error.
-    pub fn stop(x: String) {
-        std::panic::panic_any(RError(x))
+    pub fn stop<S: Into<String>>(x: S) -> ! {
+        std::panic::panic_any(RError(x.into()))
     }
 
     /// Send an R warning.

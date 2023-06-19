@@ -185,22 +185,23 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                 match result {
                     Ok(obj) => obj,
                     Err(ref payload) => {
+                        let mut scratch = String::new();
                         let msg = match payload.downcast_ref::<crate::r::RError>() {
-                            Some(x) => x.0.to_string(),
+                            Some(x) => x.0.as_str(),
                             None => {
-                              format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name))
+                                scratch = format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name));
+                                &scratch[..]
                             }
                         };
-                        let str = msg.as_str();
-                        let len = str.len();
+                        let len = msg.len();
                         let sexp = unsafe {
                             use std::convert::TryInto;
                             crate::rbindings::Rf_mkCharLen(
-                                str.as_ptr() as *const std::os::raw::c_char,
-                                str.len().try_into().unwrap(),
+                                msg.as_ptr() as *const std::os::raw::c_char,
+                                msg.len().try_into().unwrap(),
                             )
                         };
-                        drop(msg);
+                        drop(scratch);
                         drop(result);
                         unsafe {
                             crate::rbindings::Rf_error(b"%.*s\0".as_ptr() as *const std::os::raw::c_char, len, crate::rbindings::R_CHAR(sexp));
