@@ -2,9 +2,9 @@ mod registration;
 use roxido::*;
 
 #[roxido]
-fn convolve2(a: Rval, b: Rval) -> Rval {
-    let Ok((_, a)) = a.coerce_double(pc) else { R::stop("'a' is not a numeric vector."); };
-    let Ok((_, b)) = b.coerce_double(pc) else { R::stop("'b' is not a numeric vector."); };
+fn convolve2(a: Rval, b: Rval) -> Rval { // Use `let...else` statements when Rust 1.65 is available.
+    let (_, a) = a.coerce_double(pc).unwrap();
+    let (_, b) = b.coerce_double(pc).unwrap();
     let (r, ab) = Rval::new_vector_double(a.len() + b.len() - 1, pc);
     for abi in ab.iter_mut() { *abi = 0.0; }
     for (i, ai) in a.iter().enumerate() {
