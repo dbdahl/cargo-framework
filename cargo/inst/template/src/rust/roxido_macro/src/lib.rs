@@ -174,7 +174,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         TokenStream::from(quote! {
             #[no_mangle]
             extern "C" fn #name(#args) #output {
-                let result: Result<Rval,_> = std::panic::catch_unwind(|| {
+                let result: Result<Rval, _> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
                     #[allow(unused_macros)]
                     macro_rules! rval {
@@ -184,8 +184,13 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                 });
                 match result {
                     Ok(obj) => obj,
-                    Err(_) => {
-                        let msg = format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name));
+                    Err(ref payload) => {
+                        let msg = match payload.downcast_ref::<crate::r::RError>() {
+                            Some(x) => x.0.to_string(),
+                            None => {
+                              format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name))
+                            }
+                        };
                         let str = msg.as_str();
                         let len = str.len();
                         let sexp = unsafe {

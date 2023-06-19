@@ -13,31 +13,57 @@ use std::ffi::CStr;
 use std::num::TryFromIntError;
 use std::os::raw::{c_char, c_void};
 
-/// A Rust representation of an R object.
-///
-/// Technically, this is simply a Rust new type idiom (newtype) for R's `SEXP`, a pointer to R's `SEXPREC` structure.
-///
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct Rval(pub SEXP);
+pub struct R;
 
-/// Generate random bytes using R's RNG.
-///
-/// # Examples:
-/// ```
-/// let mut rng = rand_pcg::Pcg64Mcg::from_seed(crate::r::random_bytes::<16>());
-/// ```
-///
-pub fn random_bytes<const LENGTH: usize>() -> [u8; LENGTH] {
-    unsafe {
-        let m = (u8::MAX as f64) + 1.0;
-        let mut bytes: [u8; LENGTH] = [0; LENGTH];
-        GetRNGstate();
-        for x in bytes.iter_mut() {
-            *x = R_unif_index(m) as u8;
+pub struct RError(pub String);
+
+impl R {
+    /// Generate random bytes using R's RNG.
+    ///
+    /// # Examples:
+    /// ```
+    /// let mut rng = rand_pcg::Pcg64Mcg::from_seed(crate::r::random_bytes::<16>());
+    /// ```
+    ///
+    pub fn random_bytes<const LENGTH: usize>() -> [u8; LENGTH] {
+        unsafe {
+            let m = (u8::MAX as f64) + 1.0;
+            let mut bytes: [u8; LENGTH] = [0; LENGTH];
+            GetRNGstate();
+            for x in bytes.iter_mut() {
+                *x = R_unif_index(m) as u8;
+            }
+            PutRNGstate();
+            bytes
         }
-        PutRNGstate();
-        bytes
+    }
+
+    /// Flush the R console.
+    pub fn flush_console() {
+        unsafe { R_FlushConsole() };
+    }
+
+    /// Check to see if the user has attempted to interrupt the execution.
+    pub fn check_user_interrupt() -> bool {
+        extern "C" fn check_interrupt_fn(_: *mut c_void) {
+            unsafe { R_CheckUserInterrupt() };
+        }
+        unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
+    }
+
+    /// Throw an R error.
+    pub fn stop(x: String) {
+        std::panic::panic_any(RError(x))
+    }
+
+    /// Send an R warning.
+    pub fn warning(_x: String) {
+        unimplemented!()
+    }
+
+    /// Send an R message.
+    pub fn message(_x: String) {
+        unimplemented!()
     }
 }
 
@@ -132,18 +158,13 @@ macro_rules! reprintln {
     }
 }
 
-/// Flush the R console.
-pub fn flush_console() {
-    unsafe { R_FlushConsole() };
-}
-
-/// Check to see if the user has attempted to interrupt the execution.
-pub fn check_user_interrupt() -> bool {
-    extern "C" fn check_interrupt_fn(_: *mut c_void) {
-        unsafe { R_CheckUserInterrupt() };
-    }
-    unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
-}
+/// A Rust representation of an R object.
+///
+/// Technically, this is simply a Rust new type idiom (newtype) for R's `SEXP`, a pointer to R's `SEXPREC` structure.
+///
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct Rval(pub SEXP);
 
 impl Rval {
     fn new_vector<T>(
@@ -1514,31 +1535,11 @@ impl Drop for Pc {
 #[doc(hidden)]
 #[no_mangle]
 pub extern "C" fn set_custom_panic_hook() -> SEXP {
-    std::panic::set_hook(Box::new(|panic_info| {
-        let (filename, line, column) = if let Some(location) = panic_info.location() {
-            (
-                location.file().to_string(),
-                location.line(),
-                location.column(),
-            )
-        } else {
-            ("".to_string(), 0, 0)
-        };
-        let message = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
-            s.to_string()
-        } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
-            s.to_string()
-        } else {
-            "".to_string()
-        };
-        use crate::r;
-        reprintln!(
-            "Error in file '{}' at line {}, column {} : {}",
-            filename,
-            line,
-            column,
-            message
-        );
+    let default_panic = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |panic_info| {
+        if panic_info.payload().downcast_ref::<RError>().is_none() {
+            default_panic(panic_info);
+        }
     }));
     unsafe { R_NilValue }
 }
