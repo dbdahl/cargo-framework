@@ -51,20 +51,6 @@ impl R {
         unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
     }
 
-    /// Throw an R error.
-    pub fn stop<S: Into<String>>(x: S) -> ! {
-        std::panic::panic_any(RError(x.into()))
-    }
-
-    /// Send an R warning.
-    pub fn warning(_x: String) {
-        unimplemented!()
-    }
-
-    /// Send an R message.
-    pub fn message(_x: String) {
-        unimplemented!()
-    }
 }
 
 /// Print to the R console.
@@ -76,6 +62,7 @@ impl R {
 ///
 #[doc(hidden)]
 pub fn _print(x: &str, use_stdout: bool) -> bool {
+    #[repr(C)]
     struct DummyFat {
         len: usize,
         ptr: *const c_char,
@@ -155,6 +142,20 @@ macro_rules! reprintln {
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
         r::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), false)
+    }
+}
+
+/// Throw an R error.
+#[macro_export]
+macro_rules! stop {
+    () => {
+        std::panic::panic_any(r::RError(String::new()))
+    };
+    ($fmt_string:expr) => {
+        std::panic::panic_any(r::RError(format!($fmt_string)))
+    };
+    ($fmt_string:expr, $( $arg:expr ),* ) => {
+        std::panic::panic_any(r::RError(format!($fmt_string, $($arg),*)))
     }
 }
 

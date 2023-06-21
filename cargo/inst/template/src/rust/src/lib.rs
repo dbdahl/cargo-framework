@@ -2,11 +2,14 @@ mod registration;
 use roxido::*;
 
 #[roxido]
-fn convolve2(a: Rval, b: Rval) -> Rval { // Use `let...else` statements when Rust 1.65 is available.
+fn convolve2(a: Rval, b: Rval) -> Rval {
+    // Use `let...else` statements when Rust 1.65 is available.
     let (_, a) = a.coerce_double(pc).unwrap();
     let (_, b) = b.coerce_double(pc).unwrap();
     let (r, ab) = Rval::new_vector_double(a.len() + b.len() - 1, pc);
-    for abi in ab.iter_mut() { *abi = 0.0; }
+    for abi in ab.iter_mut() {
+        *abi = 0.0;
+    }
     for (i, ai) in a.iter().enumerate() {
         for (j, bj) in b.iter().enumerate() {
             ab[i + j] += ai * bj;
@@ -19,23 +22,40 @@ fn convolve2(a: Rval, b: Rval) -> Rval { // Use `let...else` statements when Rus
 fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
     let slice = guesses.slice_double().unwrap();
     let (mut x0, mut x1, tol) = (slice[0], slice[1], stol.as_f64());
-    if tol <= 0.0 { R::stop("non-positive tol value"); }
+    if tol <= 0.0 {
+        stop!("non-positive tol value");
+    }
     let symbol = Rval::new_symbol("x", pc);
     let mut feval = |x: f64| {
         symbol.assign(rval!(x), rho);
         f.eval(rho, pc).unwrap().as_f64()
     };
     let mut f0 = feval(x0);
-    if f0 == 0.0 { return rval!(x0); }
+    if f0 == 0.0 {
+        return rval!(x0);
+    }
     let f1 = feval(x1);
-    if f1 == 0.0 { return rval!(x1); }
-    if f0 * f1 > 0.0 { R::stop("x[0] and x[1] have the same sign"); }
+    if f1 == 0.0 {
+        return rval!(x1);
+    }
+    if f0 * f1 > 0.0 {
+        stop!("x[0] and x[1] have the same sign");
+    }
     loop {
         let xc = 0.5 * (x0 + x1);
-        if (x0 - x1).abs() < tol { return rval!(xc); }
+        if (x0 - x1).abs() < tol {
+            return rval!(xc);
+        }
         let fc = feval(xc);
-        if fc == 0.0 { return rval!(xc); }
-        if f0 * fc > 0.0 { x0 = xc; f0 = fc; } else { x1 = xc; }
+        if fc == 0.0 {
+            return rval!(xc);
+        }
+        if f0 * fc > 0.0 {
+            x0 = xc;
+            f0 = fc;
+        } else {
+            x1 = xc;
+        }
     }
 }
 
@@ -49,10 +69,11 @@ fn myrnorm(n: Rval, mean: Rval, sd: Rval) -> Rval {
         let vec = Rf_protect(Rf_allocVector(REALSXP, length));
         let slice = Rval(vec).slice_mut_double().unwrap();
         GetRNGstate();
-        for x in slice { *x = Rf_rnorm(mean, sd); }
+        for x in slice {
+            *x = Rf_rnorm(mean, sd);
+        }
         PutRNGstate();
         Rf_unprotect(1);
         Rval(vec)
     }
 }
-
