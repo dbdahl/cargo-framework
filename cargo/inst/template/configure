@@ -12,7 +12,7 @@ triple <- target()
 inst_dir <- "../../inst"
 dir.create(inst_dir, showWarnings = FALSE)
 con <- file(file.path(inst_dir, "cargo.log"), "w")
-okay <- run('build', '--offline', '--release', '--target', triple, '--jobs', '2', minimum_version='../..', leave_no_trace=TRUE, verbose=con) == 0
+okay <- run('build', '--offline', '--release', '--target', triple, '--jobs', '2', minimum_version='../..', leave_no_trace=TRUE, verbose=con, run_twice=TRUE) == 0
 close(con)
 
 if ( okay ) {

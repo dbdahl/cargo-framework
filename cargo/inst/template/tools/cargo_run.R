@@ -34,6 +34,7 @@
 #' @param verbose If \code{TRUE}, details of the search for Cargo are shown. If
 #'   \code{FALSE}, no details are shown.  If it is a connection, then details
 #'   are shown and also written to the connection.
+#' @param run_twice Should the cargo command be run twice?
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
 #'
@@ -47,7 +48,7 @@
 #'     message("Cargo is not installed. Please run cargo::install() in an interactive session.")
 #' }
 #'
-run <- function(..., minimum_version=".", search_methods=c("cache","convention","path"), leave_no_trace=FALSE, environment_variables=list(), rustflags=NULL, verbose=TRUE, stdout="", stderr="") {
+run <- function(..., minimum_version=".", search_methods=c("cache","convention","path"), leave_no_trace=FALSE, environment_variables=list(), rustflags=NULL, verbose=TRUE, run_twice=FALSE, stdout="", stderr="") {
   args <- shQuote(c(...))
   msg <- function(...) {
     if ( ! isFALSE(verbose) ) base::message(..., appendLF=FALSE)
@@ -147,9 +148,14 @@ run <- function(..., minimum_version=".", search_methods=c("cache","convention",
     }
     status <- check_candidate()
     if ( status == 0 ) {
-      result <- system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
+      result1 <- system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
+      result2 <- if (run_twice) {
+        system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
+      } else {
+        0
+      }
       msg("---\n")
-      return(result)
+      return(max(result1, result2))
     } else {
       msg("Method failed.\n")
     }

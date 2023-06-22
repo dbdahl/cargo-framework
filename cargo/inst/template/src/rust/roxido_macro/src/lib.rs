@@ -110,7 +110,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         panic!("A function with the 'roxido' attribute must not have a visibility modifier, but found '{}'.", vis_as_string);
     }
     // Check that all arguments are of type Rval.
-    let mut arg_names = Vec::new();
+    let mut arg_names = Vec::with_capacity(args.len());
     for arg in &args {
         match arg {
             syn::FnArg::Typed(pat_type) => {
@@ -140,8 +140,9 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
             }
         }
     }
+    let func_name = quote!(#name).to_string();
+    println!("Doing: {func_name}");
     if let Some(mut path) = r_function_directory {
-        let func_name = quote!(#name).to_string();
         path.push(&func_name);
         let mut file = File::create(&path)
             .unwrap_or_else(|_| panic!("Could not open file '{:?}' for writing.", &path));
