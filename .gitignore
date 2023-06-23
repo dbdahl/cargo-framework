@@ -7,4 +7,6 @@
 *_*.tar.gz
 target
 Cargo.lock
+roxido.txt
+registration.rs
 /README.html

@@ -8,6 +8,8 @@
 /src/*.so
 /src/rust/.cargo
 /src/rust/vendor
+/src/rust/roxido.txt
+/src/rust/src/registration.rs
 /src/rust/**/target
 /src/rust/.idea
 /inst/cargo.log

@@ -21,6 +21,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 use syn::ext::IdentExt;
@@ -141,7 +142,6 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         }
     }
     let func_name = quote!(#name).to_string();
-    println!("Doing: {func_name}");
     if let Some(mut path) = r_function_directory {
         path.push(&func_name);
         let mut file = File::create(&path)
@@ -166,6 +166,16 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
             )
         }
         .expect("Could not write to the file.");
+    } else {
+        let filename = "roxido.txt";
+        if let Ok(mut file) = OpenOptions::new().append(true).create(true).open(filename) {
+            let line = format!("{func_name} {}\n", arg_names.len());
+            if let Err(_) = file.write_all(line.as_bytes()) {
+                eprintln!("Couldn't append to file: {filename}");
+            }
+        } else {
+            eprintln!("Couldn't open the file: {filename}");
+        }
     }
     // Write the function itself, wrapping the body in 'catch_unwind' to prevent unwinding into C.
     if longjmp {

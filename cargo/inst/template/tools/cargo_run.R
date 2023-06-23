@@ -148,14 +148,14 @@ run <- function(..., minimum_version=".", search_methods=c("cache","convention",
     }
     status <- check_candidate()
     if ( status == 0 ) {
-      result1 <- system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
-      result2 <- if (run_twice) {
-        system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
+      result_first <- system3(cargo_cmd, args, env=vars, stdout=stdout, stderr=stderr)
+      result <- if (run_twice) {
+        system3(cargo_cmd, args, env=c(vars, R_CARGO_SECOND_RUN=TRUE), stdout=stdout, stderr=stderr)
       } else {
-        0
+        result_first
       }
       msg("---\n")
-      return(max(result1, result2))
+      return(result)
     } else {
       msg("Method failed.\n")
     }
