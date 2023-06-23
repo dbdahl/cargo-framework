@@ -1,8 +1,8 @@
-use roxido::*;
-
 mod registration {
     include!(concat!(env!("OUT_DIR"), "/registration.rs"));
 }
+
+use roxido::*;
 
 #[roxido]
 fn convolve2(a: Rval, b: Rval) -> Rval {
