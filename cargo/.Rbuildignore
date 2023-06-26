@@ -1,4 +1,5 @@
-justfile
+^justfile$
+Cargo\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .RData
