@@ -10,6 +10,7 @@
 /src/rust/vendor
 /src/rust/roxido.txt
 /src/rust/src/registration.rs
+/src/rust/vendor.tar.xz
 /src/rust/**/target
 /src/rust/.idea
 /inst/cargo.log
