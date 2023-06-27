@@ -5,14 +5,19 @@ cat <<'EOF' | "${R_HOME}/bin${R_ARCH_BIN}/Rscript" -
 source("tools/cargo_run.R")
 
 setwd("src/rust")
-if ( ! dir.exists("vendor") ) untar("vendor.tar.xz", tar="internal")
+offline_option <- if (file.exists("vendor.tar.xz")) {
+    untar("vendor.tar.xz", tar="internal")
+    "--offline"
+} else {
+    NULL
+}
 
 triple <- target()
 
 inst_dir <- "../../inst"
 dir.create(inst_dir, showWarnings = FALSE)
 con <- file(file.path(inst_dir, "cargo.log"), "w")
-okay <- run('build', '--offline', '--release', '--target', triple, '--jobs', '2', minimum_version='../..', leave_no_trace=TRUE, verbose=con, run_twice=TRUE) == 0
+okay <- run('build', offline_option, '--release', '--target', triple, '--jobs', '2', minimum_version='../..', leave_no_trace=TRUE, verbose=con, run_twice=TRUE) == 0
 close(con)
 
 if ( okay ) {

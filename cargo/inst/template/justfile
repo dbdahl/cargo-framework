@@ -1,12 +1,15 @@
+cran: && build
+  Rscript -e 'cargo::prebuild(what="all")'
+
+nocran: && build
+  cd src/rust; rm -rf .cargo vendor.tar.xz
+
 install: build
   R CMD INSTALL *.tar.gz
 
-build: prebuild
+build:
   rm -f *.tar.gz
   R CMD build .
-
-prebuild:
-  Rscript -e 'cargo::prebuild(what="all")'
 
 reinstall:
   R CMD INSTALL .

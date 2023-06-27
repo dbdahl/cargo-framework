@@ -1,10 +1,11 @@
-0.4.5 (2023-06-19)
+0.4.6 (2023-06-26)
   * Support for R::stop function to throw an R error.
   * Added optional support for matrices from faer crate.
   * Generate bindings from R 4.3.
   * Bump SystemRequirements for generated packages to Cargo (>= 1.63).
   * Transparent to developer: Use bibentry instead of citEntry and
     upgrade to version 2 of syn crate.
+  * Better template files when creating a new package.
 
 0.4.2 (2022-12-20)
   * Detect system installation of 'cargo'.
