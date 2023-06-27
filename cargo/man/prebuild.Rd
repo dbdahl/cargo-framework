@@ -4,10 +4,7 @@
 \alias{prebuild}
 \title{Prepare for Building the Package Source}
 \usage{
-prebuild(
-  what = c("register_calls", "document", "vendor", "authors", "all")[5],
-  pkgroot = "."
-)
+prebuild(what = c("document", "vendor", "authors", "all")[4], pkgroot = ".")
 }
 \arguments{
 \item{what}{A character vector indicating the desired action.}
@@ -22,14 +19,12 @@ This function provides many tools to be used before building an R package
 based on the Cargo Framework.
 }
 \details{
-If a package's usage of \code{\link[base:CallExternal]{base::.Call()}} changes, rerun this function with
-\code{what="register_calls"} to update the
-\code{src/rust/src/registration.rs} file. If you update the \code{roxygen2}
-documentation, rerun this function with \code{what="document"} to update the
-\code{*.Rd} files. If a package's Rust code changes a dependency, rerun this
-function with \code{what=c("authors","vendor")} to update the files
+If you update the \code{roxygen2} documentation, rerun this function
+with \code{what="document"} to update the \code{*.Rd} files. If a
+package's Rust code changes a dependency, rerun this function with
+\code{what=c("authors","vendor")} to update the files
 \code{src/rust/vendor.tar.xz} and to generate the file
-\code{authors-scratch.txt} (which will need to be manually incorporated into
-the \code{DESCRIPTION} file and then deleted). To perform all of these
-actions, use \code{what="all"}.
+\code{authors-scratch.txt} (which will need to be manually
+incorporated into the \code{DESCRIPTION} file and then deleted).
+To perform all of these actions, use \code{what="all"}.
 }

@@ -12,6 +12,7 @@ run(
   environment_variables = list(),
   rustflags = NULL,
   verbose = TRUE,
+  run_twice = FALSE,
   stdout = "",
   stderr = ""
 )
@@ -54,6 +55,8 @@ unchanged.}
 \item{verbose}{If \code{TRUE}, details of the search for Cargo are shown. If
 \code{FALSE}, no details are shown.  If it is a connection, then details
 are shown and also written to the connection.}
+
+\item{run_twice}{Should the cargo command be run twice?}
 
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
 

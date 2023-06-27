@@ -3,13 +3,14 @@
 #' This function provides many tools to be used before building an R package
 #' based on the Cargo Framework.
 #'
-#' If you update the \code{roxygen2} # documentation, rerun this function
-#' with \code{what="document"} to update the # \code{*.Rd} files. If a
-#' package's Rust code changes a dependency, rerun this # function with
-#' '\code{what=c("authors","vendor")} to update the files # \code{src/rust/
-#' vendor.tar.xz} and to generate the file # \code{authors-scratch.txt} (which will
-#' need to be manually incorporated into # the \code{DESCRIPTION} file and then
-#' deleted). To perform all of these # actions, use \code{what="all"}.
+#' If you update the \code{roxygen2} documentation, rerun this function
+#' with \code{what="document"} to update the \code{*.Rd} files. If a
+#' package's Rust code changes a dependency, rerun this function with
+#' \code{what=c("authors","vendor")} to update the files
+#' \code{src/rust/vendor.tar.xz} and to generate the file
+#' \code{authors-scratch.txt} (which will need to be manually
+#' incorporated into the \code{DESCRIPTION} file and then deleted).
+#' To perform all of these actions, use \code{what="all"}.
 #'
 #' @param what A character vector indicating the desired action.
 #' @param pkgroot The root directory of the package.
