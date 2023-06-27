@@ -1,0 +1,46 @@
+#!/usr/bin/fish
+
+while not test -f DESCRIPTION
+  if test (pwd) = /
+    echo "ERROR: Could not find DESCRIPTION file." >&2
+    exit 1
+  end
+  cd ..
+end
+
+if string length -q -- (git status --untracked-files=no --porcelain)
+  echo "WARNING: Git repository is not clean." >&2
+end
+
+set base (dirname (dirname (readlink -m (status --current-filename))))/cargo/inst/template
+
+for x in DOTgitignore \
+         DOTRbuildignore \
+         configure \
+         configure.win \
+         DESCRIPTION \
+         INSTALL \
+         justfile \
+         LICENSE \
+         src/Makevars \
+         src/Makevars.win \
+         src/shim.c \
+         src/rust/build.rs \
+         src/rust/Cargo.toml \
+         src/rust/roxido/Cargo.toml \
+         src/rust/roxido/src/lib.rs \
+         src/rust/roxido/src/r.rs \
+         src/rust/roxido/src/rbindings.rs \
+         src/rust/roxido_macro/Cargo.toml \
+         src/rust/roxido_macro/src/lib.rs \
+         src/rust/roxido_faer/Cargo.toml \
+         src/rust/roxido_faer/src/lib.rs \
+         tools/cargo_run.R
+  set fullsrc $base/$x
+  set name (string replace DOT . $x)
+  if not cmp --silent -- "$fullsrc" "$name"
+    meld "$fullsrc" "$name"
+    echo cp "$fullsrc" "$name"
+  end
+end
+
