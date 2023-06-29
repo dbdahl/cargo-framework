@@ -1,16 +1,10 @@
-clean:
-  cd src/rust; Rscript -e 'cargo::run("clean")'
-
-cran: && build
-  Rscript -e 'cargo::prebuild(what="all")'
-
-nocran: && build
-  cd src/rust; rm -rf .cargo vendor.tar.xz
-
 build:
   R CMD build .
 
 install target=default_target:
   R CMD INSTALL {{target}}
+
+cran:
+  Rscript -e "cargo::build_for_cran()"
 
 default_target := "."

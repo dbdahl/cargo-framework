@@ -1,5 +1,5 @@
 Binding: new_package
 Title: Rust-based R Package (using cargo package)
-Subtitle: Create a new R package based on Rust using the unofficial Cargo Framework
+Subtitle: Create a new R package based on Rust with help from the cargo package
 OpenFiles: tools/src/rust/src/lib.rs, R/myrnorm.R
 Icon: cargo-framework.png

@@ -22,6 +22,8 @@
 #' This function does not test the package. The developer is strongly encouraged
 #' to both inspect and test the package before submitting to CRAN.
 #'
+#' @param ... Options passed to \code{R CMD build}.
+#'
 #' @return The exit status code{R CMD build}, invisibly.
 #' @importFrom utils tar
 #' @export

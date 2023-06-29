@@ -6,6 +6,9 @@
 \usage{
 build_for_cran(...)
 }
+\arguments{
+\item{...}{Options passed to \code{R CMD build}.}
+}
 \value{
 The exit status code{R CMD build}, invisibly.
 }
