@@ -167,14 +167,19 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         }
         .expect("Could not write to the file.");
     } else {
-        let filename = "roxido.txt";
-        if let Ok(mut file) = OpenOptions::new().append(true).create(true).open(filename) {
-            let line = format!("{func_name} {}\n", arg_names.len());
-            if let Err(_) = file.write_all(line.as_bytes()) {
-                eprintln!("Couldn't append to file: {filename}");
+        match std::env::var("R_CARGO_RUN_COUNTER") {
+            Ok(x) if x == "1" => {
+                let filename = "roxido.txt";
+                if let Ok(mut file) = OpenOptions::new().append(true).create(true).open(filename) {
+                    let line = format!("{func_name} {}\n", arg_names.len());
+                    if file.write_all(line.as_bytes()).is_err() {
+                        eprintln!("Couldn't append to file: {filename}");
+                    }
+                } else {
+                    eprintln!("Couldn't open the file: {filename}");
+                }
             }
-        } else {
-            eprintln!("Couldn't open the file: {filename}");
+            _ => {}
         }
     }
     // Write the function itself, wrapping the body in 'catch_unwind' to prevent unwinding into C.

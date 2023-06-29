@@ -4,18 +4,34 @@ use std::path::Path;
 
 fn main() {
     println!("Running build.rs");
-    println!("cargo:rerun-if-changed=roxido.txt");
-    println!("cargo:rerun-if-env-changed=R_PACKAGE_NAME");
-    let out_dir = env::var_os("OUT_DIR").expect("OUT_DIR is not set");
-    let package_name = env::var("R_PACKAGE_NAME").unwrap_or_else(|_| String::new());
+    println!("cargo:rerun-if-env-changed=R_CARGO_RUN_COUNTER");
     let src_path = Path::new("roxido.txt");
-    let snippet = match env::var("R_CARGO_SECOND_RUN") {
-        Err(_) => {
-            let _ = fs::remove_file(src_path);
-            String::new()
+    let snippet = match env::var("R_CARGO_RUN_COUNTER") {
+        Ok(x) if x == "1" => None,
+        Ok(x) if x == "2" => make_registration_code(src_path),
+        Ok(_) => {
+            println!("Environment variable 'R_CARGO_RUN_COUNTER' has an unexpected value.");
+            None
         }
-        Ok(_) => match fs::read_to_string(src_path) {
-            Err(_) => String::new(),
+        Err(_) => {
+            println!("Environment variable 'R_CARGO_RUN_COUNTER' is not set.");
+            None
+        }
+    };
+    let out_dir = env::var_os("OUT_DIR").expect("Environment variable 'OUT_DIR' is not set.");
+    let dest_path = Path::new(&out_dir).join("registration.rs");
+    let snippet = snippet.unwrap_or_else(|| {
+        let _ = fs::remove_file(src_path);
+        String::new()
+    });
+    fs::write(dest_path, snippet).expect("Could not write file: {dest_path}");
+}
+
+fn make_registration_code(src_path: &Path) -> Option<String> {
+    match env::var("R_PACKAGE_NAME") {
+        Err(_) => None,
+        Ok(package_name) => match fs::read_to_string(src_path) {
+            Err(_) => None,
             Ok(functions_info) => {
                 let mut functions_info: Vec<_> = functions_info.lines().collect();
                 functions_info.sort_unstable();
@@ -68,15 +84,8 @@ fn main() {
                                 roxido::r::set_custom_panic_hook();
                             }"#,
                 );
-                snippet
+                Some(snippet)
             }
         },
-    };
-    if snippet.is_empty() {
-        println!("Empty registration.rs");
-    } else {
-        println!("Nonempty registration.rs");
     }
-    let dest_path = Path::new(&out_dir).join("registration.rs");
-    fs::write(dest_path, snippet).expect("Could not write file: {dest_path}");
 }

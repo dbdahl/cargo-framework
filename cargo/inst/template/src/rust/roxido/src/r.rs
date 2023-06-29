@@ -1445,7 +1445,7 @@ impl<const LENGTH: usize> NewProtected<[&str; LENGTH]> for Rval {
     fn new(x: [&str; LENGTH], pc: &mut Pc) -> Self {
         let y = Rval::new_vector_character(LENGTH, pc);
         for (i, x) in x.iter().enumerate() {
-            unsafe { SET_STRING_ELT(y.0, i.try_into().unwrap(), Self::new_character(*x, pc).0) };
+            unsafe { SET_STRING_ELT(y.0, i.try_into().unwrap(), Self::new_character(x, pc).0) };
         }
         y
     }
@@ -1456,7 +1456,7 @@ impl NewProtected<&[&str]> for Rval {
         let len = x.len();
         let y = Rval::new_vector_character(len, pc);
         for (i, x) in x.iter().enumerate() {
-            unsafe { SET_STRING_ELT(y.0, i.try_into().unwrap(), Self::new_character(*x, pc).0) };
+            unsafe { SET_STRING_ELT(y.0, i.try_into().unwrap(), Self::new_character(x, pc).0) };
         }
         y
     }
