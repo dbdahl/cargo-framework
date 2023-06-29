@@ -4,15 +4,12 @@
 \alias{new_package}
 \title{Make a Skeleton for a New Package}
 \usage{
-new_package(path, ...)
+new_package(path)
 }
 \arguments{
 \item{path}{A path where the package is created.  The name of the
 package is taken as the last element in the file path.}
-
-\item{...}{Extra arguments that are currently ignored.}
 }
 \description{
-A new Rust-based package using the cargo framework is created at the
-supplied path and the package is installed.
+A new Rust-based package is created at the supplied path and the package is installed.
 }

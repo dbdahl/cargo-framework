@@ -4,15 +4,11 @@
 \alias{api_documentation}
 \title{Browse API Documentation}
 \usage{
-api_documentation(pkgroot = ".")
-}
-\arguments{
-\item{pkgroot}{The root directory of the package.}
+api_documentation()
 }
 \value{
 \code{NULL}, invisibly.
 }
 \description{
-This function opens in a web browser the documentation of the API for the
-Cargo Framework.
+This function opens in a web browser the documentation of the Rust API.
 }
