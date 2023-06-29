@@ -8,11 +8,11 @@
 #' @return \code{NULL}, invisibly.
 #' @export
 #'
-api_documentation <- function(pkgroot=".") {
+api_documentation <- function(pkgroot = ".") {
   cwd <- getwd()
   on.exit(setwd(cwd))
   dir <- file.path(pkgroot, "src", "rust", "roxido")
-  if ( ! dir.exists(dir) ) {
+  if (!dir.exists(dir)) {
     stop(sprintf("Oops, '%s' does not appear to be a package root directory.", pkgroot))
   }
   setwd(dir)

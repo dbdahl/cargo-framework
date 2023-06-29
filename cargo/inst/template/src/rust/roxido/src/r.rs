@@ -287,13 +287,13 @@ impl Rval {
     ///
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
     ///
-    pub fn new_error(message: &str, pc: &mut Pc) -> Result<Self, String> {
+    pub fn new_error(message: &str, pc: &mut Pc) -> Self {
         let list = Self::new_list(2, pc);
-        list.set_list_element(0, Self::new(message, pc))?;
-        list.set_list_element(1, Self::nil())?;
-        list.names_gets(Self::new(["message", "calls"], pc))?;
-        list.class_gets(Self::new(["error", "condition"], pc))?;
-        Ok(list)
+        let _ = list.set_list_element(0, Self::new(message, pc));
+        let _ = list.set_list_element(1, Self::nil());
+        let _ = list.names_gets(Self::new(["message", "calls"], pc));
+        let _ = list.class_gets(Self::new(["error", "condition"], pc));
+        list
     }
 
     /// Define a new element for a character vector.

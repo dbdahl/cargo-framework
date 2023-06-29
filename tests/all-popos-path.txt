@@ -1,13 +1,4 @@
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
-Build directory: /home/dahl/.cache/R/cargo/rust_fn
-   Compiling proc-macro2 v1.0.60
-   Compiling quote v1.0.28
-   Compiling unicode-ident v1.0.9
-   Compiling syn v2.0.18
-   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
-   Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.41s
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:35
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:35
@@ -37,100 +28,63 @@ thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Ob
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:35
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:35
-thread '<unnamed>' panicked at 'Index 1 is out of bounds for vector of length 1', roxido/src/r.rs:589:13
+thread '<unnamed>' panicked at 'Oh no!', src/lib.rs:5:11
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'Index 1 is out of bounds for list of length 1', roxido/src/r.rs:629:13
+thread '<unnamed>' panicked at 'Oops!', src/lib.rs:4:10
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at ''names' is not the same length as vector', roxido/src/r.rs:685:13
+thread '<unnamed>' panicked at 'No way.', src/lib.rs:3:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'Not a vector', roxido/src/r.rs:682:13
-thread '<unnamed>' panicked at ''value' is not a character vector', roxido/src/r.rs:698:13
+thread '<unnamed>' panicked at 'No way.', src/lib.rs:3:9
+thread '<unnamed>' panicked at 'Oops', src/lib.rs:3:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at ''value' is not a character vector', roxido/src/r.rs:698:13
-thread '<unnamed>' panicked at ''value' is not a character vector', roxido/src/r.rs:698:13
+thread '<unnamed>' panicked at 'Oops', src/lib.rs:3:9
+thread '<unnamed>' panicked at 'Oops', src/lib.rs:3:9
 Error in (function ()  : An error was thrown!
    Compiling roxido86 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
     Finished release [optimized] target(s) in 0.17s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.60
+   Compiling proc-macro2 v1.0.63
    Compiling unicode-ident v1.0.9
-   Compiling quote v1.0.28
-   Compiling syn v2.0.18
+   Compiling quote v1.0.29
+   Compiling syn v2.0.22
    Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido88 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.51s
+    Finished release [optimized] target(s) in 5.18s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.60
-   Compiling quote v1.0.28
+   Compiling proc-macro2 v1.0.63
+   Compiling quote v1.0.29
    Compiling unicode-ident v1.0.9
-   Compiling syn v2.0.18
+   Compiling syn v2.0.22
    Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.44s
+    Finished release [optimized] target(s) in 3.76s
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 310 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
----
-Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.70.0' is available, which satisfies the need for '1.31.0'.
-    Updating crates.io index
----
----
-Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.70.0' is available, which satisfies the need for '1.31.0'.
-   Vendoring proc-macro2 v1.0.60 (/home/dahl/.cache/R/cargo/rustup/registry/src/index.crates.io-6f17d22bba15001f/proc-macro2-1.0.60) to vendor/proc-macro2
-   Vendoring quote v1.0.28 (/home/dahl/.cache/R/cargo/rustup/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.28) to vendor/quote
-   Vendoring syn v2.0.18 (/home/dahl/.cache/R/cargo/rustup/registry/src/index.crates.io-6f17d22bba15001f/syn-2.0.18) to vendor/syn
-   Vendoring unicode-ident v1.0.9 (/home/dahl/.cache/R/cargo/rustup/registry/src/index.crates.io-6f17d22bba15001f/unicode-ident-1.0.9) to vendor/unicode-ident
-To use vendored sources, add this to your .cargo/config.toml for this project:
-
----
----
-Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.70.0' is available, which satisfies the need for '1.31.0'.
----
-ℹ Loading testpkg
-ℹ Re-compiling testpkg (debug build)
-── R CMD INSTALL ───────────────────────────────────────────────────────────────
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 ---
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
 Cargo version '1.70.0' is available, which satisfies the need for '1.58.1'.
-   Compiling proc-macro2 v1.0.60
-   Compiling quote v1.0.28
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.63
+   Compiling quote v1.0.29
    Compiling unicode-ident v1.0.9
-   Compiling syn v2.0.18
+   Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
+   Compiling syn v2.0.22
    Compiling roxido_macro v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
+    Finished release [optimized] target(s) in 3.66s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 3.84s
+    Finished release [optimized] target(s) in 0.17s
 ---
 Built Rust static library.
 ** libs
 using C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
-gcc -I"/home/dahl/.local/R/4.3.1-latest/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -UNDEBUG -Wall -pedantic -g -O0 -c shim.c -o shim.o
-gcc -shared -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -lR
-installing to /tmp/RtmpmeCKgD/devtools_install_1965d31c97ca8/00LOCK-testpkg/00new/testpkg/libs
-** checking absolute paths in shared objects and dynamic libraries
-* DONE (testpkg)
-* installing *source* package ‘testpkg’ ...
-** using staged installation
----
-Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.70.0' is available, which satisfies the need for '1.58.1'.
-    Finished release [optimized] target(s) in 0.00s
----
-Built Rust static library.
-** libs
-using C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
+gcc -I"/home/dahl/.local/R/4.3.1-latest/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
 gcc -shared -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -lR
 installing to /home/dahl/.local/R/4.3.1-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
@@ -151,7 +105,6 @@ R CMD build testpkg
 * cleaning src
 * checking for LF line-endings in source and make files and shell scripts
 * checking for empty or unneeded directories
-Removed empty directory ‘testpkg/src/rust/vendor’
 * building ‘testpkg_0.1.0.tar.gz’
 
 R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
@@ -167,7 +120,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [3s/11s] NOTE
+* checking CRAN incoming feasibility ... [3s/26s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission

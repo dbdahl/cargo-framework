@@ -25,146 +25,152 @@
 #' @importFrom utils packageDate packageVersion
 #' @export
 #'
-rust_fn <- function(..., dependencies=character(0), minimum_version="1.31.0", verbose=FALSE, cached=TRUE, longjmp=TRUE, invisible=FALSE, force=FALSE) {
+rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE) {
   # Parse arguments
   mc <- match.call(expand.dots = FALSE)
-  args <- mc[['...']]
+  args <- mc[["..."]]
   len <- length(args)
   code <- args[[len]]
-  args_with_type <- sapply(as.character(args[-len]), function(arg) paste0(arg,": Rval"))
-  all_args <- paste0(args_with_type, collapse=", ")
-  code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) -> Rval { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse="\n"))
+  args_with_type <- sapply(as.character(args[-len]), function(arg) paste0(arg, ": Rval"))
+  all_args <- paste0(args_with_type, collapse = ", ")
+  code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) -> Rval { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse = "\n"))
   # Set-up directories
   path_info <- get_lib_path(verbose, cached, force)
-  if ( is.null(path_info) ) return(invisible())
-  if ( path_info[['success']] ) {
-    on.exit(add=TRUE, unlink(path_info[['lock']], recursive=TRUE, force=TRUE))
+  if (is.null(path_info)) {
+    return(invisible())
   }
-  path <- path_info[['path']]
-  verbose <- path_info[['verbose']]
-  if ( isTRUE(verbose) ) cat("Build directory: ",path,"\n",sep="")
-  globals[['lib_counter']] <- globals[['lib_counter']] + 1
-  libname <- paste0("roxido",globals[['lib_counter']])
+  if (path_info[["success"]]) {
+    on.exit(add = TRUE, unlink(path_info[["lock"]], recursive = TRUE, force = TRUE))
+  }
+  path <- path_info[["path"]]
+  verbose <- path_info[["verbose"]]
+  if (isTRUE(verbose)) cat("Build directory: ", path, "\n", sep = "")
+  globals[["lib_counter"]] <- globals[["lib_counter"]] + 1
+  libname <- paste0("roxido", globals[["lib_counter"]])
   # Write Cargo.toml file
-  rustlib_directory <- file.path(path,"rust")
-  cargo_toml_file <- file.path(rustlib_directory,"Cargo.toml")
-  toml <- c('[package]',sprintf('name = "%s"',libname),'version = "0.1.0"','edition = "2021"','')
-  toml <- c(toml,'[lib]','crate-type = ["cdylib"]','')
-  toml <- c(toml,'[dependencies]','roxido = { path="roxido" }',dependencies,'')
+  rustlib_directory <- file.path(path, "rust")
+  cargo_toml_file <- file.path(rustlib_directory, "Cargo.toml")
+  toml <- c("[package]", sprintf('name = "%s"', libname), 'version = "0.1.0"', 'edition = "2021"', "")
+  toml <- c(toml, "[lib]", 'crate-type = ["cdylib"]', "")
+  toml <- c(toml, "[dependencies]", 'roxido = { path="roxido" }', dependencies, "")
   writeLines(toml, cargo_toml_file)
   is_mac <- is_mac()
   is_windows <- is_windows()
-  rustflags <- if ( is_windows ) {
-    c('-C', 'target-cpu=native', '-C', 'link-arg=-L', '-C', sprintf('link-arg=%s', R.home('bin')), '-C', 'link-arg=-lR')
-  } else if ( is_mac ) {
-    c('-C', 'target-cpu=native', '-Clink-args=-undefined dynamic_lookup')
+  rustflags <- if (is_windows) {
+    c("-C", "target-cpu=native", "-C", "link-arg=-L", "-C", sprintf("link-arg=%s", R.home("bin")), "-C", "link-arg=-lR")
+  } else if (is_mac) {
+    c("-C", "target-cpu=native", "-Clink-args=-undefined dynamic_lookup")
   } else {
-    c('-C', 'target-cpu=native')
+    c("-C", "target-cpu=native")
   }
   # Write Rust code
   src_directory <- file.path(rustlib_directory, "src")
-  dir.create(src_directory, showWarnings=FALSE)
+  dir.create(src_directory, showWarnings = FALSE)
   lib_rs_filename <- file.path(src_directory, "lib.rs")
   writeLines(code, lib_rs_filename)
   # Clean R source directory
-  r_code_directory <- file.path(path,"R")
-  unlink(list.files(r_code_directory, full.names=TRUE))
+  r_code_directory <- file.path(path, "R")
+  unlink(list.files(r_code_directory, full.names = TRUE))
   # Build the shared library
   cwd <- getwd()
-  on.exit(add=TRUE, {
+  on.exit(add = TRUE, {
     setwd(cwd)
   })
   setwd(rustlib_directory)
-  options <- if ( ! isTRUE(verbose) ) "--quiet" else character(0)
-  run_result <- run(options, "build", "--release", minimum_version=minimum_version, leave_no_trace=FALSE,
-                    environment_variables=c(ROXIDO_R_FUNC_DIR=r_code_directory), rustflags=rustflags, verbose=isTRUE(verbose))
-  if ( run_result != 0 ) {
+  options <- if (!isTRUE(verbose)) "--quiet" else character(0)
+  run_result <- run(options, "build", "--release",
+    minimum_version = minimum_version, leave_no_trace = FALSE,
+    environment_variables = c(ROXIDO_R_FUNC_DIR = r_code_directory), rustflags = rustflags, verbose = isTRUE(verbose)
+  )
+  if (run_result != 0) {
     stop("Couldn't build Rust code.")
   }
   # Load the shared library
-  dynlib.base <- if ( !is_windows ) paste0("lib",libname) else libname
-  dynlib.ext <- if ( is_mac ) ".dylib" else .Platform$dynlib.ext
+  dynlib.base <- if (!is_windows) paste0("lib", libname) else libname
+  dynlib.ext <- if (is_mac) ".dylib" else .Platform$dynlib.ext
   dynlib.filename <- paste0(dynlib.base, dynlib.ext)
-  dynlib.name <- paste0(dynlib.base, if ( is_mac ) dynlib.ext else "")
-  dynlib.path <- file.path(rustlib_directory,"target","release",dynlib.filename)
+  dynlib.name <- paste0(dynlib.base, if (is_mac) dynlib.ext else "")
+  dynlib.path <- file.path(rustlib_directory, "target", "release", dynlib.filename)
   dyn.load(dynlib.path)
-  .Call("set_custom_panic_hook", PACKAGE=dynlib.name)
+  .Call("set_custom_panic_hook", PACKAGE = dynlib.name)
   # Source the associated R code
-  parent.frame <- new.env(parent=globalenv())
-  r_code_files <- list.files(r_code_directory, full.names=TRUE)
-  for ( r_code_file in r_code_files ) {
+  parent.frame <- new.env(parent = globalenv())
+  r_code_files <- list.files(r_code_directory, full.names = TRUE)
+  for (r_code_file in r_code_files) {
     name <- basename(r_code_file)
     ptr <- getNativeSymbolInfo(name, dynlib.name)$address
     attr(ptr, "dynlib.path") <- dynlib.path
-    reg.finalizer(ptr, function(p) dyn.unload(attr(p,"dynlib.path",TRUE)))
-    assign(paste0(".",name), ptr, envir=parent.frame)
-    source(r_code_file, local=parent.frame)
+    reg.finalizer(ptr, function(p) dyn.unload(attr(p, "dynlib.path", TRUE)))
+    assign(paste0(".", name), ptr, envir = parent.frame)
+    source(r_code_file, local = parent.frame)
   }
-  get(name, envir=parent.frame)
+  get(name, envir = parent.frame)
 }
 
 get_lib_path <- function(verbose, cached, force) {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
-  if ( ! dir.exists(path) ) {
+  if (!dir.exists(path)) {
     message <- sprintf('\nThis function needs to cache files in the directory:
     %s
 The cargo package purges cache items every %s days, but you can change
 the frequency by modifying the last line of the "%s" file in
 the directory.  You can revoke permission at any time by deleting the
 directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
-    if ( ! get_permission(message, NULL, force) ) {
+    if (!get_permission(message, NULL, force)) {
       return(NULL)
     }
     purge_cache(TRUE)
   }
-  lock <- paste0(path,".lock")
+  lock <- paste0(path, ".lock")
   success <- TRUE
-  if ( ! dir.exists(parent) ) {  # Check if it exists.
-    if ( ! dir.create(parent, showWarnings=FALSE, recursive=TRUE) ) { # Try to create it.
-      if ( ! dir.exists(parent) ) { # Check if perhaps someone else created, which is fine.
+  if (!dir.exists(parent)) { # Check if it exists.
+    if (!dir.create(parent, showWarnings = FALSE, recursive = TRUE)) { # Try to create it.
+      if (!dir.exists(parent)) { # Check if perhaps someone else created, which is fine.
         success <- FALSE
       }
     }
   }
-  success <- success && dir.create(lock, showWarnings=FALSE)
-  if ( ! success ) {
+  success <- success && dir.create(lock, showWarnings = FALSE)
+  if (!success) {
     warning(sprintf("Could not obtain exclusive lock. Perhaps run:\n    unlink(\"%s\", recursive=TRUE)", lock))
-    path <- file.path(tmpdir=tempdir(check=TRUE), paste0("roxido-",Sys.getpid()))
+    path <- file.path(tmpdir = tempdir(check = TRUE), paste0("roxido-", Sys.getpid()))
   }
   stamp_file <- file.path(path, "stamp")
-  if ( ! isTRUE(cached) || ! file.exists(stamp_file) || packageVersion("cargo") > readRDS(stamp_file) ) {
+  if (!isTRUE(cached) || !file.exists(stamp_file) || packageVersion("cargo") > readRDS(stamp_file)) {
     copy_from_template()
   }
-  verbose <- if ( isTRUE(verbose) ) {
+  verbose <- if (isTRUE(verbose)) {
     TRUE
-  } else if ( identical("never", verbose) ) {
+  } else if (identical("never", verbose)) {
     FALSE
   } else {
-    if ( length(list.files(file.path(path,"R"))) == 0 ) {
+    if (length(list.files(file.path(path, "R"))) == 0) {
       msg("Showing compilation details on first call to 'rust_fn' in this session.\nSuppress this with 'verbose=\"never\"'.\n")
       TRUE
-    } else FALSE
+    } else {
+      FALSE
+    }
   }
-  list(path=path, lock=lock, success=success, verbose=verbose)
+  list(path = path, lock = lock, success = success, verbose = verbose)
 }
 
 copy_from_template <- function() {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
-  unlink(path, recursive=TRUE, force=TRUE)
-  dir.create(path, showWarnings=FALSE)
-  saveRDS(packageVersion("cargo"), file=file.path(path, "stamp"))
-  dir.create(file.path(path,"R"), showWarnings=FALSE)
+  unlink(path, recursive = TRUE, force = TRUE)
+  dir.create(path, showWarnings = FALSE)
+  saveRDS(packageVersion("cargo"), file = file.path(path, "stamp"))
+  dir.create(file.path(path, "R"), showWarnings = FALSE)
   rustlib_directory <- file.path(path, "rust")
-  dir.create(rustlib_directory, showWarnings=FALSE)
-  file.copy(system.file(file.path("template","src","rust","roxido"), package="cargo"), rustlib_directory, recursive=TRUE)
-  file.copy(system.file(file.path("template","src","rust","roxido_macro"), package="cargo"), rustlib_directory, recursive=TRUE)
-  unlink(file.path(path, "rust", "target"), recursive=TRUE, force=TRUE)
+  dir.create(rustlib_directory, showWarnings = FALSE)
+  file.copy(system.file(file.path("template", "src", "rust", "roxido"), package = "cargo"), rustlib_directory, recursive = TRUE)
+  file.copy(system.file(file.path("template", "src", "rust", "roxido_macro"), package = "cargo"), rustlib_directory, recursive = TRUE)
+  unlink(file.path(path, "rust", "target"), recursive = TRUE, force = TRUE)
 }
 
-globals <- new.env(parent=emptyenv())
-globals[['lib_counter']] <- 0L
+globals <- new.env(parent = emptyenv())
+globals[["lib_counter"]] <- 0L
 
-is_mac <- function() identical(as.vector(Sys.info()["sysname"]),"Darwin")
-is_windows <- function() identical(.Platform$OS.type,"windows")
+is_mac <- function() identical(as.vector(Sys.info()["sysname"]), "Darwin")
+is_windows <- function() identical(.Platform$OS.type, "windows")
