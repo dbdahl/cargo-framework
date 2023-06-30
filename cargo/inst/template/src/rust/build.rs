@@ -69,7 +69,7 @@ fn make_registration_code(src_path: &Path) -> Option<String> {
                 buffer.push_str(
                     r#", .registration = TRUE
 NULL
-                    
+
 .Kall <- function(...) {
   x <- .Call(...)
   if (inherits(x, "error")) stop(x) else x
