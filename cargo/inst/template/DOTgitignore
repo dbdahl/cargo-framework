@@ -3,6 +3,7 @@
 /.Rhistory
 /.RData
 /.Ruserdata
+/R/roxido.R
 /src/shim.c
 /src/shim.o
 /src/*.a
