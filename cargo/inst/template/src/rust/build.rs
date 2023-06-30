@@ -61,6 +61,15 @@ fn make_registration_code(src_path: &Path) -> Option<String> {
                 }
                 buffer.push_str(
                     r#"
+#' @docType package
+#' @usage NULL
+#' @useDynLib "#,
+                );
+                buffer.push_str(&package_name);
+                buffer.push_str(
+                    r#", .registration = TRUE
+NULL
+                    
 .Kall <- function(...) {
   x <- .Call(...)
   if (inherits(x, "error")) stop(x) else x
