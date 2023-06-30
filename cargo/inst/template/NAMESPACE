@@ -3,4 +3,3 @@
 export(convolve2)
 export(myrnorm)
 export(zero)
-useDynLib(X@X, .registration = TRUE)

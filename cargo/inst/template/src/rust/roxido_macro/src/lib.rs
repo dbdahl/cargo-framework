@@ -171,7 +171,13 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
             Ok(x) if x == "1" => {
                 let filename = "roxido.txt";
                 if let Ok(mut file) = OpenOptions::new().append(true).create(true).open(filename) {
-                    let line = format!("{func_name} {}\n", arg_names.len());
+                    let mut line = String::new();
+                    line.push_str(&func_name);
+                    for arg in arg_names.iter() {
+                        line.push_str(", ");
+                        line.push_str(arg)
+                    }
+                    line.push_str("\n");
                     if file.write_all(line.as_bytes()).is_err() {
                         eprintln!("Couldn't append to file: {filename}");
                     }

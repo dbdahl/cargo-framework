@@ -1,6 +1,7 @@
 justfile
 authors-scratch.txt
 ^.*[.]tar[.]gz
+^src/shim.c
 ^src/librust.a
 ^src/rust/(.*/)*target
 ^src/rust/vendor/

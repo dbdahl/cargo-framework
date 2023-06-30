@@ -3,8 +3,9 @@
 /.Rhistory
 /.RData
 /.Ruserdata
+/src/shim.c
+/src/shim.o
 /src/*.a
-/src/*.o
 /src/*.so
 /src/rust/.cargo
 /src/rust/vendor

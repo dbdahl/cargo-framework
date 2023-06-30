@@ -24,7 +24,6 @@ for x in DOTgitignore \
          LICENSE \
          src/Makevars \
          src/Makevars.win \
-         src/shim.c \
          src/rust/build.rs \
          src/rust/Cargo.toml \
          src/rust/roxido/Cargo.toml \
