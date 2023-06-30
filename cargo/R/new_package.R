@@ -18,6 +18,7 @@ new_package <- function(path) {
   file.rename(file.path(path, "DOTRbuildignore"), file.path(path, ".Rbuildignore"))
   file.rename(file.path(path, "DOTgitignore"), file.path(path, ".gitignore"))
   sed("X@X", pkgname, file.path(path, "DESCRIPTION"))
+  sed("X@X", pkgname, file.path(path, "NAMESPACE"))
   install.packages(path, repos = NULL, type = "source")
 }
 
