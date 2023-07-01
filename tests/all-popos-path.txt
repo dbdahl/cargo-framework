@@ -1,4 +1,14 @@
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
+Build directory: /home/dahl/.cache/R/cargo/rust_fn
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.63
+   Compiling unicode-ident v1.0.9
+   Compiling quote v1.0.29
+   Compiling syn v2.0.22
+   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+    Finished release [optimized] target(s) in 3.81s
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:35
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:35
@@ -50,7 +60,7 @@ Error in (function ()  : An error was thrown!
    Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido88 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 5.18s
+    Finished release [optimized] target(s) in 3.60s
     Updating crates.io index
    Compiling proc-macro2 v1.0.63
    Compiling quote v1.0.29
@@ -59,7 +69,7 @@ Error in (function ()  : An error was thrown!
    Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.76s
+    Finished release [optimized] target(s) in 3.69s
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 310 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
@@ -71,15 +81,15 @@ Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
 Cargo version '1.70.0' is available, which satisfies the need for '1.58.1'.
     Updating crates.io index
    Compiling proc-macro2 v1.0.63
-   Compiling quote v1.0.29
    Compiling unicode-ident v1.0.9
+   Compiling quote v1.0.29
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
    Compiling syn v2.0.22
    Compiling roxido_macro v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized] target(s) in 3.66s
+    Finished release [optimized] target(s) in 3.67s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 0.17s
+    Finished release [optimized] target(s) in 0.18s
 ---
 Built Rust static library.
 ** libs
@@ -120,7 +130,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [3s/26s] NOTE
+* checking CRAN incoming feasibility ... NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission

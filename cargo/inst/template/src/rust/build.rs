@@ -91,8 +91,13 @@ extern "C" fn R_init_{}_rust(info: *mut rbindings::DllInfo) {{
                 for line in functions_info {
                     let tidbits: Vec<_> = line.split_whitespace().collect();
                     let func_name_with_comma = tidbits[0];
-                    let (func_name, _) =
+                    let (func_name, should_be_comma) =
                         func_name_with_comma.split_at(func_name_with_comma.len() - 1);
+                    let func_name = if should_be_comma.is_empty() || should_be_comma != "," {
+                        func_name_with_comma
+                    } else {
+                        func_name
+                    };
                     let n_args = tidbits.len() - 1;
                     snippet.push_str(&format!(
                         r#"
