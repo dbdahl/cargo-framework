@@ -6,9 +6,12 @@ use roxido::*;
 
 #[roxido]
 fn convolve2(a: Rval, b: Rval) -> Rval {
-    // Use `let...else` statements when Rust 1.65 is available.
-    let (_, a) = a.coerce_double(pc).unwrap();
-    let (_, b) = b.coerce_double(pc).unwrap();
+    let Ok((_, a)) = a.coerce_double(pc) else {
+        stop!("'a' should be a vector.")
+    };
+    let Ok((_, b)) = b.coerce_double(pc) else {
+        stop!("'b' should be a vector")
+    };
     let (r, ab) = Rval::new_vector_double(a.len() + b.len() - 1, pc);
     for abi in ab.iter_mut() {
         *abi = 0.0;
@@ -23,8 +26,9 @@ fn convolve2(a: Rval, b: Rval) -> Rval {
 
 #[roxido]
 fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
-    // Use `let...else` statements when Rust 1.65 is available.
-    let slice = guesses.slice_double().unwrap();
+    let Ok(slice) = guesses.slice_double() else {
+        stop!("'guesses' must be a vector with storage mode 'double'.")
+    };
     let (mut x0, mut x1, tol) = (slice[0], slice[1], stol.as_f64());
     if tol <= 0.0 {
         stop!("non-positive tol value");

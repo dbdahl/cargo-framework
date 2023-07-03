@@ -1,2 +1,2 @@
-PKG_LIBS = -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt
+PKG_LIBS = -L. -lrust -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 $(SHLIB): librust.a
