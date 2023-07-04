@@ -1,0 +1,16 @@
+Package: t1
+Title: A Short Phrase in Title Case
+Version: 0.1.0
+Authors@R: c(person(given = "First", family = "Last", role = c("aut", "cre"), email = "name@gmail.com", comment = c(ORCID = "ORCID-ID")),
+    person(given = "David B.", family = "Dahl", email = "dahl@stat.byu.edu", role = "cph", comment = "Rust crates: roxido, roxido_macro."),
+    person(given = "Alex", family = "Crichton", email = "alex@alexcrichton.com", role = "cph", comment = "Rust crate: proc-macro2."),
+    person(given = "David", family = "Tolnay", email = "dtolnay@gmail.com", role = "cph", comment = "Rust crates: syn, proc-macro2, quote, unicode-ident."),
+    person(given = "Unicode, Inc.", role = "cph", comment = "Rust crate: unicode-ident.")
+    )
+Description: One paragraph description of what the package does.
+License: MIT + file LICENSE | Apache License 2.0
+Depends: R (>= 4.2.0)
+SystemRequirements: Cargo (>= 1.65) for installation from source: see INSTALL file
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+cat <<'EOF' | "${R_HOME}/bin${R_ARCH_BIN}/Rscript" -
+
+source("tools/cargo_run.R")
+
+setwd("src/rust")
+cran_build <- file.exists("vendor.tar.xz")
+if (cran_build) {
+    untar("vendor.tar.xz", tar = "internal")
+    offline_option <- "--offline"
+    jobs_option <- c("--jobs", "2")
+} else {
+    offline_option <- NULL
+    jobs_option <- NULL
+}
+
+triple <- target()
+
+inst_dir <- "../../inst"
+dir.create(inst_dir, showWarnings = FALSE)
+con <- file(file.path(inst_dir, "cargo.log"), "w")
+okay <- run("build", offline_option, "--release", "--target", triple, jobs_option, minimum_version = "../..",
+            leave_no_trace = cran_build, verbose = con, run_twice = TRUE) == 0
+close(con)
+
+if (okay) {
+
+    file.copy(paste0("target/", triple, "/release/librust.a"), "..", overwrite = TRUE)
+    message("Built Rust static library.")
+
+} else {
+
+    message("No suitable version of Cargo was found.\n")
+    message(paste0(readLines("../../INSTALL"), collapse = "\n"))
+
+}
+
+EOF

@@ -1,0 +1,10 @@
+build:
+  R CMD build .
+
+install target=default_target:
+  R CMD INSTALL {{target}}
+
+cran:
+  Rscript -e "cargo::build_for_cran()"
+
+default_target := "."
