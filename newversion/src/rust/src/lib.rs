@@ -5,7 +5,7 @@ mod registration {
 use roxido::*;
 
 #[roxido]
-fn convolve2(a: Rval, b: Rval) -> Rval {
+fn convolve2(a: RObject, b: RObject) -> RObject {
     let Ok(a) = a.as_vector() else {
         stop!("'a' should be a vector.")
     };
@@ -23,11 +23,11 @@ fn convolve2(a: Rval, b: Rval) -> Rval {
             ab[i + j] += ai * bj;
         }
     }
-    r.as_rval()
+    r.as_robject()
 }
 
 #[roxido]
-fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
+fn zero(f: RObject, guesses: RObject, stol: RObject, rho: RObject) -> RObject {
     let Ok(guesses) = guesses.as_vector() else {
         stop!("'guesses' must be a vector.")
     };
@@ -38,18 +38,18 @@ fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
     if tol <= 0.0 {
         stop!("non-positive tol value");
     }
-    let symbol = Rval::new_symbol("x", pc);
+    let symbol = RObject::new_symbol("x", pc);
     let mut feval = |x: f64| {
-        let _ = symbol.assign(rval!(x), rho);
+        let _ = symbol.assign(RObject::new(x, pc), rho);
         f.eval(rho, pc).unwrap().as_f64()
     };
     let mut f0 = feval(x0);
     if f0 == 0.0 {
-        return rval!(x0);
+        return RObject::new(x0, pc);
     }
     let f1 = feval(x1);
     if f1 == 0.0 {
-        return rval!(x1);
+        return RObject::new(x1, pc);
     }
     if f0 * f1 > 0.0 {
         stop!("x[0] and x[1] have the same sign");
@@ -57,11 +57,11 @@ fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
     loop {
         let xc = 0.5 * (x0 + x1);
         if (x0 - x1).abs() < tol {
-            return rval!(xc);
+            return RObject::new(xc, pc);
         }
         let fc = feval(xc);
         if fc == 0.0 {
-            return rval!(xc);
+            return RObject::new(xc, pc);
         }
         if f0 * fc > 0.0 {
             x0 = xc;
@@ -73,7 +73,7 @@ fn zero(f: Rval, guesses: Rval, stol: Rval, rho: Rval) -> Rval {
 }
 
 #[roxido]
-fn myrnorm(n: Rval, mean: Rval, sd: Rval) -> Rval {
+fn myrnorm(n: RObject, mean: RObject, sd: RObject) -> RObject {
     unsafe {
         use rbindings::*;
         use std::convert::TryFrom;
@@ -89,6 +89,6 @@ fn myrnorm(n: Rval, mean: Rval, sd: Rval) -> Rval {
         }
         PutRNGstate();
         Rf_unprotect(1);
-        Rval::from_sexp(vec)
+        RObject::from_sexp(vec)
     }
 }

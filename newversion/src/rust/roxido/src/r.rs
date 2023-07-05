@@ -165,11 +165,11 @@ macro_rules! stop {
 ///
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct Rval(SEXP);
+pub struct RObject(SEXP);
 
-impl Rval {
+impl RObject {
     pub fn from_sexp(sexp: SEXP) -> Self {
-        Rval(sexp)
+        RObject(sexp)
     }
 
     pub fn as_sexp(self) -> SEXP {
@@ -186,7 +186,7 @@ impl Rval {
         let _ = list.set(1, Self::nil());
         let _ = list.names_gets(RVectorCharacter::new(["message", "calls"], pc));
         let _ = list.class_gets(RVectorCharacter::new(["error", "condition"], pc));
-        list.as_rval()
+        list.as_robject()
     }
 
     /// Define a new element for a character vector.
@@ -234,7 +234,7 @@ impl Rval {
     /// This method get the tag associated with an R external pointer, which was set by [`Self::external_pointer_encode`].
     ///
     pub fn external_pointer_tag(self) -> Self {
-        unsafe { Rval(R_ExternalPtrTag(self.0)) }
+        unsafe { RObject(R_ExternalPtrTag(self.0)) }
     }
 
     /// Move an R external pointer to a Rust object
@@ -348,16 +348,6 @@ impl Rval {
     /// Is the object of storage mode `integer`?
     pub fn is_integer(self) -> bool {
         unsafe { Rf_isInteger(self.0) != 0 }
-    }
-
-    /// Is the object of storage mode `double` or `integer`?
-    pub fn is_double_or_integer(self) -> bool {
-        self.is_double() || self.is_integer()
-    }
-
-    /// Is the object of storage mode `double` or `integer` and of length one?
-    pub fn is_double_or_integer_scalar(self) -> bool {
-        self.is_double_or_integer() && self.len() == 1
     }
 
     /// Is the object of storage mode `logical`?
@@ -734,14 +724,14 @@ impl Rval {
 ///
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct RVector(Rval);
+pub struct RVector(RObject);
 
 impl RVector {
-    pub fn from_rval(rval: Rval) -> Result<Self, &'static str> {
-        rval.as_vector()
+    pub fn from_robject(robject: RObject) -> Result<Self, &'static str> {
+        robject.as_vector()
     }
 
-    pub fn as_rval(self) -> Rval {
+    pub fn as_robject(self) -> RObject {
         self.0
     }
 
@@ -754,7 +744,7 @@ impl RVector {
         unsafe {
             let sexp = pc.protect(Rf_allocVector(code, len.try_into().unwrap()));
             let slice = std::slice::from_raw_parts_mut(get_ptr(sexp), len);
-            (Self(Rval(sexp)), slice)
+            (Self(RObject(sexp)), slice)
         }
     }
 
@@ -795,14 +785,14 @@ impl RVector {
     }
 
     fn slice<T>(
-        rval: Self,
+        robject: Self,
         code: u32,
         get_ptr: impl Fn(SEXP) -> *mut T,
     ) -> Result<&'static [T], &'static str> {
-        let ft = unsafe { TYPEOF(rval.0 .0) } as u32;
+        let ft = unsafe { TYPEOF(robject.0 .0) } as u32;
         if ft == code {
-            let len = rval.len();
-            let slice = unsafe { std::slice::from_raw_parts(get_ptr(rval.0 .0), len) };
+            let len = robject.len();
+            let slice = unsafe { std::slice::from_raw_parts(get_ptr(robject.0 .0), len) };
             Ok(slice)
         } else {
             Err("Object is not of the asserted type")
@@ -846,14 +836,14 @@ impl RVector {
     }
 
     fn slice_mut<T>(
-        rval: Self,
+        robject: Self,
         code: u32,
         get_ptr: impl Fn(SEXP) -> *mut T,
     ) -> Result<&'static mut [T], &'static str> {
-        let ft = unsafe { TYPEOF(rval.0 .0) } as u32;
+        let ft = unsafe { TYPEOF(robject.0 .0) } as u32;
         if ft == code {
-            let len = rval.len();
-            let slice = unsafe { std::slice::from_raw_parts_mut(get_ptr(rval.0 .0), len) };
+            let len = robject.len();
+            let slice = unsafe { std::slice::from_raw_parts_mut(get_ptr(robject.0 .0), len) };
             Ok(slice)
         } else {
             Err("Object is not of the asserted type")
@@ -897,20 +887,20 @@ impl RVector {
     }
 
     fn coerce<T>(
-        rval: Self,
+        robject: Self,
         code: u32,
         get_ptr: impl Fn(SEXP) -> *mut T,
         pc: &mut Pc,
     ) -> (Self, &'static mut [T]) {
-        let ft = unsafe { TYPEOF(rval.0 .0) } as u32;
+        let ft = unsafe { TYPEOF(robject.0 .0) } as u32;
         let sexp = if ft != code {
-            pc.protect(unsafe { Rf_coerceVector(rval.0 .0, code) })
+            pc.protect(unsafe { Rf_coerceVector(robject.0 .0, code) })
         } else {
-            rval.0 .0
+            robject.0 .0
         };
-        let len = rval.len();
+        let len = robject.len();
         let slice = unsafe { std::slice::from_raw_parts_mut(get_ptr(sexp), len) };
-        (rval, slice)
+        (robject, slice)
     }
 
     /// Coerce the object to storage mode `double` and get the associated slice, or return an error if not possible.
@@ -957,7 +947,7 @@ impl RVector {
         } else {
             self.0 .0
         };
-        RVectorCharacter(RVector(Rval(sexp)))
+        RVectorCharacter(RVector(RObject(sexp)))
     }
 
     /// Set the names attribute of an object.
@@ -974,7 +964,7 @@ impl RVector {
 }
 
 impl Deref for RVector {
-    type Target = Rval;
+    type Target = RObject;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -993,7 +983,7 @@ pub struct RVectorCharacter(RVector);
 impl RVectorCharacter {
     /// Define a new vector with storage mode `character`.
     pub fn of_size(len: usize, pc: &mut Pc) -> Self {
-        Self(RVector(Rval(unsafe {
+        Self(RVector(RObject(unsafe {
             pc.protect(Rf_allocVector(STRSXP, len.try_into().unwrap()))
         })))
     }
@@ -1002,7 +992,7 @@ impl RVectorCharacter {
     ///
     /// This function returns an error if the object is not a character vector or if `i` is greater than or equal to the length of the vector.
     ///
-    pub fn get(self, i: usize) -> Result<Rval, String> {
+    pub fn get(self, i: usize) -> Result<RObject, String> {
         let len = self.len();
         if i >= len {
             return Err(format!(
@@ -1010,7 +1000,7 @@ impl RVectorCharacter {
                 i, len
             ));
         }
-        Ok(Rval(unsafe {
+        Ok(RObject(unsafe {
             STRING_ELT(self.0 .0 .0, i.try_into().unwrap())
         }))
     }
@@ -1031,7 +1021,7 @@ impl RVectorCharacter {
             SET_STRING_ELT(
                 self.0 .0 .0,
                 i.try_into().unwrap(),
-                Rval::new_character(value, pc).0,
+                RObject::new_character(value, pc).0,
             );
         };
         Ok(())
@@ -1062,7 +1052,7 @@ impl RList {
     /// the associated R object exists.
     ///
     pub fn of_size(len: usize, pc: &mut Pc) -> Self {
-        Self(RVector(Rval(pc.protect(unsafe {
+        Self(RVector(RObject(pc.protect(unsafe {
             Rf_allocVector(VECSXP, len.try_into().unwrap())
         }))))
     }
@@ -1071,7 +1061,7 @@ impl RList {
     ///
     /// This function returns an error if the object is not a list or if `i` is greater than or equal to the length of the list.
     ///
-    pub fn get(self, i: usize) -> Result<Rval, String> {
+    pub fn get(self, i: usize) -> Result<RObject, String> {
         let len = self.len();
         if i >= len {
             return Err(format!(
@@ -1079,7 +1069,7 @@ impl RList {
                 i, len
             ));
         }
-        Ok(Rval(unsafe {
+        Ok(RObject(unsafe {
             VECTOR_ELT(self.0 .0 .0, i.try_into().unwrap())
         }))
     }
@@ -1088,7 +1078,7 @@ impl RList {
     ///
     /// This function returns an error if the object is not a list or if `i` is greater than or equal to the length of the list.
     ///
-    pub fn set(self, i: usize, value: Rval) -> Result<(), String> {
+    pub fn set(self, i: usize, value: RObject) -> Result<(), String> {
         let len = self.len();
         if i >= len {
             return Err(format!(
@@ -1118,14 +1108,14 @@ impl Deref for RList {
 ///
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct RMatrix(Rval);
+pub struct RMatrix(RObject);
 
 impl RMatrix {
-    pub fn from_rval(rval: Rval) -> Result<Self, &'static str> {
-        rval.as_matrix()
+    pub fn from_robject(robject: RObject) -> Result<Self, &'static str> {
+        robject.as_matrix()
     }
 
-    pub fn as_rval(self) -> Rval {
+    pub fn as_robject(self) -> RObject {
         self.0
     }
 
@@ -1143,7 +1133,7 @@ impl RMatrix {
                 ncol.try_into().unwrap(),
             ));
             let slice = std::slice::from_raw_parts_mut(get_ptr(sexp), nrow * ncol);
-            (RMatrix(Rval(sexp)), slice)
+            (RMatrix(RObject(sexp)), slice)
         }
     }
 
@@ -1182,7 +1172,7 @@ impl RMatrix {
                 nrow.try_into().unwrap(),
                 ncol.try_into().unwrap(),
             ));
-            Self(Rval(sexp))
+            Self(RObject(sexp))
         }
     }
 
@@ -1219,13 +1209,13 @@ impl RMatrix {
                 Rf_nrows(self.0 .0),
             ));
             Rf_copyMatrix(sexp, self.0 .0, 1);
-            Self(Rval(sexp))
+            Self(RObject(sexp))
         }
     }
 }
 
 impl Deref for RMatrix {
-    type Target = Rval;
+    type Target = RObject;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -1244,13 +1234,13 @@ pub trait TryNewProtected<T>: Sized {
 
 // f64
 
-impl From<Rval> for f64 {
-    fn from(x: Rval) -> f64 {
+impl From<RObject> for f64 {
+    fn from(x: RObject) -> f64 {
         unsafe { Rf_asReal(x.0) }
     }
 }
 
-impl NewProtected<f64> for Rval {
+impl NewProtected<f64> for RObject {
     fn new(x: f64, pc: &mut Pc) -> Self {
         Self(pc.protect(unsafe { Rf_ScalarReal(x) }))
     }
@@ -1258,13 +1248,13 @@ impl NewProtected<f64> for Rval {
 
 // i32
 
-impl From<Rval> for i32 {
-    fn from(x: Rval) -> i32 {
+impl From<RObject> for i32 {
+    fn from(x: RObject) -> i32 {
         unsafe { Rf_asInteger(x.0) }
     }
 }
 
-impl NewProtected<i32> for Rval {
+impl NewProtected<i32> for RObject {
     fn new(x: i32, pc: &mut Pc) -> Self {
         Self(pc.protect(unsafe { Rf_ScalarInteger(x) }))
     }
@@ -1272,9 +1262,9 @@ impl NewProtected<i32> for Rval {
 
 // bool
 
-impl TryFrom<Rval> for bool {
+impl TryFrom<RObject> for bool {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<bool, Self::Error> {
+    fn try_from(x: RObject) -> Result<bool, Self::Error> {
         match unsafe { Rf_asLogical(x.0) } {
             x if x == Rboolean_TRUE.try_into().unwrap() => Ok(true),
             x if x == Rboolean_FALSE.try_into().unwrap() => Ok(false),
@@ -1283,26 +1273,26 @@ impl TryFrom<Rval> for bool {
     }
 }
 
-impl NewProtected<bool> for Rval {
+impl NewProtected<bool> for RObject {
     fn new(x: bool, pc: &mut Pc) -> Self {
-        Rval(pc.protect(unsafe { Rf_ScalarLogical(x.into()) }))
+        RObject(pc.protect(unsafe { Rf_ScalarLogical(x.into()) }))
     }
 }
 
 // usize
 
-impl TryFrom<Rval> for usize {
+impl TryFrom<RObject> for usize {
     type Error = TryFromIntError;
-    fn try_from(x: Rval) -> Result<usize, Self::Error> {
+    fn try_from(x: RObject) -> Result<usize, Self::Error> {
         usize::try_from(i32::from(x))
     }
 }
 
-impl TryNewProtected<usize> for Rval {
+impl TryNewProtected<usize> for RObject {
     type Error = TryFromIntError;
     fn try_new(x: usize, pc: &mut Pc) -> Result<Self, Self::Error> {
         match i32::try_from(x) {
-            Ok(z) => Ok(Rval::new(z, pc)),
+            Ok(z) => Ok(RObject::new(z, pc)),
             Err(e) => Err(e),
         }
     }
@@ -1387,14 +1377,14 @@ impl TryNewProtected<&[usize]> for RVector {
 impl TryNewProtected<&mut [usize]> for RVector {
     type Error = TryFromIntError;
     fn try_new(x: &mut [usize], pc: &mut Pc) -> Result<Self, Self::Error> {
-        let (rval, slice) = Self::new_integer(x.len(), pc);
+        let (robject, slice) = Self::new_integer(x.len(), pc);
         for (r, s) in slice.iter_mut().zip(x) {
             match i32::try_from(*s) {
                 Ok(z) => *r = z,
                 Err(e) => return Err(e),
             }
         }
-        Ok(rval)
+        Ok(robject)
     }
 }
 
@@ -1448,9 +1438,9 @@ impl<const N: usize> NewProtected<[u8; N]> for RVector {
 
 // Pointers
 
-impl TryFrom<Rval> for *const f64 {
+impl TryFrom<RObject> for *const f64 {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<*const f64, &'static str> {
+    fn try_from(x: RObject) -> Result<*const f64, &'static str> {
         let ft = unsafe { TYPEOF(x.0) } as u32;
         if ft != REALSXP {
             Err("Object is not of storage mode `double`")
@@ -1460,9 +1450,9 @@ impl TryFrom<Rval> for *const f64 {
     }
 }
 
-impl TryFrom<Rval> for *mut f64 {
+impl TryFrom<RObject> for *mut f64 {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<*mut f64, &'static str> {
+    fn try_from(x: RObject) -> Result<*mut f64, &'static str> {
         let ft = unsafe { TYPEOF(x.0) } as u32;
         if ft != REALSXP {
             Err("Object is not of storage mode `double`")
@@ -1472,9 +1462,9 @@ impl TryFrom<Rval> for *mut f64 {
     }
 }
 
-impl TryFrom<Rval> for *const i32 {
+impl TryFrom<RObject> for *const i32 {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<*const i32, &'static str> {
+    fn try_from(x: RObject) -> Result<*const i32, &'static str> {
         let ft = unsafe { TYPEOF(x.0) } as u32;
         if ft != INTSXP || ft != LGLSXP {
             Err("Object is not of storage mode `integer`")
@@ -1486,9 +1476,9 @@ impl TryFrom<Rval> for *const i32 {
     }
 }
 
-impl TryFrom<Rval> for *mut i32 {
+impl TryFrom<RObject> for *mut i32 {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<*mut i32, &'static str> {
+    fn try_from(x: RObject) -> Result<*mut i32, &'static str> {
         let ft = unsafe { TYPEOF(x.0) } as u32;
         if ft != INTSXP || ft != LGLSXP {
             Err("Object is not of storage mode `integer`")
@@ -1500,9 +1490,9 @@ impl TryFrom<Rval> for *mut i32 {
     }
 }
 
-impl TryFrom<Rval> for *const u8 {
+impl TryFrom<RObject> for *const u8 {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<*const u8, &'static str> {
+    fn try_from(x: RObject) -> Result<*const u8, &'static str> {
         let ft = unsafe { TYPEOF(x.0) } as u32;
         if ft != RAWSXP {
             Err("Object is not of storage mode `raw`")
@@ -1512,9 +1502,9 @@ impl TryFrom<Rval> for *const u8 {
     }
 }
 
-impl TryFrom<Rval> for *mut u8 {
+impl TryFrom<RObject> for *mut u8 {
     type Error = &'static str;
-    fn try_from(x: Rval) -> Result<*mut u8, &'static str> {
+    fn try_from(x: RObject) -> Result<*mut u8, &'static str> {
         let ft = unsafe { TYPEOF(x.0) } as u32;
         if ft != RAWSXP {
             Err("Object is not of storage mode `raw`")
@@ -1526,20 +1516,20 @@ impl TryFrom<Rval> for *mut u8 {
 
 // Characters
 
-impl NewProtected<&str> for Rval {
+impl NewProtected<&str> for RObject {
     fn new(x: &str, pc: &mut Pc) -> Self {
         let sexp = Self::new_character(x, pc).0;
         Self(pc.protect(unsafe { Rf_ScalarString(sexp) }))
     }
 }
 
-impl NewProtected<&String> for Rval {
+impl NewProtected<&String> for RObject {
     fn new(x: &String, pc: &mut Pc) -> Self {
         Self::new(&x[..], pc)
     }
 }
 
-impl NewProtected<String> for Rval {
+impl NewProtected<String> for RObject {
     fn new(x: String, pc: &mut Pc) -> Self {
         Self::new(&x[..], pc)
     }
@@ -1553,7 +1543,7 @@ impl<const LENGTH: usize> NewProtected<[&str; LENGTH]> for RVectorCharacter {
                 SET_STRING_ELT(
                     rvector.0 .0 .0,
                     i.try_into().unwrap(),
-                    Rval::new_character(x, pc).0,
+                    RObject::new_character(x, pc).0,
                 )
             };
         }
@@ -1570,7 +1560,7 @@ impl NewProtected<&[&str]> for RVectorCharacter {
                 SET_STRING_ELT(
                     rvector.0 .0 .0,
                     i.try_into().unwrap(),
-                    Rval::new_character(x, pc).0,
+                    RObject::new_character(x, pc).0,
                 )
             };
         }
