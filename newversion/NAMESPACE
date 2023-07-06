@@ -2,5 +2,8 @@
 
 export(convolve2)
 export(myrnorm)
+export(test1)
+export(test2)
+export(test3)
 export(zero)
 useDynLib(t1, .registration = TRUE)

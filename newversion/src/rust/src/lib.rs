@@ -23,43 +23,54 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
             ab[i + j] += ai * bj;
         }
     }
-    r.as_robject()
+    *r
 }
 
 #[roxido]
-fn zero(f: RObject, guesses: RObject, stol: RObject, rho: RObject) -> RObject {
+fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
+    let Ok(f) = f.as_function() else {
+        stop!("'f' must be a function.")
+    };
     let Ok(guesses) = guesses.as_vector() else {
         stop!("'guesses' must be a vector.")
     };
-    let Ok(slice) = guesses.slice_double() else {
+    if guesses.len() != 2 {
+        stop!("'guesses' must be a vector of length two.")
+    }
+    let Ok(guesses) = guesses.slice_double() else {
         stop!("'guesses' must have storage mode 'double'.")
     };
-    let (mut x0, mut x1, tol) = (slice[0], slice[1], stol.as_f64());
-    if tol <= 0.0 {
-        stop!("non-positive tol value");
+    let (mut x0, mut x1, tol) = (guesses[0], guesses[1], tol.as_f64());
+    if !tol.is_finite() || tol <= 0.0 {
+        stop!("'tol' must be a strictly positive value.");
     }
-    let symbol = RObject::new_symbol("x", pc);
-    let mut feval = |x: f64| {
-        let _ = symbol.assign(RObject::new(x, pc), rho);
-        f.eval(rho, pc).unwrap().as_f64()
+    let mut g = |x: f64| {
+        let Ok(fx) = f.call1(RObject::new(x, pc), pc) else {
+            stop!("Error in function evaluation.")
+        };
+        let fx = fx.as_f64();
+        if !fx.is_finite() {
+            stop!("Non-finite function evaluation.")
+        }
+        fx
     };
-    let mut f0 = feval(x0);
+    let mut f0 = g(x0);
     if f0 == 0.0 {
         return RObject::new(x0, pc);
     }
-    let f1 = feval(x1);
+    let f1 = g(x1);
     if f1 == 0.0 {
         return RObject::new(x1, pc);
     }
     if f0 * f1 > 0.0 {
-        stop!("x[0] and x[1] have the same sign");
+        stop!("Oops, guesses[0] and guesses[1] have the same sign.");
     }
     loop {
         let xc = 0.5 * (x0 + x1);
         if (x0 - x1).abs() < tol {
             return RObject::new(xc, pc);
         }
-        let fc = feval(xc);
+        let fc = g(xc);
         if fc == 0.0 {
             return RObject::new(xc, pc);
         }
@@ -77,8 +88,8 @@ fn myrnorm(n: RObject, mean: RObject, sd: RObject) -> RObject {
     unsafe {
         use rbindings::*;
         use std::convert::TryFrom;
-        let (mean, sd) = (Rf_asReal(mean.as_sexp()), Rf_asReal(sd.as_sexp()));
-        let len_i32 = Rf_asInteger(n.as_sexp());
+        let (mean, sd) = (Rf_asReal(*mean), Rf_asReal(*sd));
+        let len_i32 = Rf_asInteger(*n);
         let len_isize = isize::try_from(len_i32).unwrap();
         let len_usize = usize::try_from(len_i32).unwrap();
         let vec = Rf_protect(Rf_allocVector(REALSXP, len_isize));
@@ -89,6 +100,6 @@ fn myrnorm(n: RObject, mean: RObject, sd: RObject) -> RObject {
         }
         PutRNGstate();
         Rf_unprotect(1);
-        RObject::from_sexp(vec)
+        RObject(vec)
     }
 }
