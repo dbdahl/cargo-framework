@@ -45,7 +45,7 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
         stop!("'tol' must be a strictly positive value.");
     }
     let mut g = |x: f64| {
-        let Ok(fx) = f.call1(RObject::new(x, pc), pc) else {
+        let Ok(fx) = f.call1(RObject::allocate(x, pc), pc) else {
             stop!("Error in function evaluation.")
         };
         let fx = fx.as_f64();
@@ -56,11 +56,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     };
     let mut f0 = g(x0);
     if f0 == 0.0 {
-        return RObject::new(x0, pc);
+        return RObject::allocate(x0, pc);
     }
     let f1 = g(x1);
     if f1 == 0.0 {
-        return RObject::new(x1, pc);
+        return RObject::allocate(x1, pc);
     }
     if f0 * f1 > 0.0 {
         stop!("Oops, guesses[0] and guesses[1] have the same sign.");
@@ -68,11 +68,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     loop {
         let xc = 0.5 * (x0 + x1);
         if (x0 - x1).abs() < tol {
-            return RObject::new(xc, pc);
+            return RObject::allocate(xc, pc);
         }
         let fc = g(xc);
         if fc == 0.0 {
-            return RObject::new(xc, pc);
+            return RObject::allocate(xc, pc);
         }
         if f0 * fc > 0.0 {
             x0 = xc;

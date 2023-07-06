@@ -22,7 +22,8 @@ pub mod r;
 pub mod rbindings;
 
 pub use r::{
-    NewProtected, Pc, RList, RMatrix, RObject, RVector, RVectorCharacter, TryNewProtected, R,
+    AllocateProtected, Pc, RList, RMatrix, RObject, RVector, RVectorCharacter,
+    TryAllocateProtected, R,
 };
 
 /// A procedural macro to facilitate calling a Rust function from R.

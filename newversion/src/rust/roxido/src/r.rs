@@ -2,10 +2,12 @@
 
 #![allow(dead_code)]
 
-// See:
+// Helpful resources:
 //   https://cran.r-project.org/doc/manuals/r-release/R-ints.html
 //   https://svn.r-project.org/R/trunk/src/include/Rinternals.h
 //   https://github.com/hadley/r-internals
+//   https://www.tidyverse.org/blog/2019/05/resource-cleanup-in-c-and-the-r-api
+//   https://github.com/wch/r-source
 
 use crate::rbindings::*;
 use std::convert::{TryFrom, TryInto};
@@ -16,8 +18,6 @@ use std::os::raw::{c_char, c_void};
 use std::str::Utf8Error;
 
 pub struct R;
-
-pub struct RError(pub String);
 
 impl R {
     /// Generate random bytes using R's RNG.
@@ -146,6 +146,8 @@ macro_rules! reprintln {
     }
 }
 
+pub struct RError(pub String);
+
 /// Throw an R error.
 #[macro_export]
 macro_rules! stop {
@@ -168,6 +170,7 @@ macro_rules! stop {
 #[repr(C)]
 pub struct RObject(pub SEXP);
 
+/// A Rust representation internal R types.
 #[repr(u32)]
 #[derive(PartialEq, Debug)]
 pub enum RObjectType {
@@ -201,6 +204,7 @@ pub enum RObjectType {
 }
 
 impl RObject {
+    /// Map integers for R types to Rust enum.
     pub fn tipe(self) -> RObjectType {
         match unsafe { TYPEOF(self.0) } {
             0 => RObjectType::NILSXP,
@@ -234,21 +238,17 @@ impl RObject {
         }
     }
 
-    pub fn from_sexp(sexp: SEXP) -> Self {
-        RObject(sexp)
-    }
-
     /// Define a new error.
     ///
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> Self {
         let list = RList::new_list(2, pc);
-        let _ = list.set(0, Self::new(message, pc));
+        let _ = list.set(0, Self::allocate(message, pc));
         let _ = list.set(1, Self::nil());
-        let _ = list.names_gets(RVectorCharacter::new(["message", "calls"], pc));
-        let _ = list.class_gets(RVectorCharacter::new(["error", "condition"], pc));
-        list.as_robject()
+        let _ = list.names_gets(RVectorCharacter::allocate(["message", "calls"], pc));
+        let _ = list.class_gets(RVectorCharacter::allocate(["error", "condition"], pc));
+        **list
     }
 
     /// Define a new element for a character vector.
@@ -437,20 +437,22 @@ impl RObject {
         unsafe { Rf_isString(self.0) != 0 }
     }
     /// Is the object a list?
+    ///
+    /// Check if the type is VECSXP.
     pub fn is_list(self) -> bool {
         self.tipe() == RObjectType::VECSXP
     }
 
     /// Is the object a list?
     ///
-    /// LISTSXP, EXPRSXP
+    /// Check if the type is LISTSXP or EXPRSXP.
     pub fn is_vector_list(self) -> bool {
         unsafe { Rf_isVectorList(self.0) != 0 }
     }
 
     /// Is the object an atomic vector?
     ///
-    /// LGLSXP, INTSXP, REALSXP, CPLXSXP, STRSXP, RAWSXP
+    /// Check if type is LGLSXP, INTSXP, REALSXP, CPLXSXP, STRSXP, or RAWSXP.
     pub fn is_vector_atomic(self) -> bool {
         unsafe { Rf_isVectorAtomic(self.0) != 0 }
     }
@@ -469,14 +471,19 @@ impl RObject {
         unsafe { Rf_isVector(self.0) != 0 }
     }
 
-    /// Is the object of length one?
-    pub fn is_scalar(self) -> bool {
-        self.len() == 1
+    /// Get the length of the object.
+    pub fn len(self) -> usize {
+        unsafe { Rf_length(self.0).try_into().unwrap() }
     }
 
-    /// Is the object a matrix?
-    pub fn is_matrix(self) -> bool {
-        unsafe { Rf_isMatrix(self.0) != 0 }
+    /// Is the length of the object zero?
+    pub fn is_empty(self) -> bool {
+        unsafe { Rf_length(self.0) == 0 }
+    }
+
+    /// Is the object of length one?
+    pub fn is_scalar(self) -> bool {
+        unsafe { Rf_length(self.0) == 1 }
     }
 
     /// Treat as an R matrix.
@@ -486,6 +493,11 @@ impl RObject {
         } else {
             Ok(RMatrix(self))
         }
+    }
+
+    /// Is the object a matrix?
+    pub fn is_matrix(self) -> bool {
+        unsafe { Rf_isMatrix(self.0) != 0 }
     }
 
     /// Is the object an array?
@@ -503,11 +515,6 @@ impl RObject {
         unsafe { Rf_isNull(self.0) != 0 }
     }
 
-    /// Is the object a function?
-    pub fn is_function(self) -> bool {
-        unsafe { Rf_isFunction(self.0) != 0 }
-    }
-
     /// Treat as an R function.
     pub fn as_function(self) -> Result<RFunction, &'static str> {
         if unsafe { Rf_isFunction(self.0) == 0 } {
@@ -515,6 +522,11 @@ impl RObject {
         } else {
             Ok(RFunction(self))
         }
+    }
+
+    /// Is the object a function?
+    pub fn is_function(self) -> bool {
+        unsafe { Rf_isFunction(self.0) != 0 }
     }
 
     /// Is the object an environment?
@@ -568,26 +580,12 @@ impl RObject {
         Ok(())
     }
 
-    /// Set the class attribute of an object.
+    /// Set the class attribute of an R object.
     ///
     /// The function returns an error if `value` is not a character vector.
     ///
-    pub fn class_gets(self, value: RVectorCharacter) -> Result<(), &'static str> {
-        if !value.is_character() {
-            return Err("Lengths do not match");
-        }
+    pub fn class_gets(self, value: RVectorCharacter) {
         unsafe { Rf_classgets(self.0, value.0 .0 .0) };
-        Ok(())
-    }
-
-    /// Get the length of the object.
-    pub fn len(self) -> usize {
-        unsafe { Rf_length(self.0).try_into().unwrap() }
-    }
-
-    /// Is the length of the object zero?
-    pub fn is_empty(self) -> bool {
-        unsafe { Rf_length(self.0) == 0 }
     }
 
     /// Coerce the object to an `f64` value (potentially leading to an `NA`/`NaN` value).
@@ -611,22 +609,13 @@ impl RObject {
         len.try_into().unwrap_or(0)
     }
 
-    /// Coerce the object to storage mode `character` and get the associated `String` value.
-    ///
-    /// If coercion is not possible (because, for example, no UTF-8 representation exists), `""` is returned.
-    ///
-    pub fn as_string(self) -> Result<String, &'static str> {
+    /// Coerce the object to storage mode `character` and allocate an associated `String` value.
+    pub fn as_string(self) -> Result<String, Utf8Error> {
         let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
-        match c_str.to_str() {
-            Ok(x) => Ok(x.to_string()),
-            Err(_) => Err("No UTF-8 representation"),
-        }
+        c_str.to_str().map(|x| x.to_string())
     }
 
     /// Coerce the object to storage mode `character` and get the associated `&str` value.
-    ///
-    /// If coercion is not possible (because, for example, no UTF-8 representation exists), `""` is returned.
-    ///
     pub fn as_str(self) -> Result<&'static str, Utf8Error> {
         let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
         c_str.to_str()
@@ -635,9 +624,10 @@ impl RObject {
     /// Evaluation a expression, returning the value or an error code.
     pub fn eval(self, environment: RObject, pc: &mut Pc) -> Result<RObject, i32> {
         let mut p_out_error: i32 = 0;
-        let sexp = unsafe { R_tryEval(self.0, environment.0, &mut p_out_error as *mut i32) };
+        let sexp =
+            pc.protect(unsafe { R_tryEval(self.0, environment.0, &mut p_out_error as *mut i32) });
         match p_out_error {
-            0 => Ok(RObject(pc.protect(sexp))),
+            0 => Ok(RObject(sexp)),
             e => Err(e),
         }
     }
@@ -661,14 +651,6 @@ impl Deref for RObject {
 pub struct RVector(RObject);
 
 impl RVector {
-    pub fn from_robject(robject: RObject) -> Result<Self, &'static str> {
-        robject.as_vector()
-    }
-
-    pub fn as_robject(self) -> RObject {
-        self.0
-    }
-
     fn new_vector<T>(
         len: usize,
         code: RObjectType,
@@ -682,36 +664,36 @@ impl RVector {
         }
     }
 
-    /// Define a new vector with storage mode `double`.
+    /// Allocate a new vector with storage mode `double`.
     ///
-    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// The values are uninitialized.  Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
     pub fn new_double(len: usize, pc: &mut Pc) -> (Self, &'static mut [f64]) {
         Self::new_vector(len, RObjectType::REALSXP, |x| unsafe { REAL(x) }, pc)
     }
 
-    /// Define a new vector with storage mode `integer`.
+    /// Allocate a new vector with storage mode `integer`.
     ///
-    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// The values are uninitialized.  Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
     pub fn new_integer(len: usize, pc: &mut Pc) -> (Self, &'static mut [i32]) {
         Self::new_vector(len, RObjectType::INTSXP, |x| unsafe { INTEGER(x) }, pc)
     }
 
-    /// Define a new vector with storage mode `logical`.
+    /// Allocate a new vector with storage mode `logical`.
     ///
-    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// The values are uninitialized.  Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
     pub fn new_logical(len: usize, pc: &mut Pc) -> (Self, &'static mut [i32]) {
         Self::new_vector(len, RObjectType::LGLSXP, |x| unsafe { LOGICAL(x) }, pc)
     }
 
-    /// Define a new vector with storage mode `raw`.
+    /// Allocate a new vector with storage mode `raw`.
     ///
-    /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
+    /// The values are uninitialized.  Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
     pub fn new_raw(len: usize, pc: &mut Pc) -> (Self, &'static mut [u8]) {
@@ -885,11 +867,12 @@ impl RVector {
     /// The function returns an error if `names` is not an vector object of the same length as the object.
     ///
     pub fn names_gets(self, names: RVectorCharacter) -> Result<(), &'static str> {
-        if names.len() != self.len() {
-            return Err("Lengths do not match");
+        if unsafe { Rf_length(names.0 .0 .0) != Rf_length(self.0 .0) } {
+            Err("Lengths do not match")
+        } else {
+            unsafe { Rf_namesgets(self.0 .0, names.0 .0 .0) };
+            Ok(())
         }
-        unsafe { Rf_namesgets(self.0 .0, names.0 .0 .0) };
-        Ok(())
     }
 }
 
@@ -1351,13 +1334,13 @@ impl Deref for RFunction {
 
 // Conversion
 
-pub trait NewProtected<T> {
-    fn new(_: T, _: &mut Pc) -> Self;
+pub trait AllocateProtected<T> {
+    fn allocate(_: T, _: &mut Pc) -> Self;
 }
 
-pub trait TryNewProtected<T>: Sized {
+pub trait TryAllocateProtected<T>: Sized {
     type Error;
-    fn try_new(_: T, _: &mut Pc) -> Result<Self, Self::Error>;
+    fn try_allocate(_: T, _: &mut Pc) -> Result<Self, Self::Error>;
 }
 
 // f64
@@ -1368,8 +1351,8 @@ impl From<RObject> for f64 {
     }
 }
 
-impl NewProtected<f64> for RObject {
-    fn new(x: f64, pc: &mut Pc) -> Self {
+impl AllocateProtected<f64> for RObject {
+    fn allocate(x: f64, pc: &mut Pc) -> Self {
         Self(pc.protect(unsafe { Rf_ScalarReal(x) }))
     }
 }
@@ -1382,8 +1365,8 @@ impl From<RObject> for i32 {
     }
 }
 
-impl NewProtected<i32> for RObject {
-    fn new(x: i32, pc: &mut Pc) -> Self {
+impl AllocateProtected<i32> for RObject {
+    fn allocate(x: i32, pc: &mut Pc) -> Self {
         Self(pc.protect(unsafe { Rf_ScalarInteger(x) }))
     }
 }
@@ -1401,8 +1384,8 @@ impl TryFrom<RObject> for bool {
     }
 }
 
-impl NewProtected<bool> for RObject {
-    fn new(x: bool, pc: &mut Pc) -> Self {
+impl AllocateProtected<bool> for RObject {
+    fn allocate(x: bool, pc: &mut Pc) -> Self {
         RObject(pc.protect(unsafe { Rf_ScalarLogical(x.into()) }))
     }
 }
@@ -1416,11 +1399,11 @@ impl TryFrom<RObject> for usize {
     }
 }
 
-impl TryNewProtected<usize> for RObject {
+impl TryAllocateProtected<usize> for RObject {
     type Error = TryFromIntError;
-    fn try_new(x: usize, pc: &mut Pc) -> Result<Self, Self::Error> {
+    fn try_allocate(x: usize, pc: &mut Pc) -> Result<Self, Self::Error> {
         match i32::try_from(x) {
-            Ok(z) => Ok(RObject::new(z, pc)),
+            Ok(z) => Ok(RObject::allocate(z, pc)),
             Err(e) => Err(e),
         }
     }
@@ -1442,16 +1425,16 @@ impl TryFrom<RVector> for &mut [f64] {
     }
 }
 
-impl NewProtected<&[f64]> for RVector {
-    fn new(x: &[f64], pc: &mut Pc) -> Self {
+impl AllocateProtected<&[f64]> for RVector {
+    fn allocate(x: &[f64], pc: &mut Pc) -> Self {
         let (rvector, slice) = Self::new_double(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
     }
 }
 
-impl NewProtected<&mut [f64]> for RVector {
-    fn new(x: &mut [f64], pc: &mut Pc) -> Self {
+impl AllocateProtected<&mut [f64]> for RVector {
+    fn allocate(x: &mut [f64], pc: &mut Pc) -> Self {
         let (rvector, slice) = Self::new_double(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
@@ -1472,25 +1455,25 @@ impl TryFrom<RVector> for &mut [i32] {
     }
 }
 
-impl NewProtected<&[i32]> for RVector {
-    fn new(x: &[i32], pc: &mut Pc) -> Self {
+impl AllocateProtected<&[i32]> for RVector {
+    fn allocate(x: &[i32], pc: &mut Pc) -> Self {
         let (rvector, slice) = Self::new_integer(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
     }
 }
 
-impl NewProtected<&mut [i32]> for RVector {
-    fn new(x: &mut [i32], pc: &mut Pc) -> Self {
+impl AllocateProtected<&mut [i32]> for RVector {
+    fn allocate(x: &mut [i32], pc: &mut Pc) -> Self {
         let (rvector, slice) = Self::new_integer(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
     }
 }
 
-impl TryNewProtected<&[usize]> for RVector {
+impl TryAllocateProtected<&[usize]> for RVector {
     type Error = TryFromIntError;
-    fn try_new(x: &[usize], pc: &mut Pc) -> Result<Self, Self::Error> {
+    fn try_allocate(x: &[usize], pc: &mut Pc) -> Result<Self, Self::Error> {
         let (rvector, slice) = Self::new_integer(x.len(), pc);
         for (r, s) in slice.iter_mut().zip(x) {
             match i32::try_from(*s) {
@@ -1502,9 +1485,9 @@ impl TryNewProtected<&[usize]> for RVector {
     }
 }
 
-impl TryNewProtected<&mut [usize]> for RVector {
+impl TryAllocateProtected<&mut [usize]> for RVector {
     type Error = TryFromIntError;
-    fn try_new(x: &mut [usize], pc: &mut Pc) -> Result<Self, Self::Error> {
+    fn try_allocate(x: &mut [usize], pc: &mut Pc) -> Result<Self, Self::Error> {
         let (robject, slice) = Self::new_integer(x.len(), pc);
         for (r, s) in slice.iter_mut().zip(x) {
             match i32::try_from(*s) {
@@ -1530,37 +1513,37 @@ impl TryFrom<RVector> for &mut [u8] {
     }
 }
 
-impl NewProtected<&[u8]> for RVector {
-    fn new(x: &[u8], pc: &mut Pc) -> Self {
+impl AllocateProtected<&[u8]> for RVector {
+    fn allocate(x: &[u8], pc: &mut Pc) -> Self {
         let (rvector, slice) = RVector::new_raw(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
     }
 }
 
-impl NewProtected<&mut [u8]> for RVector {
-    fn new(x: &mut [u8], pc: &mut Pc) -> Self {
+impl AllocateProtected<&mut [u8]> for RVector {
+    fn allocate(x: &mut [u8], pc: &mut Pc) -> Self {
         let (rvector, slice) = Self::new_raw(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
     }
 }
 
-impl<const N: usize> NewProtected<[f64; N]> for RVector {
-    fn new(x: [f64; N], pc: &mut Pc) -> Self {
-        Self::new(&x[..], pc)
+impl<const N: usize> AllocateProtected<[f64; N]> for RVector {
+    fn allocate(x: [f64; N], pc: &mut Pc) -> Self {
+        Self::allocate(&x[..], pc)
     }
 }
 
-impl<const N: usize> NewProtected<[i32; N]> for RVector {
-    fn new(x: [i32; N], pc: &mut Pc) -> Self {
-        Self::new(&x[..], pc)
+impl<const N: usize> AllocateProtected<[i32; N]> for RVector {
+    fn allocate(x: [i32; N], pc: &mut Pc) -> Self {
+        Self::allocate(&x[..], pc)
     }
 }
 
-impl<const N: usize> NewProtected<[u8; N]> for RVector {
-    fn new(x: [u8; N], pc: &mut Pc) -> Self {
-        Self::new(&x[..], pc)
+impl<const N: usize> AllocateProtected<[u8; N]> for RVector {
+    fn allocate(x: [u8; N], pc: &mut Pc) -> Self {
+        Self::allocate(&x[..], pc)
     }
 }
 
@@ -1640,27 +1623,27 @@ impl TryFrom<RObject> for *mut u8 {
 
 // Characters
 
-impl NewProtected<&str> for RObject {
-    fn new(x: &str, pc: &mut Pc) -> Self {
+impl AllocateProtected<&str> for RObject {
+    fn allocate(x: &str, pc: &mut Pc) -> Self {
         let sexp = Self::new_character(x, pc).0;
         Self(pc.protect(unsafe { Rf_ScalarString(sexp) }))
     }
 }
 
-impl NewProtected<&String> for RObject {
-    fn new(x: &String, pc: &mut Pc) -> Self {
-        Self::new(&x[..], pc)
+impl AllocateProtected<&String> for RObject {
+    fn allocate(x: &String, pc: &mut Pc) -> Self {
+        Self::allocate(&x[..], pc)
     }
 }
 
-impl NewProtected<String> for RObject {
-    fn new(x: String, pc: &mut Pc) -> Self {
-        Self::new(&x[..], pc)
+impl AllocateProtected<String> for RObject {
+    fn allocate(x: String, pc: &mut Pc) -> Self {
+        Self::allocate(&x[..], pc)
     }
 }
 
-impl<const LENGTH: usize> NewProtected<[&str; LENGTH]> for RVectorCharacter {
-    fn new(x: [&str; LENGTH], pc: &mut Pc) -> Self {
+impl<const LENGTH: usize> AllocateProtected<[&str; LENGTH]> for RVectorCharacter {
+    fn allocate(x: [&str; LENGTH], pc: &mut Pc) -> Self {
         let rvector = Self::of_size(LENGTH, pc);
         for (i, x) in x.iter().enumerate() {
             unsafe {
@@ -1675,8 +1658,8 @@ impl<const LENGTH: usize> NewProtected<[&str; LENGTH]> for RVectorCharacter {
     }
 }
 
-impl NewProtected<&[&str]> for RVectorCharacter {
-    fn new(x: &[&str], pc: &mut Pc) -> Self {
+impl AllocateProtected<&[&str]> for RVectorCharacter {
+    fn allocate(x: &[&str], pc: &mut Pc) -> Self {
         let len = x.len();
         let rvector = Self::of_size(len, pc);
         for (i, x) in x.iter().enumerate() {
