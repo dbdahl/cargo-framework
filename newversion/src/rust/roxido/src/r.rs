@@ -622,10 +622,11 @@ impl RObject {
     }
 
     /// Evaluation a expression, returning the value or an error code.
-    pub fn eval(self, environment: RObject, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn eval(self, environment: impl Into<RObject>, pc: &mut Pc) -> Result<RObject, i32> {
         let mut p_out_error: i32 = 0;
-        let sexp =
-            pc.protect(unsafe { R_tryEval(self.0, environment.0, &mut p_out_error as *mut i32) });
+        let sexp = pc.protect(unsafe {
+            R_tryEval(self.0, environment.into().0, &mut p_out_error as *mut i32)
+        });
         match p_out_error {
             0 => Ok(RObject(sexp)),
             e => Err(e),
@@ -994,7 +995,7 @@ impl RList {
     ///
     /// This function returns an error if the object is not a list or if `i` is greater than or equal to the length of the list.
     ///
-    pub fn set<S: Into<RObject>>(self, i: usize, value: S) -> Result<(), String> {
+    pub fn set(self, i: usize, value: impl Into<RObject>) -> Result<(), String> {
         let len = self.len();
         if i >= len {
             return Err(format!(
@@ -1172,8 +1173,8 @@ impl RFunction {
     /// This function will cause a long jump (leading to a memory leak) if the R function throws any errors.
     /// Using [`Self::call1`] is the safe alternative, with slightly more overhead.
     ///
-    pub unsafe fn call1_unsafe(self, x1: RObject, pc: &mut Pc) -> Self {
-        let sexp = pc.protect(Rf_lang2(self.0 .0, x1.0));
+    pub unsafe fn call1_unsafe(self, x1: impl Into<RObject>, pc: &mut Pc) -> Self {
+        let sexp = pc.protect(Rf_lang2(self.0 .0, x1.into().0));
         let sexp = pc.protect(Rf_eval(sexp, R_GetCurrentEnv()));
         Self(RObject(sexp))
     }
@@ -1185,8 +1186,13 @@ impl RFunction {
     /// This function will cause a long jump (leading to a memory leak) if the R function throws any errors.
     /// Using [`Self::call2`] is the safe alternative, with slightly more overhead.
     ///
-    pub unsafe fn call2_unsafe(self, x1: RObject, x2: RObject, pc: &mut Pc) -> Self {
-        let sexp = pc.protect(Rf_lang3(self.0 .0, x1.0, x2.0));
+    pub unsafe fn call2_unsafe(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Self {
+        let sexp = pc.protect(Rf_lang3(self.0 .0, x1.into().0, x2.into().0));
         let sexp = pc.protect(Rf_eval(sexp, R_GetCurrentEnv()));
         Self(RObject(sexp))
     }
@@ -1198,8 +1204,14 @@ impl RFunction {
     /// This function will cause a long jump (leading to a memory leak) if the R function throws any errors.
     /// Using [`Self::call3`] is the safe alternative, with slightly more overhead.
     ///
-    pub unsafe fn call3_unsafe(self, x1: RObject, x2: RObject, x3: RObject, pc: &mut Pc) -> Self {
-        let sexp = pc.protect(Rf_lang4(self.0 .0, x1.0, x2.0, x3.0));
+    pub unsafe fn call3_unsafe(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Self {
+        let sexp = pc.protect(Rf_lang4(self.0 .0, x1.into().0, x2.into().0, x3.into().0));
         let sexp = pc.protect(Rf_eval(sexp, R_GetCurrentEnv()));
         Self(RObject(sexp))
     }
@@ -1213,13 +1225,19 @@ impl RFunction {
     ///
     pub unsafe fn call4_unsafe(
         self,
-        x1: RObject,
-        x2: RObject,
-        x3: RObject,
-        x4: RObject,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        x4: impl Into<RObject>,
         pc: &mut Pc,
     ) -> Self {
-        let sexp = pc.protect(Rf_lang5(self.0 .0, x1.0, x2.0, x3.0, x4.0));
+        let sexp = pc.protect(Rf_lang5(
+            self.0 .0,
+            x1.into().0,
+            x2.into().0,
+            x3.into().0,
+            x4.into().0,
+        ));
         let sexp = pc.protect(Rf_eval(sexp, R_GetCurrentEnv()));
         Self(RObject(sexp))
     }
@@ -1233,14 +1251,21 @@ impl RFunction {
     ///
     pub unsafe fn call5_unsafe(
         self,
-        x1: RObject,
-        x2: RObject,
-        x3: RObject,
-        x4: RObject,
-        x5: RObject,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        x4: impl Into<RObject>,
+        x5: impl Into<RObject>,
         pc: &mut Pc,
     ) -> Self {
-        let sexp = pc.protect(Rf_lang6(self.0 .0, x1.0, x2.0, x3.0, x4.0, x5.0));
+        let sexp = pc.protect(Rf_lang6(
+            self.0 .0,
+            x1.into().0,
+            x2.into().0,
+            x3.into().0,
+            x4.into().0,
+            x5.into().0,
+        ));
         let sexp = pc.protect(Rf_eval(sexp, R_GetCurrentEnv()));
         Self(RObject(sexp))
     }
@@ -1254,25 +1279,36 @@ impl RFunction {
     }
 
     /// Call a function with one argument, returning the value or an error code.
-    pub fn call1(self, x1: RObject, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn call1(self, x1: impl Into<RObject>, pc: &mut Pc) -> Result<RObject, i32> {
         unsafe {
-            let sexp = pc.protect(Rf_lang2(self.0 .0, x1.0));
+            let sexp = pc.protect(Rf_lang2(self.0 .0, x1.into().0));
             Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
         }
     }
 
     /// Call a function with two arguments, returning the value or an error code.
-    pub fn call2(self, x1: RObject, x2: RObject, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn call2(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Result<RObject, i32> {
         unsafe {
-            let sexp = pc.protect(Rf_lang3(self.0 .0, x1.0, x2.0));
+            let sexp = pc.protect(Rf_lang3(self.0 .0, x1.into().0, x2.into().0));
             Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
         }
     }
 
     /// Call a function with three arguments, returning the value or an error code.
-    pub fn call3(self, x1: RObject, x2: RObject, x3: RObject, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn call3(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Result<RObject, i32> {
         unsafe {
-            let sexp = pc.protect(Rf_lang4(self.0 .0, x1.0, x2.0, x3.0));
+            let sexp = pc.protect(Rf_lang4(self.0 .0, x1.into().0, x2.into().0, x3.into().0));
             Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
         }
     }
@@ -1280,14 +1316,20 @@ impl RFunction {
     /// Call a function with four arguments, returning the value or an error code.
     pub fn call4(
         self,
-        x1: RObject,
-        x2: RObject,
-        x3: RObject,
-        x4: RObject,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        x4: impl Into<RObject>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         unsafe {
-            let sexp = pc.protect(Rf_lang5(self.0 .0, x1.0, x2.0, x3.0, x4.0));
+            let sexp = pc.protect(Rf_lang5(
+                self.0 .0,
+                x1.into().0,
+                x2.into().0,
+                x3.into().0,
+                x4.into().0,
+            ));
             Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
         }
     }
@@ -1295,15 +1337,22 @@ impl RFunction {
     /// Call a function with five arguments, returning the value or an error code.
     pub fn call5(
         self,
-        x1: RObject,
-        x2: RObject,
-        x3: RObject,
-        x4: RObject,
-        x5: RObject,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        x4: impl Into<RObject>,
+        x5: impl Into<RObject>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         unsafe {
-            let sexp = pc.protect(Rf_lang6(self.0 .0, x1.0, x2.0, x3.0, x4.0, x5.0));
+            let sexp = pc.protect(Rf_lang6(
+                self.0 .0,
+                x1.into().0,
+                x2.into().0,
+                x3.into().0,
+                x4.into().0,
+                x5.into().0,
+            ));
             Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
         }
     }

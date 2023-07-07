@@ -47,7 +47,7 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     let (x_rval, x_slice) = RVector::new_double(1, pc);
     let mut g = |x: f64| {
         x_slice[0] = x;
-        let Ok(fx) = f.call1(*x_rval, pc) else {
+        let Ok(fx) = f.call1(x_rval, pc) else {
             stop!("Error in function evaluation.")
         };
         let fx = fx.as_f64();
