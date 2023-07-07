@@ -491,7 +491,7 @@ impl RObject {
         if unsafe { Rf_isMatrix(self.0) == 0 } {
             Err("Not a matrix")
         } else {
-            Ok(RMatrix(self))
+            Ok(RMatrix(RVector(self)))
         }
     }
 
@@ -1025,7 +1025,7 @@ impl Deref for RList {
 ///
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct RMatrix(RObject);
+pub struct RMatrix(RVector);
 
 impl RMatrix {
     fn new_matrix<T>(
@@ -1042,7 +1042,7 @@ impl RMatrix {
                 ncol.try_into().unwrap(),
             ));
             let slice = std::slice::from_raw_parts_mut(get_ptr(sexp), nrow * ncol);
-            (RMatrix(RObject(sexp)), slice)
+            (Self(RVector(RObject(sexp))), slice)
         }
     }
 
@@ -1093,7 +1093,7 @@ impl RMatrix {
                 nrow.try_into().unwrap(),
                 ncol.try_into().unwrap(),
             ));
-            Self(RObject(sexp))
+            Self(RVector(RObject(sexp)))
         }
     }
 
@@ -1102,7 +1102,7 @@ impl RMatrix {
     /// The function returns an error if the object is not a matrix.
     ///
     pub fn nrow(self) -> usize {
-        unsafe { Rf_nrows(self.0 .0).try_into().unwrap() }
+        unsafe { Rf_nrows(self.0 .0 .0).try_into().unwrap() }
     }
 
     /// Get the number of columns in a matrix.
@@ -1110,7 +1110,7 @@ impl RMatrix {
     /// The function returns an error if the object is not a matrix.
     ///
     pub fn ncol(self) -> usize {
-        unsafe { Rf_ncols(self.0 .0).try_into().unwrap() }
+        unsafe { Rf_ncols(self.0 .0 .0).try_into().unwrap() }
     }
 
     /// Is the object a square matrix?
@@ -1126,11 +1126,11 @@ impl RMatrix {
         unsafe {
             let sexp = pc.protect(Rf_allocMatrix(
                 self.tipe() as u32,
-                Rf_ncols(self.0 .0),
-                Rf_nrows(self.0 .0),
+                Rf_ncols(self.0 .0 .0),
+                Rf_nrows(self.0 .0 .0),
             ));
-            Rf_copyMatrix(sexp, self.0 .0, 1);
-            Self(RObject(sexp))
+            Rf_copyMatrix(sexp, self.0 .0 .0, 1);
+            Self(RVector(RObject(sexp)))
         }
     }
 }
@@ -1392,7 +1392,7 @@ impl From<RVectorCharacter> for RObject {
 
 impl From<RMatrix> for RObject {
     fn from(x: RMatrix) -> Self {
-        x.0
+        x.0 .0
     }
 }
 
