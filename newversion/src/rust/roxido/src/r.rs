@@ -244,11 +244,11 @@ impl RObject {
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> Self {
         let list = RList::new_list(2, pc);
-        let _ = list.set(0, **RVectorCharacter::allocate(message, pc));
+        let _ = list.set(0, RVectorCharacter::allocate(message, pc));
         let _ = list.set(1, Self::nil());
         let _ = list.names_gets(RVectorCharacter::allocate(["message", "calls"], pc));
         let _ = list.class_gets(RVectorCharacter::allocate(["error", "condition"], pc));
-        **list
+        list.into()
     }
 
     /// Define a new element for a character vector.
@@ -994,7 +994,7 @@ impl RList {
     ///
     /// This function returns an error if the object is not a list or if `i` is greater than or equal to the length of the list.
     ///
-    pub fn set(self, i: usize, value: RObject) -> Result<(), String> {
+    pub fn set<S: Into<RObject>>(self, i: usize, value: S) -> Result<(), String> {
         let len = self.len();
         if i >= len {
             return Err(format!(
@@ -1003,7 +1003,7 @@ impl RList {
             ));
         }
         unsafe {
-            SET_VECTOR_ELT(self.0 .0 .0, i.try_into().unwrap(), value.0);
+            SET_VECTOR_ELT(self.0 .0 .0, i.try_into().unwrap(), value.into().0);
         }
         Ok(())
     }
@@ -1027,14 +1027,6 @@ impl Deref for RList {
 pub struct RMatrix(RObject);
 
 impl RMatrix {
-    pub fn from_robject(robject: RObject) -> Result<Self, &'static str> {
-        robject.as_matrix()
-    }
-
-    pub fn as_robject(self) -> RObject {
-        self.0
-    }
-
     fn new_matrix<T>(
         nrow: usize,
         ncol: usize,
@@ -1160,14 +1152,6 @@ impl Deref for RMatrix {
 pub struct RFunction(RObject);
 
 impl RFunction {
-    pub fn from_robject(robject: RObject) -> Result<Self, &'static str> {
-        robject.as_function()
-    }
-
-    pub fn as_robject(self) -> RObject {
-        self.0
-    }
-
     /// Call a function with no arguments.
     ///
     /// # Safety
@@ -1341,6 +1325,38 @@ pub trait AllocateProtected<T> {
 pub trait TryAllocateProtected<T>: Sized {
     type Error;
     fn try_allocate(_: T, _: &mut Pc) -> Result<Self, Self::Error>;
+}
+
+// RObject
+
+impl From<RVector> for RObject {
+    fn from(x: RVector) -> Self {
+        x.0
+    }
+}
+
+impl From<RVectorCharacter> for RObject {
+    fn from(x: RVectorCharacter) -> Self {
+        x.0 .0
+    }
+}
+
+impl From<RMatrix> for RObject {
+    fn from(x: RMatrix) -> Self {
+        x.0
+    }
+}
+
+impl From<RList> for RObject {
+    fn from(x: RList) -> Self {
+        x.0 .0
+    }
+}
+
+impl From<RFunction> for RObject {
+    fn from(x: RFunction) -> Self {
+        x.0
+    }
 }
 
 // f64
