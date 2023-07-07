@@ -244,7 +244,7 @@ impl RObject {
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> Self {
         let list = RList::new_list(2, pc);
-        let _ = list.set(0, Self::allocate(message, pc));
+        let _ = list.set(0, **RVectorCharacter::allocate(message, pc));
         let _ = list.set(1, Self::nil());
         let _ = list.names_gets(RVectorCharacter::allocate(["message", "calls"], pc));
         let _ = list.class_gets(RVectorCharacter::allocate(["error", "condition"], pc));
@@ -895,7 +895,7 @@ pub struct RVectorCharacter(RVector);
 
 impl RVectorCharacter {
     /// Define a new vector with storage mode `character`.
-    pub fn of_size(len: usize, pc: &mut Pc) -> Self {
+    pub fn new(len: usize, pc: &mut Pc) -> Self {
         Self(RVector(RObject(unsafe {
             pc.protect(Rf_allocVector(
                 RObjectType::STRSXP as u32,
@@ -1351,9 +1351,9 @@ impl From<RObject> for f64 {
     }
 }
 
-impl AllocateProtected<f64> for RObject {
+impl AllocateProtected<f64> for RVector {
     fn allocate(x: f64, pc: &mut Pc) -> Self {
-        Self(pc.protect(unsafe { Rf_ScalarReal(x) }))
+        Self(RObject(pc.protect(unsafe { Rf_ScalarReal(x) })))
     }
 }
 
@@ -1365,9 +1365,9 @@ impl From<RObject> for i32 {
     }
 }
 
-impl AllocateProtected<i32> for RObject {
+impl AllocateProtected<i32> for RVector {
     fn allocate(x: i32, pc: &mut Pc) -> Self {
-        Self(pc.protect(unsafe { Rf_ScalarInteger(x) }))
+        Self(RObject(pc.protect(unsafe { Rf_ScalarInteger(x) })))
     }
 }
 
@@ -1384,9 +1384,9 @@ impl TryFrom<RObject> for bool {
     }
 }
 
-impl AllocateProtected<bool> for RObject {
+impl AllocateProtected<bool> for RVector {
     fn allocate(x: bool, pc: &mut Pc) -> Self {
-        RObject(pc.protect(unsafe { Rf_ScalarLogical(x.into()) }))
+        Self(RObject(pc.protect(unsafe { Rf_ScalarLogical(x.into()) })))
     }
 }
 
@@ -1399,11 +1399,11 @@ impl TryFrom<RObject> for usize {
     }
 }
 
-impl TryAllocateProtected<usize> for RObject {
+impl TryAllocateProtected<usize> for RVector {
     type Error = TryFromIntError;
     fn try_allocate(x: usize, pc: &mut Pc) -> Result<Self, Self::Error> {
         match i32::try_from(x) {
-            Ok(z) => Ok(RObject::allocate(z, pc)),
+            Ok(z) => Ok(Self::allocate(z, pc)),
             Err(e) => Err(e),
         }
     }
@@ -1499,23 +1499,25 @@ impl TryAllocateProtected<&mut [usize]> for RVector {
     }
 }
 
-impl TryFrom<RVector> for &[u8] {
+impl TryFrom<RObject> for &[u8] {
     type Error = &'static str;
-    fn try_from(x: RVector) -> Result<&'static [u8], &'static str> {
-        x.slice_raw()
+    fn try_from(x: RObject) -> Result<&'static [u8], &'static str> {
+        let y = x.as_vector()?;
+        y.slice_raw()
     }
 }
 
-impl TryFrom<RVector> for &mut [u8] {
+impl TryFrom<RObject> for &mut [u8] {
     type Error = &'static str;
-    fn try_from(x: RVector) -> Result<&'static mut [u8], &'static str> {
-        x.slice_mut_raw()
+    fn try_from(x: RObject) -> Result<&'static mut [u8], &'static str> {
+        let y = x.as_vector()?;
+        y.slice_mut_raw()
     }
 }
 
 impl AllocateProtected<&[u8]> for RVector {
     fn allocate(x: &[u8], pc: &mut Pc) -> Self {
-        let (rvector, slice) = RVector::new_raw(x.len(), pc);
+        let (rvector, slice) = Self::new_raw(x.len(), pc);
         slice.copy_from_slice(x);
         rvector
     }
@@ -1623,28 +1625,24 @@ impl TryFrom<RObject> for *mut u8 {
 
 // Characters
 
-impl AllocateProtected<&str> for RObject {
+impl AllocateProtected<&str> for RVectorCharacter {
     fn allocate(x: &str, pc: &mut Pc) -> Self {
-        let sexp = Self::new_character(x, pc).0;
-        Self(pc.protect(unsafe { Rf_ScalarString(sexp) }))
+        let sexp = RObject::new_character(x, pc).0;
+        Self(RVector(RObject(
+            pc.protect(unsafe { Rf_ScalarString(sexp) }),
+        )))
     }
 }
 
-impl AllocateProtected<&String> for RObject {
+impl AllocateProtected<&String> for RVectorCharacter {
     fn allocate(x: &String, pc: &mut Pc) -> Self {
-        Self::allocate(&x[..], pc)
-    }
-}
-
-impl AllocateProtected<String> for RObject {
-    fn allocate(x: String, pc: &mut Pc) -> Self {
         Self::allocate(&x[..], pc)
     }
 }
 
 impl<const LENGTH: usize> AllocateProtected<[&str; LENGTH]> for RVectorCharacter {
     fn allocate(x: [&str; LENGTH], pc: &mut Pc) -> Self {
-        let rvector = Self::of_size(LENGTH, pc);
+        let rvector = Self::new(LENGTH, pc);
         for (i, x) in x.iter().enumerate() {
             unsafe {
                 SET_STRING_ELT(
@@ -1661,7 +1659,7 @@ impl<const LENGTH: usize> AllocateProtected<[&str; LENGTH]> for RVectorCharacter
 impl AllocateProtected<&[&str]> for RVectorCharacter {
     fn allocate(x: &[&str], pc: &mut Pc) -> Self {
         let len = x.len();
-        let rvector = Self::of_size(len, pc);
+        let rvector = Self::new(len, pc);
         for (i, x) in x.iter().enumerate() {
             unsafe {
                 SET_STRING_ELT(

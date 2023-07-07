@@ -44,8 +44,10 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     if !tol.is_finite() || tol <= 0.0 {
         stop!("'tol' must be a strictly positive value.");
     }
+    let (x_rval, x_slice) = RVector::new_double(1, pc);
     let mut g = |x: f64| {
-        let Ok(fx) = f.call1(RObject::allocate(x, pc), pc) else {
+        x_slice[0] = x;
+        let Ok(fx) = f.call1(*x_rval, pc) else {
             stop!("Error in function evaluation.")
         };
         let fx = fx.as_f64();
@@ -56,11 +58,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     };
     let mut f0 = g(x0);
     if f0 == 0.0 {
-        return RObject::allocate(x0, pc);
+        return *RVector::allocate(x0, pc);
     }
     let f1 = g(x1);
     if f1 == 0.0 {
-        return RObject::allocate(x1, pc);
+        return *RVector::allocate(x1, pc);
     }
     if f0 * f1 > 0.0 {
         stop!("Oops, guesses[0] and guesses[1] have the same sign.");
@@ -68,11 +70,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     loop {
         let xc = 0.5 * (x0 + x1);
         if (x0 - x1).abs() < tol {
-            return RObject::allocate(xc, pc);
+            return *RVector::allocate(xc, pc);
         }
         let fc = g(xc);
         if fc == 0.0 {
-            return RObject::allocate(xc, pc);
+            return *RVector::allocate(xc, pc);
         }
         if f0 * fc > 0.0 {
             x0 = xc;
