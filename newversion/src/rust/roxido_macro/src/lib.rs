@@ -177,7 +177,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                         line.push_str(", ");
                         line.push_str(arg)
                     }
-                    line.push_str("\n");
+                    line.push('\n');
                     if file.write_all(line.as_bytes()).is_err() {
                         eprintln!("Couldn't append to file: {filename}");
                     }

@@ -20,6 +20,61 @@ use std::str::Utf8Error;
 pub struct R;
 
 impl R {
+    /// Get R's definition of the `Inf` value.
+    pub fn infinity_positive() -> f64 {
+        unsafe { R_PosInf }
+    }
+
+    /// Get R's definition of the `-Inf` value.
+    pub fn infinity_negative() -> f64 {
+        unsafe { R_NegInf }
+    }
+
+    /// Get R's definition of the `NaN` value.
+    pub fn nan() -> f64 {
+        unsafe { R_NaN }
+    }
+
+    /// Get R's definition of the `NA` value of storage mode `double`.
+    pub fn na_double() -> f64 {
+        unsafe { R_NaReal }
+    }
+
+    /// Get R's definition of the `NA` value of storage mode `integer`.
+    pub fn na_integer() -> i32 {
+        unsafe { R_NaInt }
+    }
+
+    /// Get R's definition of the `NA` value of storage mode `logical`.
+    pub fn na_logical() -> i32 {
+        unsafe { R_NaInt }
+    }
+
+    /// Test if value is finite.
+    pub fn is_finite(x: f64) -> bool {
+        unsafe { R_finite(x) != 0 }
+    }
+
+    /// Test if value is `NaN`.
+    pub fn is_nan(x: f64) -> bool {
+        unsafe { R_IsNaN(x) != 0 }
+    }
+
+    /// Test if value is NA for storage mode `double`.
+    pub fn is_na_double(x: f64) -> bool {
+        unsafe { R_IsNA(x) != 0 }
+    }
+
+    /// Test if value is NA for storage mode `integer`.
+    pub fn is_na_integer(x: i32) -> bool {
+        unsafe { x == R_NaInt }
+    }
+
+    /// Test if value is NA for storage mode `logical`.
+    pub fn is_na_logical(x: i32) -> bool {
+        unsafe { x == R_NaInt }
+    }
+
     /// Generate random bytes using R's RNG.
     ///
     /// # Examples:
@@ -247,7 +302,7 @@ impl RObject {
         let _ = list.set(0, RVectorCharacter::allocate(message, pc));
         let _ = list.set(1, Self::nil());
         let _ = list.names_gets(RVectorCharacter::allocate(["message", "calls"], pc));
-        let _ = list.class_gets(RVectorCharacter::allocate(["error", "condition"], pc));
+        list.class_gets(RVectorCharacter::allocate(["error", "condition"], pc));
         list.into()
     }
 
@@ -337,66 +392,10 @@ impl RObject {
         Self(unsafe { R_NilValue })
     }
 
-    /// Get R's definition of the `Inf` value.
-    pub fn infinity_positive() -> f64 {
-        unsafe { R_PosInf }
-    }
-
-    /// Get R's definition of the `-Inf` value.
-    pub fn infinity_negative() -> f64 {
-        unsafe { R_NegInf }
-    }
-
-    /// Get R's definition of the `NaN` value.
-    pub fn nan() -> f64 {
-        unsafe { R_NaN }
-    }
-
-    /// Get R's definition of the `NA` value of storage mode `double`.
-    pub fn na_double() -> f64 {
-        unsafe { R_NaReal }
-    }
-
-    /// Get R's definition of the `NA` value of storage mode `integer`.
-    pub fn na_integer() -> i32 {
-        unsafe { R_NaInt }
-    }
-
-    /// Get R's definition of the `NA` value of storage mode `logical`.
-    pub fn na_logical() -> i32 {
-        unsafe { R_NaInt }
-    }
-
     /// Get R's definition of the `NA` value for an element of an object of storage mode `character`.
     pub fn na_character() -> Self {
         Self(unsafe { R_NaString })
     }
-
-    /// Test if value is finite.
-    pub fn is_finite(x: f64) -> bool {
-        unsafe { R_finite(x) != 0 }
-    }
-
-    /// Test if value is `NaN`.
-    pub fn is_nan(x: f64) -> bool {
-        unsafe { R_IsNaN(x) != 0 }
-    }
-
-    /// Test if value is NA for storage mode `double`.
-    pub fn is_na_double(x: f64) -> bool {
-        unsafe { R_IsNA(x) != 0 }
-    }
-
-    /// Test if value is NA for storage mode `integer`.
-    pub fn is_na_integer(x: i32) -> bool {
-        unsafe { x == R_NaInt }
-    }
-
-    /// Test if value is NA for storage mode `logical`.
-    pub fn is_na_logical(x: i32) -> bool {
-        unsafe { x == R_NaInt }
-    }
-
     /// Test if value is NA for an element of an object of storage mode `character`.
     pub fn is_na_character(self) -> bool {
         unsafe { self.0 == R_NaString }
@@ -1136,7 +1135,7 @@ impl RMatrix {
 }
 
 impl Deref for RMatrix {
-    type Target = RObject;
+    type Target = RVector;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
