@@ -21,7 +21,10 @@
 pub mod r;
 pub mod rbindings;
 
-pub use r::{NewProtected, Pc, Rval, TryNewProtected, R};
+pub use r::{
+    AllocateProtected, Pc, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
+    TryAllocateProtected, R,
+};
 
 /// A procedural macro to facilitate calling a Rust function from R.
 pub use roxido_macro::roxido;

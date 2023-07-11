@@ -1,6 +1,6 @@
 [package]
 name = "roxido_macro"
-version = "0.5.2"
+version = "0.6.0"
 authors = ["David B. Dahl <dahl@stat.byu.edu>"]
 edition = "2021"
 description = "Macros to support the roxido crate"

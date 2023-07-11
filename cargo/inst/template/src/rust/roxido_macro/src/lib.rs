@@ -110,7 +110,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
     if !vis_as_string.is_empty() {
         panic!("A function with the 'roxido' attribute must not have a visibility modifier, but found '{}'.", vis_as_string);
     }
-    // Check that all arguments are of type Rval.
+    // Check that all arguments are of type RObject.
     let mut arg_names = Vec::with_capacity(args.len());
     for arg in &args {
         match arg {
@@ -119,23 +119,23 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                 arg_names.push(quote!(#name).to_string());
                 let ty = &pat_type.ty;
                 let string = quote!(#ty).to_string();
-                if string != "Rval" {
-                    panic!("All arguments to a function with the 'roxido' attribute must be of type Rval, but found '{}'.", string)
+                if string != "RObject" {
+                    panic!("All arguments to a function with the 'roxido' attribute must be of type RObject, but found '{}'.", string)
                 }
             }
             _ => panic!(
-                "All arguments to a function with the 'roxido' attribute must be of type Rval."
+                "All arguments to a function with the 'roxido' attribute must be of type RObject."
             ),
         }
     }
-    // Check that return is of type Rval.
+    // Check that return is of type RObject.
     match &output {
         syn::ReturnType::Default => panic!(),
         syn::ReturnType::Type(_, tipe) => {
             let tipe_as_string = quote!(#tipe).to_string();
-            if tipe_as_string != "Rval" {
+            if tipe_as_string != "RObject" {
                 panic!(
-                    "A function with the 'roxido' attribute must return Rval, but found '{}'.",
+                    "A function with the 'roxido' attribute must return RObject, but found '{}'.",
                     tipe_as_string
                 );
             }
@@ -177,7 +177,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                         line.push_str(", ");
                         line.push_str(arg)
                     }
-                    line.push_str("\n");
+                    line.push('\n');
                     if file.write_all(line.as_bytes()).is_err() {
                         eprintln!("Couldn't append to file: {filename}");
                     }
@@ -196,11 +196,11 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         TokenStream::from(quote! {
             #[no_mangle]
             extern "C" fn #name(#args) #output {
-                let result: Result<Rval, _> = std::panic::catch_unwind(|| {
+                let result: Result<RObject, _> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
                     #[allow(unused_macros)]
-                    macro_rules! rval {
-                        ($val:expr) => { Rval::new($val, pc) }
+                    macro_rules! robject {
+                        ($val:expr) => { RObject::new($val, pc) }
                     }
                     #body
                 });
@@ -228,7 +228,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                         unsafe {
                             crate::rbindings::Rf_error(b"%.*s\0".as_ptr() as *const std::os::raw::c_char, len, crate::rbindings::R_CHAR(sexp));
                         }
-                        crate::Rval::nil() // We never get here.
+                        crate::RObject::nil() // We never get here.
                     }
                 }
             }
@@ -237,11 +237,11 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         TokenStream::from(quote! {
             #[no_mangle]
             extern "C" fn #name(#args) #output {
-                let result: Result<Rval,_> = std::panic::catch_unwind(|| {
+                let result: Result<RObject,_> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
                     #[allow(unused_macros)]
-                    macro_rules! rval {
-                        ($val:expr) => { Rval::new($val, pc) }
+                    macro_rules! robject {
+                        ($val:expr) => { RObject::new($val, pc) }
                     }
                     #body
                 });
@@ -249,7 +249,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                     Ok(obj) => obj,
                     Err(_) => {
                         let pc = &mut crate::r::Pc::new();
-                        crate::Rval::new_error(format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name)).as_str(), pc)
+                        crate::RObject::new_error(format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name)).as_str(), pc)
                     }
                 }
             }
