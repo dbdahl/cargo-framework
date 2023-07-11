@@ -440,6 +440,16 @@ impl RObject {
     pub fn is_character(self) -> bool {
         unsafe { Rf_isString(self.0) != 0 }
     }
+
+    /// Treat as an R list.
+    pub fn as_list(self) -> Result<RList, &'static str> {
+        if !self.is_list() {
+            Err("Not a list")
+        } else {
+            Ok(RList(RVector(self)))
+        }
+    }
+
     /// Is the object a list?
     ///
     /// Check if the type is VECSXP.
