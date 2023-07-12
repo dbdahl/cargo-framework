@@ -199,10 +199,10 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                 let result: Result<RObject, _> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
                     #[allow(unused_macros)]
-                    macro_rules! robject {
-                        ($val:expr) => { RObject::new($val, pc) }
-                    }
-                    #body
+                    macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
+                    #[allow(unused_macros)]
+                    macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
+                    #body.into()
                 });
                 match result {
                     Ok(obj) => obj,
@@ -240,10 +240,10 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                 let result: Result<RObject,_> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
                     #[allow(unused_macros)]
-                    macro_rules! robject {
-                        ($val:expr) => { RObject::new($val, pc) }
-                    }
-                    #body
+                    macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
+                    #[allow(unused_macros)]
+                    macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
+                    #body.into()
                 });
                 match result {
                     Ok(obj) => obj,

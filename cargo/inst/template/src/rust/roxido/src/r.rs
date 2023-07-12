@@ -298,7 +298,7 @@ impl RObject {
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> Self {
-        let list = RList::new_list(2, pc);
+        let list = RList::new(2, pc);
         let _ = list.set(0, RVectorCharacter::allocate(message, pc));
         let _ = list.set(1, Self::nil());
         let _ = list.names_gets(RVectorCharacter::allocate(["message", "calls"], pc));
@@ -338,11 +338,11 @@ impl RObject {
     /// This method moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
     /// Thus the programmer is then responsible to release the memory by calling [`Self::external_pointer_decode`].
     ///
-    pub fn external_pointer_encode<T>(x: T, tag: Self) -> Self {
+    pub fn external_pointer_encode<T>(x: T, tag: impl Into<RObject>) -> Self {
         unsafe {
             // Move to Box<_> and then forget about it.
             let ptr = Box::into_raw(Box::new(x)) as *mut c_void;
-            Self(R_MakeExternalPtr(ptr, tag.0, R_NilValue))
+            Self(R_MakeExternalPtr(ptr, tag.into().0, R_NilValue))
         }
     }
 
@@ -600,9 +600,9 @@ impl RObject {
     }
 
     /// Set an attribute.
-    pub fn set_attribute(self, which: &str, value: Self, pc: &mut Pc) {
+    pub fn set_attribute(self, which: &str, value: impl Into<RObject>, pc: &mut Pc) {
         unsafe {
-            Rf_setAttrib(self.0, Self::new_symbol(which, pc).0, value.0);
+            Rf_setAttrib(self.0, Self::new_symbol(which, pc).0, value.into().0);
         }
     }
 
@@ -610,11 +610,15 @@ impl RObject {
     ///
     /// The function returns an error if the object is not a symbol.
     ///   
-    pub fn assign(self, value: Self, environment: Self) -> Result<(), &'static str> {
+    pub fn assign(
+        self,
+        value: impl Into<RObject>,
+        environment: impl Into<RObject>,
+    ) -> Result<(), &'static str> {
         if !self.is_symbol() {
             return Err("Not a symbol");
         }
-        unsafe { Rf_defineVar(self.0, value.0, environment.0) };
+        unsafe { Rf_defineVar(self.0, value.into().0, environment.into().0) };
         Ok(())
     }
 
@@ -622,11 +626,15 @@ impl RObject {
     ///
     /// The function returns an error if the object is not a symbol.
     ///   
-    pub fn assign_inherits(self, value: Self, environment: Self) -> Result<(), &'static str> {
+    pub fn assign_inherits(
+        self,
+        value: impl Into<RObject>,
+        environment: impl Into<RObject>,
+    ) -> Result<(), &'static str> {
         if !self.is_symbol() {
             return Err("Not a symbol");
         }
-        unsafe { Rf_setVar(self.0, value.0, environment.0) };
+        unsafe { Rf_setVar(self.0, value.into().0, environment.into().0) };
         Ok(())
     }
 
@@ -1018,7 +1026,7 @@ impl RList {
     /// Although the stated lifetime is `'static`, the reference is actually only valid as long as
     /// the associated R object exists.
     ///
-    pub fn new_list(len: usize, pc: &mut Pc) -> Self {
+    pub fn new(len: usize, pc: &mut Pc) -> Self {
         Self(RVector(RObject(pc.protect(unsafe {
             Rf_allocVector(RObjectType::VECSXP as u32, len.try_into().unwrap())
         }))))
