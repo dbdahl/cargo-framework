@@ -207,13 +207,13 @@ pub struct RError(pub String);
 #[macro_export]
 macro_rules! stop {
     () => {
-        std::panic::panic_any(r::RError(String::new()))
+        std::panic::panic_any(RError(String::new()))
     };
     ($fmt_string:expr) => {
-        std::panic::panic_any(r::RError(format!($fmt_string)))
+        std::panic::panic_any(RError(format!($fmt_string)))
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        std::panic::panic_any(r::RError(format!($fmt_string, $($arg),*)))
+        std::panic::panic_any(RError(format!($fmt_string, $($arg),*)))
     }
 }
 
@@ -450,6 +450,15 @@ impl RObject {
         }
     }
 
+    /// Treat as an R list.
+    pub fn as_list_or_stop(self, msg: &str) -> RList {
+        if !self.is_list() {
+            stop!("{}", msg)
+        } else {
+            RList(RVector(self))
+        }
+    }
+
     /// Is the object a list?
     ///
     /// Check if the type is VECSXP.
@@ -473,10 +482,19 @@ impl RObject {
 
     /// Treat as an R vector.
     pub fn as_vector(self) -> Result<RVector, &'static str> {
-        if unsafe { Rf_isVector(self.0) == 0 } {
+        if !self.is_vector() {
             Err("Not a vector")
         } else {
             Ok(RVector(self))
+        }
+    }
+
+    /// Treat as an R vector.
+    pub fn as_vector_or_stop(self, msg: &str) -> RVector {
+        if !self.is_vector() {
+            stop!("{}", msg)
+        } else {
+            RVector(self)
         }
     }
 
@@ -502,10 +520,19 @@ impl RObject {
 
     /// Treat as an R matrix.
     pub fn as_matrix(self) -> Result<RMatrix, &'static str> {
-        if unsafe { Rf_isMatrix(self.0) == 0 } {
+        if !self.is_matrix() {
             Err("Not a matrix")
         } else {
             Ok(RMatrix(RVector(self)))
+        }
+    }
+
+    /// Treat as an R matrix.
+    pub fn as_matrix_or_stop(self, msg: &str) -> RMatrix {
+        if !self.is_matrix() {
+            stop!("{}", msg)
+        } else {
+            RMatrix(RVector(self))
         }
     }
 
@@ -531,10 +558,19 @@ impl RObject {
 
     /// Treat as an R function.
     pub fn as_function(self) -> Result<RFunction, &'static str> {
-        if unsafe { Rf_isFunction(self.0) == 0 } {
+        if !self.is_function() {
             Err("Not a function")
         } else {
             Ok(RFunction(self))
+        }
+    }
+
+    /// Treat as an R function.
+    pub fn as_function_or_stop(self, msg: &str) -> RFunction {
+        if !self.is_function() {
+            stop!("{}", msg);
+        } else {
+            RFunction(self)
         }
     }
 

@@ -22,7 +22,7 @@ pub mod r;
 pub mod rbindings;
 
 pub use r::{
-    AllocateProtected, Pc, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
+    AllocateProtected, Pc, RError, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
     TryAllocateProtected, R,
 };
 
