@@ -9,14 +9,14 @@ impl RMatrix2Faer for RMatrix {
     fn as_faer_f64(self) -> Result<MatRef<'static, f64>, &'static str> {
         Ok(unsafe {
             use roxido::rbindings::*;
-            if Rf_isMatrix(***self) == 0 {
+            if Rf_isMatrix(self.0) == 0 {
                 return Err("Not a matrix");
             }
-            if Rf_isReal(***self) == 0 {
+            if Rf_isReal(self.0) == 0 {
                 return Err("Not f64");
             }
-            let nrow = Rf_nrows(***self).try_into().unwrap();
-            let ncol = Rf_ncols(***self).try_into().unwrap();
+            let nrow = Rf_nrows(self.0).try_into().unwrap();
+            let ncol = Rf_ncols(self.0).try_into().unwrap();
             let slice = self.slice_double()?;
             MatRef::from_raw_parts(slice.as_ptr(), nrow, ncol, 1, nrow.try_into().unwrap())
         })
