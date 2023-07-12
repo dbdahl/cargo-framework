@@ -17,7 +17,7 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
             ab[i + j] += ai * bj;
         }
     }
-    r.into()
+    r
 }
 
 #[roxido]
@@ -48,11 +48,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     };
     let mut f0 = g(x0);
     if f0 == 0.0 {
-        return *RVector::allocate(x0, pc);
+        return rvec!(x0);
     }
     let f1 = g(x1);
     if f1 == 0.0 {
-        return *RVector::allocate(x1, pc);
+        return rvec!(x1);
     }
     if f0 * f1 > 0.0 {
         stop!("Oops, guesses[0] and guesses[1] have the same sign.");
@@ -60,11 +60,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     loop {
         let xc = 0.5 * (x0 + x1);
         if (x0 - x1).abs() < tol {
-            return *RVector::allocate(xc, pc);
+            return rvec!(xc);
         }
         let fc = g(xc);
         if fc == 0.0 {
-            return *RVector::allocate(xc, pc);
+            return rvec!(xc);
         }
         if f0 * fc > 0.0 {
             x0 = xc;
