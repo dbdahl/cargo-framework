@@ -536,7 +536,7 @@ test_that("call", {
   f <- rust_fn(a, "rvec!(a.as_function().unwrap().call0(pc).is_err())")
   errfn <- function() stop("An error was thrown!")
   expect_true(f(errfn))
-  okfn <- function() 1+2
+  okfn <- function() 1 + 2
   expect_false(f(okfn))
 })
 
