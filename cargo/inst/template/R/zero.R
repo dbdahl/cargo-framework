@@ -15,10 +15,5 @@
 #' cube1 <- function(x) (x^2 + 1) * (x - 1.5)
 #' zero(cube1, c(-2, 11.5))
 zero <- function(f, guesses, tol = 1e-7) {
-  f.check <- function(x) {
-    x <- f(x)
-    if(!is.numeric(x)) stop("Need a numeric result")
-    as.double(x)
-  }
-  .Call(.zero, body(f.check), as.double(guesses), as.double(tol), new.env())
+  .Call(.zero, f, guesses, tol)
 }

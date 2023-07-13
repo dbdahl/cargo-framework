@@ -1476,6 +1476,12 @@ pub trait TryAllocateProtected<T>: Sized {
 
 // RObject
 
+impl From<()> for RObject {
+    fn from(_: ()) -> Self {
+        RObject::nil()
+    }
+}
+
 impl From<RVector> for RObject {
     fn from(x: RVector) -> Self {
         x.0
@@ -1799,6 +1805,12 @@ impl AllocateProtected<&str> for RVectorCharacter {
 
 impl AllocateProtected<&String> for RVectorCharacter {
     fn allocate(x: &String, pc: &mut Pc) -> Self {
+        Self::allocate(&x[..], pc)
+    }
+}
+
+impl AllocateProtected<String> for RVectorCharacter {
+    fn allocate(x: String, pc: &mut Pc) -> Self {
         Self::allocate(&x[..], pc)
     }
 }

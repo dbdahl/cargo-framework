@@ -1,76 +1,102 @@
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
-Build directory: /home/dahl/.cache/R/cargo/rust_fn
-    Updating crates.io index
-   Compiling proc-macro2 v1.0.63
-   Compiling unicode-ident v1.0.9
-   Compiling quote v1.0.29
-   Compiling syn v2.0.22
-   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
-   Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.81s
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:35
+warning: unreachable expression
+ --> src/lib.rs:3:7
+  |
+2 |       panic!("Oops!");
+  |       --------------- any code following this expression is unreachable
+3 |       ()
+  |       ^^ unreachable expression
+  |
+  = note: `#[warn(unreachable_code)]` on by default
+
+warning: unreachable expression
+ --> src/lib.rs:3:7
+  |
+2 |       panic!("Oops!");
+  |       --------------- any code following this expression is unreachable
+3 |       ()
+  |       ^^ unreachable expression
+  |
+  = note: `#[warn(unreachable_code)]` on by default
+
+warning: unreachable expression
+ --> src/lib.rs:3:7
+  |
+2 |       panic!("Oops!");
+  |       --------------- any code following this expression is unreachable
+3 |       ()
+  |       ^^ unreachable expression
+  |
+  = note: `#[warn(unreachable_code)]` on by default
+
+warning: unreachable expression
+ --> src/lib.rs:3:7
+  |
+2 |       panic!("Oops!");
+  |       --------------- any code following this expression is unreachable
+3 |       ()
+  |       ^^ unreachable expression
+  |
+  = note: `#[warn(unreachable_code)]` on by default
+
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:31
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:35
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: TryFromIntError(())', src/lib.rs:3:40
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Logical value is NA"', src/lib.rs:3:31
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: TryFromIntError(())', src/lib.rs:3:48
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:36
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:3:37
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:36
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:57
 thread '<unnamed>' panicked at 'Oops, not a double vector', src/lib.rs:5:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'Oops, not a double vector', src/lib.rs:5:9
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:37
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:3:48
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:37
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:34
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:58
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:2:58
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:34
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:36
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:58
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:3:37
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:36
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:57
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:3:47
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'Oops, not an integer vector', src/lib.rs:5:11
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:3:48
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'Oops, not an integer vector', src/lib.rs:5:11
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:37
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:58
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:2:27
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:3:37
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:35
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:35
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Object is not of the asserted type"', src/lib.rs:2:52
 thread '<unnamed>' panicked at 'Oh no!', src/lib.rs:5:11
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'Oops!', src/lib.rs:4:10
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'No way.', src/lib.rs:3:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'No way.', src/lib.rs:3:9
-thread '<unnamed>' panicked at 'Oops', src/lib.rs:3:9
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-thread '<unnamed>' panicked at 'Oops', src/lib.rs:3:9
-thread '<unnamed>' panicked at 'Oops', src/lib.rs:3:9
+thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:2:24
 Error in (function ()  : An error was thrown!
-   Compiling roxido86 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+   Compiling roxido87 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
     Finished release [optimized] target(s) in 0.17s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.63
-   Compiling unicode-ident v1.0.9
+   Compiling proc-macro2 v1.0.64
+   Compiling unicode-ident v1.0.10
    Compiling quote v1.0.29
-   Compiling syn v2.0.22
-   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
-   Compiling roxido88 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.60s
-    Updating crates.io index
-   Compiling proc-macro2 v1.0.63
-   Compiling quote v1.0.29
-   Compiling unicode-ident v1.0.9
-   Compiling syn v2.0.22
-   Compiling roxido_macro v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
-   Compiling roxido v0.5.2 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling syn v2.0.25
+   Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.69s
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 310 ]
+    Finished release [optimized] target(s) in 4.84s
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.64
+   Compiling unicode-ident v1.0.10
+   Compiling quote v1.0.29
+   Compiling syn v2.0.25
+   Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling roxido90 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+    Finished release [optimized] target(s) in 3.53s
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 308 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
 * installing *source* package ‘testpkg’ ...
@@ -78,18 +104,18 @@ Rscript -e "cargo::new_package('testpkg')"
 ---
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.70.0' is available, which satisfies the need for '1.58.1'.
+Cargo version '1.70.0' is available, which satisfies the need for '1.65'.
     Updating crates.io index
-   Compiling proc-macro2 v1.0.63
-   Compiling unicode-ident v1.0.9
+   Compiling proc-macro2 v1.0.64
+   Compiling unicode-ident v1.0.10
    Compiling quote v1.0.29
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-   Compiling syn v2.0.22
-   Compiling roxido_macro v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.5.2 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized] target(s) in 3.67s
+   Compiling syn v2.0.25
+   Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
+   Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
+    Finished release [optimized] target(s) in 3.57s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 0.18s
+    Finished release [optimized] target(s) in 0.19s
 ---
 Built Rust static library.
 ** libs
@@ -130,7 +156,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... NOTE
+* checking CRAN incoming feasibility ... [3s/27s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
@@ -145,9 +171,9 @@ New submission
 * checking whether package ‘testpkg’ can be installed ... OK
 * used C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
 * checking installed package size ... NOTE
-  installed size is  5.8Mb
+  installed size is  5.9Mb
   sub-directories of 1Mb or more:
-    libs   5.7Mb
+    libs   5.8Mb
 * checking package directory ... OK
 * checking for future file timestamps ... OK
 * checking DESCRIPTION meta-information ... NOTE

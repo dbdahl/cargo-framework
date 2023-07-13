@@ -2,8 +2,13 @@ library(cargo)
 # skip_on_cran()
 
 test_that("force", {
+  f <- rust_fn("", force = TRUE)
+  expect_equal(f(), NULL)
+})
+
+test_that("force", {
   f <- rust_fn(a, "
-      Rval::new(i32::from(a), pc)
+      rvec!(i32::from(a))
   ", force = TRUE)
   expect_equal(f(7), 7)
 })
@@ -11,35 +16,30 @@ test_that("force", {
 test_that("printing", {
   f <- rust_fn("
       rprintln!();
-      Rval::nil()
   ")
   expect_equal(capture.output(f()), c("", "NULL"))
   f <- rust_fn('
       reprintln!("error: there was a problem.");
-      Rval::nil()
   ')
   std.out <- capture.output(std.err <- capture.output(f(), type = "message"))
   expect_equal(std.err, "error: there was a problem.")
   expect_equal(std.out, "NULL")
   f <- rust_fn('
       rprintln!("Hi");
-      Rval::nil()
   ', invisible = TRUE)
   expect_equal(capture.output(f()), "Hi")
   f <- rust_fn('
       rprintln!("{} + 2 = {}", 1, 1+2);
-      Rval::nil()
   ', invisible = TRUE)
   expect_equal(capture.output(f()), "1 + 2 = 3")
   f <- rust_fn('
       rprint!("Hi");
       rprint!(" ");
       rprint!("{}{}","every","body");
-      Rval::nil()
   ', invisible = TRUE)
   expect_equal(capture.output(f()), "Hi everybody")
   f <- rust_fn('
-      Rval::new(rprintln!("Washington"), pc)
+      rvec!(rprintln!("Washington"))
   ')
   output <- capture.output(interrupted <- f())
   expect_equal(interrupted, FALSE)
@@ -49,31 +49,35 @@ test_that("printing", {
 test_that("longjmp", {
   expect_silent(f1 <- rust_fn('
       panic!("Oops!");
+      ()
   ', longjmp = TRUE, invisible = FALSE))
   expect_silent(f2 <- rust_fn('
       panic!("Oops!");
+      ()
   ', longjmp = TRUE, invisible = TRUE))
   expect_silent(f4 <- rust_fn('
       panic!("Oops!");
+      ()
   ', longjmp = FALSE, invisible = FALSE))
   expect_silent(f4 <- rust_fn('
       panic!("Oops!");
+      ()
   ', longjmp = FALSE, invisible = TRUE))
 })
 
 test_that("f64", {
   f1 <- rust_fn(a, "
-      Rval::new(f64::from(a), pc)
+      rvec!(f64::from(a))
   ")
   f2 <- rust_fn(a, "
-      Rval::new(f64::from(a), pc)
+      RVector::allocate(f64::from(a), pc)
   ")
   f3 <- rust_fn(a, "
       let b: f64 = a.into();
-      Rval::new(b, pc)
+      RVector::allocate(b, pc)
   ")
   f4 <- rust_fn(a, "
-      Rval::new(a.as_f64(), pc)
+      RVector::allocate(a.as_f64(), pc)
   ")
   for (f in list(f1, f2, f3, f4)) {
     expect_equal(f(7), 7)
@@ -93,17 +97,17 @@ test_that("f64", {
 
 test_that("i32", {
   f1 <- rust_fn(a, "
-      Rval::new(i32::from(a), pc)
+      rvec!(i32::from(a))
   ")
   f2 <- rust_fn(a, "
-      Rval::new(i32::from(a), pc)
+      RVector::allocate(i32::from(a), pc)
   ")
   f3 <- rust_fn(a, "
       let b: i32 = a.into();
-      Rval::new(b, pc)
+      RVector::allocate(b, pc)
   ")
   f4 <- rust_fn(a, "
-      Rval::new(a.as_i32(), pc)
+      RVector::allocate(a.as_i32(), pc)
   ")
   for (f in list(f1, f2, f3)) {
     expect_equal(f(7), 7L)
@@ -123,18 +127,18 @@ test_that("i32", {
 test_that("bool", {
   f1 <- rust_fn(a, "
       use std::convert::TryFrom;
-      Rval::new(bool::try_from(a).unwrap(), pc)
+      rvec!(bool::try_from(a).unwrap())
   ")
   f2 <- rust_fn(a, "
-      Rval::new(a.is_true(), pc)
+      RVector::allocate(a.is_true(), pc)
   ")
   f3 <- rust_fn(a, "
-      Rval::new(a.is_true(), pc)
+      RVector::allocate(a.is_true(), pc)
   ")
   f4 <- rust_fn(a, "
-      Rval::new(a.as_bool(), pc)
+      RVector::allocate(a.as_bool(), pc)
   ")
-  for (f in list(f1, f2, f3)) {
+  for (f in list(f1, f2, f3, f4)) {
     expect_equal(f(7), TRUE)
     expect_equal(f(c(7, 6, 5, 4)), TRUE)
     expect_equal(f(0L), FALSE)
@@ -151,7 +155,7 @@ test_that("bool", {
 test_that("usize", {
   f1 <- rust_fn(a, "
       use std::convert::TryFrom;
-      Rval::try_new(usize::try_from(a).unwrap(), pc).unwrap()
+      RVector::try_allocate(usize::try_from(a).unwrap(), pc).unwrap()
   ")
   for (f in list(f1)) {
     expect_equal(f(7), 7L)
@@ -164,13 +168,13 @@ test_that("usize", {
     expect_equal(f(TRUE), 1L)
   }
   f <- rust_fn(a, "
-      Rval::try_new(a.as_usize(), pc).unwrap()
+      RVector::try_allocate(a.as_usize(), pc).unwrap()
   ")
   expect_equal(f(5), 5L)
   expect_equal(f(TRUE), 1L)
   expect_equal(f(-5), 0L)
   f <- rust_fn(a, "
-    Rval::try_new(a.as_usize(), pc).unwrap()
+      RVector::try_allocate(a.as_usize(), pc).unwrap()
   ")
   expect_equal(f(7), 7L)
   expect_equal(f(-7), 0L)
@@ -185,71 +189,76 @@ test_that("usize", {
 
 test_that("Special values", {
   f <- rust_fn("
-    Rval::nil()
+    ()
+  ")
+  f <- rust_fn("
+    RObject::nil()
   ")
   expect_equal(f(), NULL)
   f <- rust_fn("
-    Rval::new(Rval::nan(), pc)
+    RVector::allocate(R::nan(), pc)
   ")
   expect_equal(f(), NaN)
   f <- rust_fn("
-    Rval::new(Rval::na_double(), pc)
+    RVector::allocate(R::na_double(), pc)
   ")
   expect_equal(f(), NA_real_)
   f <- rust_fn("
-    Rval::new(Rval::na_integer(), pc)
+    rvec!(R::na_integer())
   ")
   expect_equal(f(), NA_integer_)
   f <- rust_fn("
-    Rval::new(Rval::na_logical(), pc)
+    rvec!(R::na_logical())
   ")
   expect_equal(f(), NA_integer_)
-  f <- rust_fn(b, "
-    Rval::new(Rval::na_character().0 == b.get_character_element(0).unwrap().0, pc)
-  ")
+  f <- rust_fn(b, '
+    let b = b.as_vector_or_stop("Not a vector").coerce_character(pc);
+    rvec!(RObject::na_character().0 == b.get(0).unwrap().0)
+  ')
   expect_true(f(NA_character_))
   f <- rust_fn("
-    Rval::new(Rval::infinity_positive(), pc)
+    RVector::allocate(R::infinity_positive(), pc)
   ")
   expect_equal(f(), Inf)
   expect_true(is.infinite(f()))
   f <- rust_fn("
-    Rval::new(Rval::infinity_negative(), pc)
+    rvec!(R::infinity_negative())
   ")
   expect_equal(f(), -Inf)
   expect_true(is.infinite(f()))
   f <- rust_fn(a, "
-    Rval::new(Rval::is_finite(a.as_f64()), pc)
+    rvec!(R::is_finite(a.as_f64()))
   ")
   expect_true(f(1.0))
   expect_false(f(Inf))
   expect_false(f(-Inf))
   f <- rust_fn(a, "
-    Rval::new(Rval::is_nan(a.as_f64()), pc)
+    rvec!(R::is_nan(a.as_f64()))
   ")
   expect_true(f(NaN))
   expect_false(f(1.0))
   expect_false(f(NA))
   f <- rust_fn(a, "
-    Rval::new(Rval::is_na_double(a.as_f64()), pc)
+    rvec!(R::is_na_double(a.as_f64()))
   ")
   expect_false(f(NaN))
   expect_false(f(1.0))
   expect_true(f(NA))
   f <- rust_fn(a, "
-    Rval::new(Rval::is_na_integer(a.as_i32()), pc)
+    rvec!(R::is_na_integer(a.as_i32()))
   ")
   expect_false(f(1L))
   expect_true(f(NA))
-  f <- rust_fn(a, "
-    let b = a.slice_logical().unwrap();
-    Rval::new(Rval::is_na_logical(b[0]), pc)
-  ")
+  f <- rust_fn(a, '
+    let b = a.as_vector_or_stop("Not a vector.").slice_logical().unwrap();
+    rvec!(R::is_na_logical(b[0]))
+  ')
   expect_true(f(NA))
   expect_false(f(TRUE))
   expect_false(f(FALSE))
   f <- rust_fn(a, "
-    Rval::new(Rval::is_na_character(a.get_character_element(0).unwrap()), pc)
+    let a = a.as_vector().unwrap().coerce_character(pc);
+    rvec!(a.get(0).unwrap().is_na_character())
   ")
   a <- NA
   storage.mode(a) <- "character"
@@ -260,24 +269,24 @@ test_that("Special values", {
 test_that("f64 slice", {
   f1 <- rust_fn(a, "
       use std::convert::TryInto;
-      let b: &[f64] = a.try_into().unwrap();
-      Rval::new(b, pc)
+      let b: &[f64] = a.as_vector().unwrap().try_into().unwrap();
+      rvec!(b)
   ")
   f2 <- rust_fn(a, '
       use std::convert::TryInto;
-      let b: Result<&[f64],_> = a.try_into();
+      let b: Result<&[f64],_> = a.as_vector().and_then(|x| x.try_into());
       if b.is_err() {
         panic!("Oops, not a double vector")
       }
-      Rval::new(b.unwrap(), pc)
+      rvec!(b.unwrap())
   ')
   f3 <- rust_fn(a, "
       use std::convert::TryFrom;
-      let b = <&[f64]>::try_from(a).unwrap();
-      Rval::new(b, pc)
+      let b = <&[f64]>::try_from(a.as_vector().unwrap()).unwrap();
+      rvec!(b)
   ")
   f4 <- rust_fn(a, "
-      Rval::new(a.slice_double().unwrap(), pc)
+      rvec!(a.as_vector().and_then(|x| x.slice_double()).unwrap())
   ")
   for (f in list(f1, f2, f3, f4)) {
     expect_equal(f(7), 7)
@@ -287,35 +296,39 @@ test_that("f64 slice", {
     expect_error(f(c(1L, 2L)))
   }
   f1 <- rust_fn(a, "
-      let b = a.coerce_double(pc).unwrap().1;
-      Rval::new(b, pc)
+      let b = a.as_vector().and_then(|x| Ok(x.coerce_double(pc))).unwrap().1;
+      rvec!(b)
   ")
   f2 <- rust_fn(a, "
-      a.coerce_double(pc).unwrap().0
+      a.as_vector().and_then(|x| Ok(x.coerce_double(pc))).unwrap().0
   ")
   for (f in list(f1, f2)) {
     expect_equal(f(7), 7)
     expect_equal(f(c(7, 6, 5, 4)), c(7, 6, 5, 4))
     expect_equal(f(numeric()), numeric())
-    expect_equal(f(c()), numeric())
     expect_equal(f(c(1L, 2L)), f(c(1, 2)))
   }
   f1 <- rust_fn("
       let data = [3.0, 4.5, 6.1];
-      let (rval, slice) = Rval::new_vector_double(data.len(), pc);
+      let (rval, slice) = RVector::new_double(data.len(), pc);
       slice.copy_from_slice(&data[..]);
       rval
   ")
   f <- f1
   expect_equal(f(), c(3, 4.5, 6.1))
   f1 <- rust_fn("
-      Rval::new([3.0, 4.5, 6.1], pc)
+      rvec!([3.0, 4.5, 6.1])
   ")
   f <- f1
   expect_equal(f(), c(3, 4.5, 6.1))
   f1 <- rust_fn("
       let a = [3.0, 4.5, 6.1];
-      Rval::new(&a[..], pc)
+      rvec!(&a[..])
+  ")
+  f <- f1
+  f1 <- rust_fn("
+      let a = [3.0, 4.5, 6.1];
+      rvec!(a)
   ")
   f <- f1
   expect_equal(f(), c(3, 4.5, 6.1))
@@ -324,24 +337,24 @@ test_that("f64 slice", {
 test_that("i32 slice", {
   f1 <- rust_fn(a, "
       use std::convert::TryInto;
-      let b: &[i32] = a.try_into().unwrap();
-      Rval::new(b, pc)
+      let b: &[i32] = a.as_vector().unwrap().try_into().unwrap();
+      rvec!(b)
   ")
   f2 <- rust_fn(a, '
       use std::convert::TryInto;
-      let b: Result<&[i32],_> = a.try_into();
+      let b: Result<&[i32],_> = a.as_vector().unwrap().try_into();
       if b.is_err() {
           panic!("Oops, not an integer vector")
       }
-      Rval::new(b.unwrap(), pc)
+      rvec!(b.unwrap())
   ')
   f3 <- rust_fn(a, "
       use std::convert::TryFrom;
-      let b = <&[i32]>::try_from(a).unwrap();
-      Rval::new(b, pc)
+      let b = <&[i32]>::try_from(a.as_vector().unwrap()).unwrap();
+      rvec!(b)
   ")
   f4 <- rust_fn(a, "
-      Rval::new(a.slice_integer().unwrap(), pc)
+      rvec!(a.as_vector().unwrap().slice_integer().unwrap())
   ")
   for (f in list(f1, f2, f3, f4)) {
     expect_equal(f(7L), 7L)
@@ -351,107 +364,103 @@ test_that("i32 slice", {
     expect_error(f(c(1, 2)))
   }
   f1 <- rust_fn(a, "
-      let b = a.coerce_integer(pc).unwrap().1;
-      Rval::new(b, pc)
+      let b = a.as_vector().unwrap().coerce_integer(pc).1;
+      rvec!(b)
   ")
   f2 <- rust_fn(a, "
-      a.coerce_integer(pc).unwrap().0
+      a.as_vector().unwrap().coerce_integer(pc).0
   ")
   for (f in list(f1, f2)) {
     expect_equal(f(7), 7L)
     expect_equal(f(c(7, 6, 5, 4)), c(7L, 6L, 5L, 4L))
     expect_equal(f(numeric()), integer())
-    expect_equal(f(c()), integer())
+    expect_equal(c(), NULL)
     expect_equal(f(c(1L, 2L)), f(c(1L, 2L)))
   }
   f1 <- rust_fn("
       let data = [3, 4, 6];
-      let (rval, slice) = Rval::new_vector_integer(data.len(), pc);
+      let (rval, slice) = RVector::new_integer(data.len(), pc);
       slice.copy_from_slice(&data[..]);
       rval
   ")
   f <- f1
   expect_equal(f(), c(3L, 4L, 6L))
   f1 <- rust_fn("
-      Rval::new([3, 4, 6], pc)
+      rvec!([3, 4, 6])
   ")
   f <- f1
   expect_equal(f(), c(3L, 4L, 6L))
   f1 <- rust_fn("
       let a = [3, 4, 6];
-      Rval::new(&a[..], pc)
+      rvec!(&a[..])
   ")
   f <- f1
   expect_equal(f(), c(3L, 4L, 6L))
 })
 
 test_that("vectors", {
-  f <- rust_fn(len, "Rval::new_vector_double(len.as_usize(), pc).0")
+  f <- rust_fn(len, "RVector::new_double(len.as_usize(), pc).0")
   expect_true(is.double(f(4)))
   expect_equal(length(f(0)), 0)
   expect_equal(length(f(5)), 5)
-  f <- rust_fn(len, "Rval::new_vector_integer(len.as_usize(), pc).0")
+  f <- rust_fn(len, "RVector::new_integer(len.as_usize(), pc).0")
   expect_true(is.integer(f(4)))
   expect_equal(length(f(0)), 0)
   expect_equal(length(f(5)), 5)
-  f <- rust_fn(len, "Rval::new_vector_logical(len.as_usize(), pc).0")
+  f <- rust_fn(len, "RVector::new_logical(len.as_usize(), pc).0")
   expect_true(is.logical(f(4)))
   expect_equal(length(f(0)), 0)
   expect_equal(length(f(5)), 5)
-  f <- rust_fn(len, "Rval::new_vector_raw(len.as_usize(), pc).0")
+  f <- rust_fn(len, "RVector::new_raw(len.as_usize(), pc).0")
   expect_true(is.raw(f(4)))
   expect_equal(length(f(0)), 0)
   expect_equal(length(f(5)), 5)
-  f <- rust_fn(len, "Rval::new_vector_character(len.as_usize(), pc)")
+  f <- rust_fn(len, "RVectorCharacter::new(len.as_usize(), pc)")
   expect_true(is.character(f(4)))
   expect_equal(length(f(0)), 0)
   expect_equal(length(f(5)), 5)
   f <- rust_fn('
-      let a = Rval::new_vector_character(1, pc);
-      let _ = a.set_character_element(0, "David", pc);
-      if a.set_character_element(1, "Lisa", pc).is_err() {
+      let a = RVectorCharacter::new(1, pc);
+      let _ = a.set(0, "David", pc);
+      if a.set(1, "Lisa", pc).is_err() {
           panic!("Oh no!");
       }
       a
   ')
   expect_error(f())
   f <- rust_fn('
-      let a = Rval::new_vector_character(2, pc);
-      let _ = a.set_character_element(0, "David", pc);
-      let _ = a.set_character_element(1, "Lisa", pc);
+      let a = RVectorCharacter::new(2, pc);
+      let _ = a.set(0, "David", pc);
+      let _ = a.set(1, "Lisa", pc);
       a
   ')
   expect_equal(f(), c("David", "Lisa"))
-  f <- rust_fn('Rval::new(["David", "Lisa"], pc)')
+  f <- rust_fn('rstr!(["David", "Lisa"])')
   expect_equal(f(), c("David", "Lisa"))
-  f <- rust_fn('let a = ["David", "Lisa"]; Rval::new(&a[..], pc)')
+  f <- rust_fn('let a = ["David", "Lisa"]; rstr!(&a[..])')
   expect_equal(f(), c("David", "Lisa"))
 })
 
 test_that("data.frame", {
-  f <- rust_fn(x, "Rval::new(x.is_data_frame(), pc)")
+  f <- rust_fn(x, "rvec!(x.is_data_frame())")
   expect_true(f(data.frame(x = 1:2, y = 4:5)))
   expect_false(f(matrix(1:4, nrow = 2)))
 })
 
 test_that("matrices", {
-  f <- rust_fn(nrow, ncol, "Rval::new_matrix_double(nrow.as_usize(),ncol.as_usize(), pc).0")
+  f <- rust_fn(nrow, ncol, "RMatrix::new_double(nrow.as_usize(),ncol.as_usize(), pc).0")
   expect_equal(dim(f(2, 3)), c(2, 3))
   expect_equal(dim(f(-2, 3)), c(0, 3))
   expect_true(is.double(f(2, 3)))
-  f <- rust_fn(nrow, ncol, "Rval::new_matrix_integer(nrow.as_usize(),ncol.as_usize(), pc).0")
+  f <- rust_fn(nrow, ncol, "RMatrix::new_integer(nrow.as_usize(),ncol.as_usize(), pc).0")
   expect_equal(dim(f(2, 3)), c(2, 3))
   expect_equal(dim(f(-2, -3)), c(0, 0))
   expect_true(is.integer(f(2, 3)))
-  f <- rust_fn(nrow, ncol, "Rval::new_matrix_logical(nrow.as_usize(),ncol.as_usize(), pc).0")
+  f <- rust_fn(nrow, ncol, "RMatrix::new_logical(nrow.as_usize(),ncol.as_usize(), pc).0")
   expect_equal(dim(f(2, 3)), c(2, 3))
   expect_equal(dim(f(2, -3)), c(2, 0))
   expect_true(is.logical(f(2, 3)))
-  f <- rust_fn(nrow, ncol, "Rval::new_matrix_character(nrow.as_usize(),ncol.as_usize(), pc)")
-  expect_equal(dim(f(2, 3)), c(2, 3))
-  expect_equal(dim(f(-2, 3)), c(0, 3))
-  expect_true(is.character(f(2, 3)))
-  f <- rust_fn(x, "x.transpose(pc).unwrap()")
+  f <- rust_fn(x, "x.as_matrix().unwrap().transpose(pc)")
   x <- matrix(1:6, nrow = 3)
   expect_identical(t(x), f(x))
   x <- matrix(as.character(1:12), nrow = 3)
@@ -459,13 +468,13 @@ test_that("matrices", {
 })
 
 test_that("lists", {
-  f <- rust_fn(len, "Rval::new_list(len.as_usize(), pc)")
+  f <- rust_fn(len, "RList::new(len.as_usize(), pc)")
   expect_true(is.list(f(4)))
   expect_equal(length(f(0)), 0)
   expect_equal(length(f(5)), 5)
   f <- rust_fn('
-      let result = Rval::new_list(1, pc);
-      if result.set_list_element(1, Rval::new(1, pc)).is_err() {
+      let result = RList::new(1, pc);
+      if result.set(1, rvec!(1)).is_err() {
          panic!("Oops!");
       }
       result
@@ -475,7 +484,7 @@ test_that("lists", {
 
 test_that("attr", {
   f <- rust_fn(a, '
-      a.set_attribute("names", Rval::new(["name","age"], pc), pc);
+      a.set_attribute("names", RVectorCharacter::allocate(["name","age"], pc), pc);
       a
   ')
   expect_equal(f(c("Sally", "17")), c(name = "Sally", age = "17"))
@@ -488,7 +497,7 @@ test_that("attr", {
 
 test_that("names_gets", {
   f <- rust_fn(a, '
-      if a.names_gets(Rval::new(["name","age"], pc)).is_err() {
+      if a.as_vector().unwrap().names_gets(rstr!(["name","age"])).is_err() {
         panic!("No way.")
       }
       a
@@ -501,26 +510,17 @@ test_that("names_gets", {
 
 test_that("class_gets", {
   f <- rust_fn(a, '
-      let _ = a.class_gets(Rval::new(["dog","animal"], pc));
+      let _ = a.class_gets(rstr!(["dog","animal"]));
       a
   ')
   expect_true(inherits(f(c("Sally", "17")), "dog"))
   expect_true(inherits(f(c("Sally", "17")), "animal"))
   expect_false(inherits(f(c("Sally", "17")), "cat"))
-  f <- rust_fn(a, '
-      if a.class_gets(Rval::new([234], pc)).is_err() {
-        panic!("Oops")
-      }
-      a
-  ')
-  expect_error(f(list("Sally", 17)))
-  expect_error(f(list("Sally")))
-  expect_error(f(function(x) x))
 })
 
 test_that("len", {
   f <- rust_fn(a, "
-      Rval::try_new(a.len(), pc).unwrap()
+      RVector::try_allocate(a.len(), pc).unwrap()
   ")
   expect_equal(f(NA), 1)
   expect_equal(f(c()), 0)
@@ -529,18 +529,20 @@ test_that("len", {
 })
 
 test_that("call", {
-  f <- rust_fn(a, "a.call0(pc).unwrap()")
+  f <- rust_fn(a, "a.as_function().unwrap().call0(pc).unwrap()")
   expect_equal(f(function() 4), 4)
   expect_false(f(function() 4) == 3)
   expect_false(f(function() 4) == 3)
-  f <- rust_fn(a, "Rval::new(a.call0(pc).is_err(), pc)")
+  f <- rust_fn(a, "rvec!(a.as_function().unwrap().call0(pc).is_err())")
   errfn <- function() stop("An error was thrown!")
   expect_true(f(errfn))
+  okfn <- function() 1+2
+  expect_false(f(okfn))
 })
 
 test_that("string", {
   f <- rust_fn(a, "
-      Rval::new(a.as_string(), pc)
+      rstr!(a.as_string().unwrap())
   ")
   expect_equal(f(c("David")), "David")
   expect_equal(f(c("David", "Lisa")), "David")
