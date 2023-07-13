@@ -16,15 +16,18 @@
 //! overhead and allows a programmer to easily add additional wrappers.
 //!
 //! This crate provides the Rust API for the cargo framework.  Of particular note
-//! is the [Rval] structure and its functions.
+//! is [R], [RObject], [RVector], [RMatrix], [RVectorCharacter], [RList], and [RFunction].
 
 pub mod r;
 pub mod rbindings;
 
 pub use r::{
-    AllocateProtected, Pc, RError, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
+    AllocateProtected, Pc, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
     TryAllocateProtected, R,
 };
+
+#[doc(hidden)]
+pub use r::RStopHelper;
 
 /// A procedural macro to facilitate calling a Rust function from R.
 pub use roxido_macro::roxido;

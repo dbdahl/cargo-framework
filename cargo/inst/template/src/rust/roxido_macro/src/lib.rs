@@ -209,7 +209,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                     Ok(obj) => obj,
                     Err(ref payload) => {
                         let mut scratch = String::new();
-                        let msg = match payload.downcast_ref::<crate::r::RError>() {
+                        let msg = match payload.downcast_ref::<crate::r::RStopHelper>() {
                             Some(x) => x.0.as_str(),
                             None => {
                                 scratch = format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name));

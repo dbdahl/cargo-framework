@@ -1,4 +1,4 @@
-0.4.8 (2023-07-13)
+0.4.9 (2023-07-13)
   * Support for R::stop function to throw an R error.
   * Added optional support for matrices from faer crate.
   * Generate bindings from R 4.3.

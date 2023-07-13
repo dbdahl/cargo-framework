@@ -22,6 +22,7 @@ for x in DOTgitignore \
          INSTALL \
          justfile \
          LICENSE \
+         src/dummy.c \
          src/Makevars \
          src/Makevars.win \
          src/rust/build.rs \

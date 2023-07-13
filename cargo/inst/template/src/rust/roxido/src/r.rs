@@ -20,6 +20,39 @@ use std::str::Utf8Error;
 pub struct R;
 
 impl R {
+    /// Generate random bytes using R's RNG.
+    ///
+    /// # Examples:
+    /// ```
+    /// let mut rng = rand_pcg::Pcg64Mcg::from_seed(crate::r::random_bytes::<16>());
+    /// ```
+    ///
+    pub fn random_bytes<const LENGTH: usize>() -> [u8; LENGTH] {
+        unsafe {
+            let m = (u8::MAX as f64) + 1.0;
+            let mut bytes: [u8; LENGTH] = [0; LENGTH];
+            GetRNGstate();
+            for x in bytes.iter_mut() {
+                *x = R_unif_index(m) as u8;
+            }
+            PutRNGstate();
+            bytes
+        }
+    }
+
+    /// Flush the R console.
+    pub fn flush_console() {
+        unsafe { R_FlushConsole() };
+    }
+
+    /// Check to see if the user has attempted to interrupt the execution.
+    pub fn check_user_interrupt() -> bool {
+        extern "C" fn check_interrupt_fn(_: *mut c_void) {
+            unsafe { R_CheckUserInterrupt() };
+        }
+        unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
+    }
+
     /// Get R's definition of the `Inf` value.
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
@@ -73,39 +106,6 @@ impl R {
     /// Test if value is NA for storage mode `logical`.
     pub fn is_na_logical(x: i32) -> bool {
         unsafe { x == R_NaInt }
-    }
-
-    /// Generate random bytes using R's RNG.
-    ///
-    /// # Examples:
-    /// ```
-    /// let mut rng = rand_pcg::Pcg64Mcg::from_seed(crate::r::random_bytes::<16>());
-    /// ```
-    ///
-    pub fn random_bytes<const LENGTH: usize>() -> [u8; LENGTH] {
-        unsafe {
-            let m = (u8::MAX as f64) + 1.0;
-            let mut bytes: [u8; LENGTH] = [0; LENGTH];
-            GetRNGstate();
-            for x in bytes.iter_mut() {
-                *x = R_unif_index(m) as u8;
-            }
-            PutRNGstate();
-            bytes
-        }
-    }
-
-    /// Flush the R console.
-    pub fn flush_console() {
-        unsafe { R_FlushConsole() };
-    }
-
-    /// Check to see if the user has attempted to interrupt the execution.
-    pub fn check_user_interrupt() -> bool {
-        extern "C" fn check_interrupt_fn(_: *mut c_void) {
-            unsafe { R_CheckUserInterrupt() };
-        }
-        unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
     }
 }
 
@@ -201,19 +201,20 @@ macro_rules! reprintln {
     }
 }
 
-pub struct RError(pub String);
+#[doc(hidden)]
+pub struct RStopHelper(pub String);
 
 /// Throw an R error.
 #[macro_export]
 macro_rules! stop {
     () => {
-        std::panic::panic_any(RError(String::new()))
+        std::panic::panic_any(RStopHelper(String::new()))
     };
     ($fmt_string:expr) => {
-        std::panic::panic_any(RError(format!($fmt_string)))
+        std::panic::panic_any(RStopHelper(format!($fmt_string)))
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        std::panic::panic_any(RError(format!($fmt_string, $($arg),*)))
+        std::panic::panic_any(RStopHelper(format!($fmt_string, $($arg),*)))
     }
 }
 
@@ -225,7 +226,7 @@ macro_rules! stop {
 #[repr(C)]
 pub struct RObject(pub SEXP);
 
-/// A Rust representation internal R types.
+/// A Rust representation of R's internal types.
 #[repr(u32)]
 #[derive(PartialEq, Debug)]
 pub enum RObjectType {
@@ -293,6 +294,257 @@ impl RObject {
         }
     }
 
+    /// Get the value `NULL`.
+    pub fn nil() -> Self {
+        Self(unsafe { R_NilValue })
+    }
+
+    /// Get R's definition of the `NA` value for an element of an object of storage mode `character`.
+    pub fn na_character() -> Self {
+        Self(unsafe { R_NaString })
+    }
+
+    /// Duplicate an object.
+    ///
+    /// Since multiple symbols may be bound to the same object, if the usual R semantics are to
+    /// apply, any code which alters one of them needs to make a copy before modifying the copy.
+    /// This method is commonly called on arguments to `.Call` before modifying them.
+    ///
+    pub fn duplicate(self, pc: &mut Pc) -> Self {
+        Self(pc.protect(unsafe { Rf_duplicate(self.0) }))
+    }
+
+    /// Is the object `NULL`?
+    pub fn is_nil(self) -> bool {
+        unsafe { Rf_isNull(self.0) != 0 }
+    }
+
+    /// Get the length of the object.
+    pub fn len(self) -> usize {
+        unsafe { Rf_length(self.0).try_into().unwrap() }
+    }
+
+    /// Is the length of the object zero?
+    pub fn is_empty(self) -> bool {
+        unsafe { Rf_length(self.0) == 0 }
+    }
+
+    /// Is the object of length one?
+    pub fn is_scalar(self) -> bool {
+        unsafe { Rf_length(self.0) == 1 }
+    }
+
+    /// Is the object of storage mode `double`?
+    pub fn is_double(self) -> bool {
+        unsafe { Rf_isReal(self.0) != 0 }
+    }
+
+    /// Is the object of storage mode `integer`?
+    pub fn is_integer(self) -> bool {
+        unsafe { Rf_isInteger(self.0) != 0 }
+    }
+
+    // Is the object of storage model `double` or `integer` and a scalar?
+    pub fn is_double_or_integer_scalar(self) -> bool {
+        self.is_scalar() && (self.is_double() || self.is_integer())
+    }
+
+    /// Is the object of storage mode `logical`?
+    pub fn is_logical(self) -> bool {
+        unsafe { Rf_isLogical(self.0) != 0 }
+    }
+
+    /// Is the object of storage mode `raw`?
+    pub fn is_raw(self) -> bool {
+        self.tipe() == RObjectType::RAWSXP
+    }
+
+    /// Is the object a symbol?
+    pub fn is_symbol(self) -> bool {
+        self.tipe() == RObjectType::SYMSXP
+    }
+
+    /// Is the object an element of an object of storage mode `character`?
+    pub fn is_character_element(self) -> bool {
+        self.tipe() == RObjectType::CHARSXP
+    }
+
+    /// Is the object of storage mode `character`?
+    pub fn is_character(self) -> bool {
+        unsafe { Rf_isString(self.0) != 0 }
+    }
+
+    /// Test if value is NA for an element of an object of storage mode `character`.
+    pub fn is_na_character(self) -> bool {
+        unsafe { self.0 == R_NaString }
+    }
+
+    /// Can the object be interpreted as `TRUE`?
+    pub fn is_true(self) -> bool {
+        unsafe { Rf_asLogical(self.0) == Rboolean_TRUE.try_into().unwrap() }
+    }
+
+    /// Can the object be interpreted as `FALSE`?
+    pub fn is_false(self) -> bool {
+        unsafe { Rf_asLogical(self.0) == Rboolean_FALSE.try_into().unwrap() }
+    }
+
+    /// Coerce the object to an `f64` value (potentially leading to an `NA`/`NaN` value).
+    pub fn as_f64(self) -> f64 {
+        unsafe { Rf_asReal(self.0) }
+    }
+
+    /// Coerce the object to an `i32` value (potentially leading to an `NA`/`NaN` value).
+    pub fn as_i32(self) -> i32 {
+        unsafe { Rf_asInteger(self.0) }
+    }
+
+    /// Coerce the object to a `bool` value (potentially leading to an `NA`/`NaN` value).
+    pub fn as_bool(self) -> bool {
+        unsafe { Rf_asLogical(self.0) == Rboolean_TRUE.try_into().unwrap() }
+    }
+
+    /// Coerce the object to a `usize` value (potentially leading to an `NA`/`NaN` value), setting negative values to zero.
+    pub fn as_usize(self) -> usize {
+        let len = unsafe { Rf_asInteger(self.0) };
+        len.try_into().unwrap_or(0)
+    }
+
+    /// Coerce the object to storage mode `character` and allocate an associated `String` value.
+    pub fn as_string(self) -> Result<String, Utf8Error> {
+        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
+        c_str.to_str().map(|x| x.to_string())
+    }
+
+    /// Coerce the object to storage mode `character` and get the associated `&str` value.
+    pub fn as_str(self) -> Result<&'static str, Utf8Error> {
+        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
+        c_str.to_str()
+    }
+
+    /// Is the object a vector?
+    pub fn is_vector(self) -> bool {
+        unsafe { Rf_isVector(self.0) != 0 }
+    }
+
+    /// Is the object a list?
+    ///
+    /// Check if the type is LISTSXP or EXPRSXP.
+    pub fn is_vector_list(self) -> bool {
+        unsafe { Rf_isVectorList(self.0) != 0 }
+    }
+
+    /// Is the object an atomic vector?
+    ///
+    /// Check if type is LGLSXP, INTSXP, REALSXP, CPLXSXP, STRSXP, or RAWSXP.
+    pub fn is_vector_atomic(self) -> bool {
+        unsafe { Rf_isVectorAtomic(self.0) != 0 }
+    }
+
+    /// Treat as an R vector.
+    pub fn as_vector(self) -> Result<RVector, &'static str> {
+        if !self.is_vector() {
+            Err("Not a vector")
+        } else {
+            Ok(RVector(self))
+        }
+    }
+
+    /// Treat as an R vector.
+    pub fn as_vector_or_stop(self, msg: &str) -> RVector {
+        if !self.is_vector() {
+            stop!("{}", msg)
+        } else {
+            RVector(self)
+        }
+    }
+
+    /// Is the object a list?
+    ///
+    /// Check if the type is VECSXP.
+    pub fn is_list(self) -> bool {
+        self.tipe() == RObjectType::VECSXP
+    }
+
+    /// Treat as an R list.
+    pub fn as_list(self) -> Result<RList, &'static str> {
+        if !self.is_list() {
+            Err("Not a list")
+        } else {
+            Ok(RList(RVector(self)))
+        }
+    }
+
+    /// Treat as an R list.
+    pub fn as_list_or_stop(self, msg: &str) -> RList {
+        if !self.is_list() {
+            stop!("{}", msg)
+        } else {
+            RList(RVector(self))
+        }
+    }
+
+    /// Is the object a matrix?
+    pub fn is_matrix(self) -> bool {
+        unsafe { Rf_isMatrix(self.0) != 0 }
+    }
+
+    /// Treat as an R matrix.
+    pub fn as_matrix(self) -> Result<RMatrix, &'static str> {
+        if !self.is_matrix() {
+            Err("Not a matrix")
+        } else {
+            Ok(RMatrix(RVector(self)))
+        }
+    }
+
+    /// Treat as an R matrix.
+    pub fn as_matrix_or_stop(self, msg: &str) -> RMatrix {
+        if !self.is_matrix() {
+            stop!("{}", msg)
+        } else {
+            RMatrix(RVector(self))
+        }
+    }
+
+    /// Is the object an array?
+    pub fn is_array(self) -> bool {
+        unsafe { Rf_isArray(self.0) != 0 }
+    }
+
+    /// Is the object a data.frame?
+    pub fn is_data_frame(self) -> bool {
+        unsafe { Rf_isFrame(self.0) != 0 }
+    }
+
+    /// Is the object a function?
+    pub fn is_function(self) -> bool {
+        unsafe { Rf_isFunction(self.0) != 0 }
+    }
+
+    /// Treat as an R function.
+    pub fn as_function(self) -> Result<RFunction, &'static str> {
+        if !self.is_function() {
+            Err("Not a function")
+        } else {
+            Ok(RFunction(self))
+        }
+    }
+
+    /// Treat as an R function.
+    pub fn as_function_or_stop(self, msg: &str) -> RFunction {
+        if !self.is_function() {
+            stop!("{}", msg);
+        } else {
+            RFunction(self)
+        }
+    }
+
+    /// Is the object an environment?
+    pub fn is_environment(self) -> bool {
+        unsafe { Rf_isEnvironment(self.0) != 0 }
+    }
+
     /// Define a new error.
     ///
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
@@ -309,7 +561,7 @@ impl RObject {
     /// Define a new element for a character vector.
     ///
     /// An element of a character vector should generally *not* be returned to a user, but this
-    /// function can be used in conjunction with [`Self::set_character_element`].
+    /// function can be used in conjunction with [`RVectorCharacter::set`].
     ///
     pub fn new_character(x: &str, pc: &mut Pc) -> Self {
         Self(pc.protect(unsafe {
@@ -321,16 +573,6 @@ impl RObject {
     pub fn new_symbol(x: &str, pc: &mut Pc) -> Self {
         let sexp = Self::new_character(x, pc).0;
         Self(pc.protect(unsafe { Rf_installChar(sexp) }))
-    }
-
-    /// Duplicate an object.
-    ///
-    /// Since multiple symbols may be bound to the same object, if the usual R semantics are to
-    /// apply, any code which alters one of them needs to make a copy before modifying the copy.
-    /// This method is commonly called on arguments to `.Call` before modifying them.
-    ///
-    pub fn duplicate(self, pc: &mut Pc) -> Self {
-        Self(pc.protect(unsafe { Rf_duplicate(self.0) }))
     }
 
     /// Move Rust object to an R external pointer
@@ -387,213 +629,6 @@ impl RObject {
         }
     }
 
-    /// Get the value `NULL`.
-    pub fn nil() -> Self {
-        Self(unsafe { R_NilValue })
-    }
-
-    /// Get R's definition of the `NA` value for an element of an object of storage mode `character`.
-    pub fn na_character() -> Self {
-        Self(unsafe { R_NaString })
-    }
-    /// Test if value is NA for an element of an object of storage mode `character`.
-    pub fn is_na_character(self) -> bool {
-        unsafe { self.0 == R_NaString }
-    }
-
-    /// Is the object of storage mode `double`?
-    pub fn is_double(self) -> bool {
-        unsafe { Rf_isReal(self.0) != 0 }
-    }
-
-    /// Is the object of storage mode `integer`?
-    pub fn is_integer(self) -> bool {
-        unsafe { Rf_isInteger(self.0) != 0 }
-    }
-
-    // Is the object of storage model `double` or `integer` and a scalar?
-    pub fn is_double_or_integer_scalar(self) -> bool {
-        self.is_scalar() && (self.is_double() || self.is_integer())
-    }
-
-    /// Is the object of storage mode `logical`?
-    pub fn is_logical(self) -> bool {
-        unsafe { Rf_isLogical(self.0) != 0 }
-    }
-
-    /// Is the object of storage mode `raw`?
-    pub fn is_raw(self) -> bool {
-        self.tipe() == RObjectType::RAWSXP
-    }
-
-    /// Is the object a symbol?
-    pub fn is_symbol(self) -> bool {
-        self.tipe() == RObjectType::SYMSXP
-    }
-
-    /// Is the object an element of an object of storage mode `character`?
-    pub fn is_character_element(self) -> bool {
-        self.tipe() == RObjectType::CHARSXP
-    }
-
-    /// Is the object of storage mode `character`?
-    pub fn is_character(self) -> bool {
-        unsafe { Rf_isString(self.0) != 0 }
-    }
-
-    /// Treat as an R list.
-    pub fn as_list(self) -> Result<RList, &'static str> {
-        if !self.is_list() {
-            Err("Not a list")
-        } else {
-            Ok(RList(RVector(self)))
-        }
-    }
-
-    /// Treat as an R list.
-    pub fn as_list_or_stop(self, msg: &str) -> RList {
-        if !self.is_list() {
-            stop!("{}", msg)
-        } else {
-            RList(RVector(self))
-        }
-    }
-
-    /// Is the object a list?
-    ///
-    /// Check if the type is VECSXP.
-    pub fn is_list(self) -> bool {
-        self.tipe() == RObjectType::VECSXP
-    }
-
-    /// Is the object a list?
-    ///
-    /// Check if the type is LISTSXP or EXPRSXP.
-    pub fn is_vector_list(self) -> bool {
-        unsafe { Rf_isVectorList(self.0) != 0 }
-    }
-
-    /// Is the object an atomic vector?
-    ///
-    /// Check if type is LGLSXP, INTSXP, REALSXP, CPLXSXP, STRSXP, or RAWSXP.
-    pub fn is_vector_atomic(self) -> bool {
-        unsafe { Rf_isVectorAtomic(self.0) != 0 }
-    }
-
-    /// Treat as an R vector.
-    pub fn as_vector(self) -> Result<RVector, &'static str> {
-        if !self.is_vector() {
-            Err("Not a vector")
-        } else {
-            Ok(RVector(self))
-        }
-    }
-
-    /// Treat as an R vector.
-    pub fn as_vector_or_stop(self, msg: &str) -> RVector {
-        if !self.is_vector() {
-            stop!("{}", msg)
-        } else {
-            RVector(self)
-        }
-    }
-
-    /// Is the object a vector?
-    pub fn is_vector(self) -> bool {
-        unsafe { Rf_isVector(self.0) != 0 }
-    }
-
-    /// Get the length of the object.
-    pub fn len(self) -> usize {
-        unsafe { Rf_length(self.0).try_into().unwrap() }
-    }
-
-    /// Is the length of the object zero?
-    pub fn is_empty(self) -> bool {
-        unsafe { Rf_length(self.0) == 0 }
-    }
-
-    /// Is the object of length one?
-    pub fn is_scalar(self) -> bool {
-        unsafe { Rf_length(self.0) == 1 }
-    }
-
-    /// Treat as an R matrix.
-    pub fn as_matrix(self) -> Result<RMatrix, &'static str> {
-        if !self.is_matrix() {
-            Err("Not a matrix")
-        } else {
-            Ok(RMatrix(RVector(self)))
-        }
-    }
-
-    /// Treat as an R matrix.
-    pub fn as_matrix_or_stop(self, msg: &str) -> RMatrix {
-        if !self.is_matrix() {
-            stop!("{}", msg)
-        } else {
-            RMatrix(RVector(self))
-        }
-    }
-
-    /// Is the object a matrix?
-    pub fn is_matrix(self) -> bool {
-        unsafe { Rf_isMatrix(self.0) != 0 }
-    }
-
-    /// Is the object an array?
-    pub fn is_array(self) -> bool {
-        unsafe { Rf_isArray(self.0) != 0 }
-    }
-
-    /// Is the object a data.frame?
-    pub fn is_data_frame(self) -> bool {
-        unsafe { Rf_isFrame(self.0) != 0 }
-    }
-
-    /// Is the object `NULL`?
-    pub fn is_nil(self) -> bool {
-        unsafe { Rf_isNull(self.0) != 0 }
-    }
-
-    /// Treat as an R function.
-    pub fn as_function(self) -> Result<RFunction, &'static str> {
-        if !self.is_function() {
-            Err("Not a function")
-        } else {
-            Ok(RFunction(self))
-        }
-    }
-
-    /// Treat as an R function.
-    pub fn as_function_or_stop(self, msg: &str) -> RFunction {
-        if !self.is_function() {
-            stop!("{}", msg);
-        } else {
-            RFunction(self)
-        }
-    }
-
-    /// Is the object a function?
-    pub fn is_function(self) -> bool {
-        unsafe { Rf_isFunction(self.0) != 0 }
-    }
-
-    /// Is the object an environment?
-    pub fn is_environment(self) -> bool {
-        unsafe { Rf_isEnvironment(self.0) != 0 }
-    }
-
-    /// Can the object be interpreted as `TRUE`?
-    pub fn is_true(self) -> bool {
-        unsafe { Rf_asLogical(self.0) == Rboolean_TRUE.try_into().unwrap() }
-    }
-
-    /// Can the object be interpreted as `FALSE`?
-    pub fn is_false(self) -> bool {
-        unsafe { Rf_asLogical(self.0) == Rboolean_FALSE.try_into().unwrap() }
-    }
-
     /// Get an attribute.
     pub fn get_attribute(self, which: &str, pc: &mut Pc) -> Self {
         Self(unsafe { Rf_getAttrib(self.0, Self::new_symbol(which, pc).0) })
@@ -644,39 +679,6 @@ impl RObject {
     ///
     pub fn class_gets(self, value: RVectorCharacter) {
         unsafe { Rf_classgets(self.0, value.0 .0 .0) };
-    }
-
-    /// Coerce the object to an `f64` value (potentially leading to an `NA`/`NaN` value).
-    pub fn as_f64(self) -> f64 {
-        unsafe { Rf_asReal(self.0) }
-    }
-
-    /// Coerce the object to an `i32` value (potentially leading to an `NA`/`NaN` value).
-    pub fn as_i32(self) -> i32 {
-        unsafe { Rf_asInteger(self.0) }
-    }
-
-    /// Coerce the object to a `bool` value (potentially leading to an `NA`/`NaN` value).
-    pub fn as_bool(self) -> bool {
-        unsafe { Rf_asLogical(self.0) == Rboolean_TRUE.try_into().unwrap() }
-    }
-
-    /// Coerce the object to a `usize` value (potentially leading to an `NA`/`NaN` value), setting negative values to zero.
-    pub fn as_usize(self) -> usize {
-        let len = unsafe { Rf_asInteger(self.0) };
-        len.try_into().unwrap_or(0)
-    }
-
-    /// Coerce the object to storage mode `character` and allocate an associated `String` value.
-    pub fn as_string(self) -> Result<String, Utf8Error> {
-        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
-        c_str.to_str().map(|x| x.to_string())
-    }
-
-    /// Coerce the object to storage mode `character` and get the associated `&str` value.
-    pub fn as_str(self) -> Result<&'static str, Utf8Error> {
-        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(self.0)) as *const c_char) };
-        c_str.to_str()
     }
 
     /// Evaluation a expression, returning the value or an error code.
@@ -1144,7 +1146,7 @@ impl RMatrix {
     }
 
     /// Define a new matrix with storage mode `character`.
-    pub fn new_matrix_character(nrow: usize, ncol: usize, pc: &mut Pc) -> Self {
+    pub fn new_character(nrow: usize, ncol: usize, pc: &mut Pc) -> Self {
         unsafe {
             let sexp = pc.protect(Rf_allocMatrix(
                 RObjectType::STRSXP as u32,
@@ -1251,6 +1253,93 @@ impl Deref for RMatrix {
 pub struct RFunction(RObject);
 
 impl RFunction {
+    /// Call a function with no arguments, returning the value or an error code.
+    pub fn call0(self, pc: &mut Pc) -> Result<RObject, i32> {
+        unsafe {
+            let sexp = pc.protect(Rf_lang1(self.0 .0));
+            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
+        }
+    }
+
+    /// Call a function with one argument, returning the value or an error code.
+    pub fn call1(self, x1: impl Into<RObject>, pc: &mut Pc) -> Result<RObject, i32> {
+        unsafe {
+            let sexp = pc.protect(Rf_lang2(self.0 .0, x1.into().0));
+            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
+        }
+    }
+
+    /// Call a function with two arguments, returning the value or an error code.
+    pub fn call2(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Result<RObject, i32> {
+        unsafe {
+            let sexp = pc.protect(Rf_lang3(self.0 .0, x1.into().0, x2.into().0));
+            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
+        }
+    }
+
+    /// Call a function with three arguments, returning the value or an error code.
+    pub fn call3(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Result<RObject, i32> {
+        unsafe {
+            let sexp = pc.protect(Rf_lang4(self.0 .0, x1.into().0, x2.into().0, x3.into().0));
+            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
+        }
+    }
+
+    /// Call a function with four arguments, returning the value or an error code.
+    pub fn call4(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        x4: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Result<RObject, i32> {
+        unsafe {
+            let sexp = pc.protect(Rf_lang5(
+                self.0 .0,
+                x1.into().0,
+                x2.into().0,
+                x3.into().0,
+                x4.into().0,
+            ));
+            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
+        }
+    }
+
+    /// Call a function with five arguments, returning the value or an error code.
+    pub fn call5(
+        self,
+        x1: impl Into<RObject>,
+        x2: impl Into<RObject>,
+        x3: impl Into<RObject>,
+        x4: impl Into<RObject>,
+        x5: impl Into<RObject>,
+        pc: &mut Pc,
+    ) -> Result<RObject, i32> {
+        unsafe {
+            let sexp = pc.protect(Rf_lang6(
+                self.0 .0,
+                x1.into().0,
+                x2.into().0,
+                x3.into().0,
+                x4.into().0,
+                x5.into().0,
+            ));
+            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
+        }
+    }
+
     /// Call a function with no arguments.
     ///
     /// # Safety
@@ -1366,93 +1455,6 @@ impl RFunction {
         ));
         let sexp = pc.protect(Rf_eval(sexp, R_GetCurrentEnv()));
         Self(RObject(sexp))
-    }
-
-    /// Call a function with no arguments, returning the value or an error code.
-    pub fn call0(self, pc: &mut Pc) -> Result<RObject, i32> {
-        unsafe {
-            let sexp = pc.protect(Rf_lang1(self.0 .0));
-            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
-        }
-    }
-
-    /// Call a function with one argument, returning the value or an error code.
-    pub fn call1(self, x1: impl Into<RObject>, pc: &mut Pc) -> Result<RObject, i32> {
-        unsafe {
-            let sexp = pc.protect(Rf_lang2(self.0 .0, x1.into().0));
-            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
-        }
-    }
-
-    /// Call a function with two arguments, returning the value or an error code.
-    pub fn call2(
-        self,
-        x1: impl Into<RObject>,
-        x2: impl Into<RObject>,
-        pc: &mut Pc,
-    ) -> Result<RObject, i32> {
-        unsafe {
-            let sexp = pc.protect(Rf_lang3(self.0 .0, x1.into().0, x2.into().0));
-            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
-        }
-    }
-
-    /// Call a function with three arguments, returning the value or an error code.
-    pub fn call3(
-        self,
-        x1: impl Into<RObject>,
-        x2: impl Into<RObject>,
-        x3: impl Into<RObject>,
-        pc: &mut Pc,
-    ) -> Result<RObject, i32> {
-        unsafe {
-            let sexp = pc.protect(Rf_lang4(self.0 .0, x1.into().0, x2.into().0, x3.into().0));
-            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
-        }
-    }
-
-    /// Call a function with four arguments, returning the value or an error code.
-    pub fn call4(
-        self,
-        x1: impl Into<RObject>,
-        x2: impl Into<RObject>,
-        x3: impl Into<RObject>,
-        x4: impl Into<RObject>,
-        pc: &mut Pc,
-    ) -> Result<RObject, i32> {
-        unsafe {
-            let sexp = pc.protect(Rf_lang5(
-                self.0 .0,
-                x1.into().0,
-                x2.into().0,
-                x3.into().0,
-                x4.into().0,
-            ));
-            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
-        }
-    }
-
-    /// Call a function with five arguments, returning the value or an error code.
-    pub fn call5(
-        self,
-        x1: impl Into<RObject>,
-        x2: impl Into<RObject>,
-        x3: impl Into<RObject>,
-        x4: impl Into<RObject>,
-        x5: impl Into<RObject>,
-        pc: &mut Pc,
-    ) -> Result<RObject, i32> {
-        unsafe {
-            let sexp = pc.protect(Rf_lang6(
-                self.0 .0,
-                x1.into().0,
-                x2.into().0,
-                x3.into().0,
-                x4.into().0,
-                x5.into().0,
-            ));
-            Self(RObject(sexp)).eval(RObject(R_GetCurrentEnv()), pc)
-        }
     }
 }
 
@@ -1912,7 +1914,7 @@ impl Drop for Pc {
 pub extern "C" fn set_custom_panic_hook() -> SEXP {
     let default_panic = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
-        if panic_info.payload().downcast_ref::<RError>().is_none() {
+        if panic_info.payload().downcast_ref::<RStopHelper>().is_none() {
             default_panic(panic_info);
         }
     }));
