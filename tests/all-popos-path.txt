@@ -1,4 +1,14 @@
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
+Build directory: /home/dahl/.cache/R/cargo/rust_fn
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.64
+   Compiling quote v1.0.29
+   Compiling unicode-ident v1.0.10
+   Compiling syn v2.0.25
+   Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
+   Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
+   Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
+    Finished release [optimized] target(s) in 4.02s
 warning: unreachable expression
  --> src/lib.rs:3:7
   |
@@ -77,7 +87,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:2:24
 Error in (function ()  : An error was thrown!
    Compiling roxido87 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.17s
+    Finished release [optimized] target(s) in 0.18s
     Updating crates.io index
    Compiling proc-macro2 v1.0.64
    Compiling unicode-ident v1.0.10
@@ -86,16 +96,16 @@ Error in (function ()  : An error was thrown!
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 4.84s
+    Finished release [optimized] target(s) in 3.88s
     Updating crates.io index
    Compiling proc-macro2 v1.0.64
-   Compiling unicode-ident v1.0.10
    Compiling quote v1.0.29
+   Compiling unicode-ident v1.0.10
    Compiling syn v2.0.25
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido90 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.53s
+    Finished release [optimized] target(s) in 3.89s
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 308 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
@@ -113,15 +123,16 @@ Cargo version '1.70.0' is available, which satisfies the need for '1.65'.
    Compiling syn v2.0.25
    Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized] target(s) in 3.57s
+    Finished release [optimized] target(s) in 4.13s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 0.19s
+    Finished release [optimized] target(s) in 0.21s
 ---
 Built Rust static library.
 ** libs
 using C compiler: ‘gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0’
+gcc -I"/home/dahl/.local/R/4.3.1-latest/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c dummy.c -o dummy.o
 gcc -I"/home/dahl/.local/R/4.3.1-latest/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -lR
+gcc -shared -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -L/usr/local/lib -o testpkg.so dummy.o shim.o -L. -lrust -L/home/dahl/.local/R/4.3.1-latest/lib/R/lib -lR
 installing to /home/dahl/.local/R/4.3.1-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
 ** R
 ** inst
@@ -156,7 +167,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [3s/27s] NOTE
+* checking CRAN incoming feasibility ... [3s/10s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
