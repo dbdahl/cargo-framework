@@ -6,6 +6,7 @@
 /R/roxido.R
 /src/shim.c
 /src/shim.o
+/src/dummy.o
 /src/*.a
 /src/*.so
 /src/rust/.cargo
