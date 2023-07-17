@@ -1,8 +1,9 @@
-0.4.9 (2023-07-13)
+0.4.9 (2023-07-17)
   * Support for R::stop function to throw an R error.
   * Added optional support for matrices from faer crate.
   * Generate bindings from R 4.3.
-  * Bump SystemRequirements for generated packages to Cargo (>= 1.65).
+  * Adjust "SystemRequirements" for generated packages as per
+    [Using Rust in CRAN packages](https://cran.r-project.org/web/packages/using_rust.html
   * Transparent to developer: Use bibentry instead of citEntry and
     upgrade to version 2 of syn crate.
   * Better template files when creating a new package.
