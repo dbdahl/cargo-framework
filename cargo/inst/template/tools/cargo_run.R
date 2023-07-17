@@ -65,12 +65,11 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       msg("Could not find 'SystemRequirements' field in DESCRIPTION file.\n")
       return(100)
     }
-    y <- gsub(".*[Cc]argo\\s*\\(>=\\s*([^)]+)\\).*", "\\1", x)
-    if (identical(x, y)) {
-      msg("Could not find expected 'SystemRequirements: Cargo (>= XXXX)' in DESCRIPTION file.")
+    if (!grepl("([Cc]argo|[Rr]ustc)\\s*[(]>=", x)) {
+      msg("In DESCRIPTION file, could not find 'SystemRequirements: rustc (>= XXXX)' or 'SystemRequirements: Cargo (>= XXXX)'.")
       return(101)
     }
-    gsub("\\s*([^ ]+)\\s*", "\\1", y)
+    sub("\\D*\\).*", "", sub(".*[(,]\\s*>=\\D*", "", x))
   } else {
     if (minimum_version == ".") "1.31.0" else minimum_version
   }
