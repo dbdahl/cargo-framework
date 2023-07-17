@@ -1,14 +1,15 @@
+rm -rf `Rscript -e 'cat(tools::R_user_dir("cargo", "cache"))'`/rust_fn
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
 Build directory: /home/dahl/.cache/R/cargo/rust_fn
     Updating crates.io index
-   Compiling proc-macro2 v1.0.64
-   Compiling quote v1.0.29
-   Compiling unicode-ident v1.0.10
-   Compiling syn v2.0.25
+   Compiling proc-macro2 v1.0.66
+   Compiling unicode-ident v1.0.11
+   Compiling quote v1.0.31
+   Compiling syn v2.0.26
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 4.02s
+    Finished release [optimized] target(s) in 4.69s
 warning: unreachable expression
  --> src/lib.rs:3:7
   |
@@ -87,25 +88,25 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a vector"', src/lib.rs:2:24
 Error in (function ()  : An error was thrown!
    Compiling roxido87 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.18s
+    Finished release [optimized] target(s) in 0.23s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.64
-   Compiling unicode-ident v1.0.10
-   Compiling quote v1.0.29
-   Compiling syn v2.0.25
+   Compiling proc-macro2 v1.0.66
+   Compiling unicode-ident v1.0.11
+   Compiling quote v1.0.31
+   Compiling syn v2.0.26
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido89 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.88s
+    Finished release [optimized] target(s) in 4.66s
     Updating crates.io index
-   Compiling proc-macro2 v1.0.64
-   Compiling quote v1.0.29
-   Compiling unicode-ident v1.0.10
-   Compiling syn v2.0.25
+   Compiling proc-macro2 v1.0.66
+   Compiling unicode-ident v1.0.11
+   Compiling quote v1.0.31
+   Compiling syn v2.0.26
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido90 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.89s
+    Finished release [optimized] target(s) in 5.08s
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 308 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
@@ -116,16 +117,16 @@ Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
 Cargo version '1.70.0' is available, which satisfies the need for '1.65'.
     Updating crates.io index
-   Compiling proc-macro2 v1.0.64
-   Compiling unicode-ident v1.0.10
-   Compiling quote v1.0.29
+   Compiling proc-macro2 v1.0.66
+   Compiling unicode-ident v1.0.11
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-   Compiling syn v2.0.25
+   Compiling quote v1.0.31
+   Compiling syn v2.0.26
    Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized] target(s) in 4.13s
+    Finished release [optimized] target(s) in 7.20s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 0.21s
+    Finished release [optimized] target(s) in 0.33s
 ---
 Built Rust static library.
 ** libs
@@ -167,7 +168,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [3s/10s] NOTE
+* checking CRAN incoming feasibility ... [4s/11s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission

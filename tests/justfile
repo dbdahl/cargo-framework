@@ -1,11 +1,14 @@
 all: rust_fn package
 
-rust_fn:
+rust_fn: clean
     Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
 
-package:
+package: clean
     rm -rf testpkg
     Rscript -e "cargo::new_package('testpkg')"
     R CMD build testpkg
     R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
     Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
+
+clean:
+    rm -rf `Rscript -e 'cat(tools::R_user_dir("cargo", "cache"))'`/rust_fn
