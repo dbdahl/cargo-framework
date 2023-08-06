@@ -29,24 +29,20 @@ impl Numeric for TF64 {}
 impl Numeric for TI32 {}
 
 struct RObject<RType = AnyType, RMode = Unspecified> {
-    ptr: SEXP,
+    sexp: SEXP,
     rtype: PhantomData<(RType, RMode)>,
 }
 
 impl<RType, RMode> RObject<RType, RMode> {
-    fn new<RTypeTo, RModeTo>(ptr: SEXP) -> RObject<RTypeTo, RModeTo> {
+    fn new<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
         RObject {
-            ptr,
+            sexp,
             rtype: PhantomData,
         }
     }
 
     fn convert<RTypeTo, RModeTo>(self) -> RObject<RTypeTo, RModeTo> {
-        Self::new(self.ptr)
-        // RObject {
-        //     ptr: self.ptr,
-        //     rtype: PhantomData,
-        // }
+        Self::new(self.sexp)
     }
 
     pub fn to_base(self) -> RObject {
@@ -54,44 +50,44 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     pub fn is_f64(&self) -> bool {
-        unsafe { Rf_isReal(self.ptr) != 0 }
+        unsafe { Rf_isReal(self.sexp) != 0 }
     }
 
     pub fn is_i32(&self) -> bool {
-        unsafe { Rf_isInteger(self.ptr) != 0 }
+        unsafe { Rf_isInteger(self.sexp) != 0 }
     }
 
     pub fn is_vector(&self) -> bool {
-        unsafe { Rf_isVector(self.ptr) != 0 }
+        unsafe { Rf_isVector(self.sexp) != 0 }
     }
 
     pub fn is_vector_atomic(&self) -> bool {
-        unsafe { Rf_isVectorAtomic(self.ptr) != 0 }
+        unsafe { Rf_isVectorAtomic(self.sexp) != 0 }
     }
 
     pub fn is_vector_list(&self) -> bool {
-        unsafe { Rf_isVectorList(self.ptr) != 0 }
+        unsafe { Rf_isVectorList(self.sexp) != 0 }
     }
 
     pub fn is_matrix(&self) -> bool {
-        unsafe { Rf_isMatrix(self.ptr) != 0 }
+        unsafe { Rf_isMatrix(self.sexp) != 0 }
     }
 
     pub fn is_array(&self) -> bool {
-        unsafe { Rf_isArray(self.ptr) != 0 }
+        unsafe { Rf_isArray(self.sexp) != 0 }
     }
 
     pub fn is_function(&self) -> bool {
-        unsafe { Rf_isFunction(self.ptr) != 0 }
+        unsafe { Rf_isFunction(self.sexp) != 0 }
     }
 
     pub fn is_number(&self) -> bool {
-        unsafe { Rf_isNumber(self.ptr) != 0 }
+        unsafe { Rf_isNumber(self.sexp) != 0 }
     }
 
     pub fn is_scalar(&self) -> bool {
         if self.is_number() {
-            unsafe { Rf_xlength(self.ptr) == 1 }
+            unsafe { Rf_xlength(self.sexp) == 1 }
         } else {
             false
         }
@@ -99,7 +95,7 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn as_f64(&self) -> Result<f64, &'static str> {
         if self.is_scalar() {
-            Ok(unsafe { Rf_asReal(self.ptr) })
+            Ok(unsafe { Rf_asReal(self.sexp) })
         } else {
             Err("Canot be interperated as an f64")
         }
@@ -107,7 +103,7 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn as_i32(&self) -> Result<i32, &'static str> {
         if self.is_scalar() {
-            Ok(unsafe { Rf_asInteger(self.ptr) })
+            Ok(unsafe { Rf_asInteger(self.sexp) })
         } else {
             Err("Canot be interperated as an i32")
         }
@@ -115,7 +111,7 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn as_usize(&self) -> Result<usize, &'static str> {
         if self.is_scalar() {
-            let value = unsafe { Rf_asInteger(self.ptr) };
+            let value = unsafe { Rf_asInteger(self.sexp) };
             match usize::try_from(value) {
                 Ok(e) => Ok(e),
                 _ => Err("Canot be interperated as a usize scalar"),
@@ -127,7 +123,7 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn as_bool(&self) -> Result<bool, &'static str> {
         if self.is_scalar() {
-            let value = unsafe { Rf_asLogical(self.ptr) };
+            let value = unsafe { Rf_asLogical(self.sexp) };
             Ok(value != 0)
         } else {
             Err("Canot be interperated as an bool")
@@ -211,26 +207,30 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     /// Define a new symbol.
     pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject {
-        let sexp = Self::new_character(x, pc).ptr;
+        let sexp = Self::new_character(x, pc).sexp;
         Self::new(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
     /// Get an attribute.
     pub fn get_attribute(self, which: &str, pc: &mut Pc) -> RObject {
-        Self::new(unsafe { Rf_getAttrib(self.ptr, Self::new_symbol(which, pc).ptr) })
+        Self::new(unsafe { Rf_getAttrib(self.sexp, Self::new_symbol(which, pc).sexp) })
     }
 
     /// Set an attribute.
     pub fn set_attribute(self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
         unsafe {
-            Rf_setAttrib(self.ptr, Self::new_symbol(which, pc).ptr, value.into().ptr);
+            Rf_setAttrib(
+                self.sexp,
+                Self::new_symbol(which, pc).sexp,
+                value.into().sexp,
+            );
         }
     }
 }
 
 impl<S: Sliceable, T> RObject<S, T> {
     pub fn len(&self) -> usize {
-        let len = unsafe { Rf_xlength(self.ptr) };
+        let len = unsafe { Rf_xlength(self.sexp) };
         len.try_into().unwrap() // Won't ever fail if R is sane.
     }
 
@@ -242,22 +242,22 @@ impl<S: Sliceable, T> RObject<S, T> {
 
 impl<S: Sliceable> RObject<S, TF64> {
     pub fn slice(&self) -> &'static [f64] {
-        self.slice_engine(unsafe { REAL(self.ptr) })
+        self.slice_engine(unsafe { REAL(self.sexp) })
     }
 }
 
 impl<S: Sliceable> RObject<S, TI32> {
     pub fn slice(&self) -> &'static [i32] {
-        self.slice_engine(unsafe { INTEGER(self.ptr) })
+        self.slice_engine(unsafe { INTEGER(self.sexp) })
     }
 }
 
 impl<T> RObject<Matrix, T> {
     pub fn nrows(&self) -> usize {
-        unsafe { Rf_nrows(self.ptr).try_into().unwrap() }
+        unsafe { Rf_nrows(self.sexp).try_into().unwrap() }
     }
     pub fn ncols(&self) -> usize {
-        unsafe { Rf_ncols(self.ptr).try_into().unwrap() }
+        unsafe { Rf_ncols(self.sexp).try_into().unwrap() }
     }
 }
 
@@ -277,7 +277,7 @@ impl RObject<Function, Unspecified> {
         match p_out_error {
             0 => {
                 let robject = RObject {
-                    ptr: sexp,
+                    sexp,
                     rtype: PhantomData,
                 };
                 Ok(robject)
@@ -287,12 +287,12 @@ impl RObject<Function, Unspecified> {
     }
 
     pub fn call0(self, pc: &mut Pc) -> Result<RObject, i32> {
-        let expression = unsafe { Rf_lang1(self.ptr) };
+        let expression = unsafe { Rf_lang1(self.sexp) };
         Self::eval(expression, pc)
     }
 
     pub fn call1<T1, M1>(self, arg1: RObject<T1, M1>, pc: &mut Pc) -> Result<RObject, i32> {
-        let expression = unsafe { Rf_lang2(self.ptr, arg1.ptr) };
+        let expression = unsafe { Rf_lang2(self.sexp, arg1.sexp) };
         Self::eval(expression, pc)
     }
 
@@ -302,7 +302,7 @@ impl RObject<Function, Unspecified> {
         arg2: RObject<T2, M2>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
-        let expression = unsafe { Rf_lang3(self.ptr, arg1.ptr, arg2.ptr) };
+        let expression = unsafe { Rf_lang3(self.sexp, arg1.sexp, arg2.sexp) };
         Self::eval(expression, pc)
     }
 
@@ -313,7 +313,7 @@ impl RObject<Function, Unspecified> {
         arg3: RObject<T2, M3>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
-        let expression = unsafe { Rf_lang4(self.ptr, arg1.ptr, arg2.ptr, arg3.ptr) };
+        let expression = unsafe { Rf_lang4(self.sexp, arg1.sexp, arg2.sexp, arg3.sexp) };
         Self::eval(expression, pc)
     }
 
@@ -325,7 +325,7 @@ impl RObject<Function, Unspecified> {
         arg4: RObject<T4, M4>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
-        let expression = unsafe { Rf_lang5(self.ptr, arg1.ptr, arg2.ptr, arg3.ptr, arg4.ptr) };
+        let expression = unsafe { Rf_lang5(self.sexp, arg1.sexp, arg2.sexp, arg3.sexp, arg4.sexp) };
         Self::eval(expression, pc)
     }
 
@@ -338,8 +338,11 @@ impl RObject<Function, Unspecified> {
         arg5: RObject<T5, M5>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
-        let expression =
-            unsafe { Rf_lang6(self.ptr, arg1.ptr, arg2.ptr, arg3.ptr, arg4.ptr, arg5.ptr) };
+        let expression = unsafe {
+            Rf_lang6(
+                self.sexp, arg1.sexp, arg2.sexp, arg3.sexp, arg4.sexp, arg5.sexp,
+            )
+        };
         Self::eval(expression, pc)
     }
 }
