@@ -1,9 +1,19 @@
+//! Extension Framework for R using Rust
+
+#![allow(dead_code)]
+
+// Helpful resources:
+//   https://cran.r-project.org/doc/manuals/r-release/R-ints.html
+//   https://svn.r-project.org/R/trunk/src/include/Rinternals.h
+//   https://github.com/hadley/r-internals
+//   https://www.tidyverse.org/blog/2019/05/resource-cleanup-in-c-and-the-r-api
+//   https://github.com/wch/r-source
+
 use crate::pc::Pc;
 use crate::rbindings::*;
 
 use std::ffi::c_char;
 use std::marker::PhantomData;
-use std::ops::Index;
 
 struct AnyType(());
 struct Vector(());
@@ -12,21 +22,13 @@ struct Array(());
 struct Function(());
 struct RString(());
 
-struct TF64(());
-struct TI32(());
 struct Character(());
 struct Unspecified(());
 
 trait Sliceable {}
-
 impl Sliceable for Vector {}
 impl Sliceable for Matrix {}
 impl Sliceable for Array {}
-
-trait Numeric {}
-
-impl Numeric for TF64 {}
-impl Numeric for TI32 {}
 
 struct RObject<RType = AnyType, RMode = Unspecified> {
     sexp: SEXP,
@@ -130,7 +132,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_f64(self) -> Result<RObject<Vector, TF64>, &'static str> {
+    pub fn as_vector_f64(self) -> Result<RObject<Vector, f64>, &'static str> {
         if self.is_vector_atomic() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -138,7 +140,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_integer(self) -> Result<RObject<Vector, TI32>, &'static str> {
+    pub fn as_vector_integer(self) -> Result<RObject<Vector, i32>, &'static str> {
         if self.is_vector_atomic() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -146,7 +148,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_f64(self) -> Result<RObject<Matrix, TF64>, &'static str> {
+    pub fn as_matrix_f64(self) -> Result<RObject<Matrix, f64>, &'static str> {
         if self.is_matrix() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -154,7 +156,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_i32(self) -> Result<RObject<Matrix, TI32>, &'static str> {
+    pub fn as_matrix_i32(self) -> Result<RObject<Matrix, i32>, &'static str> {
         if self.is_matrix() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -162,7 +164,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_f64(self) -> Result<RObject<Array, TF64>, &'static str> {
+    pub fn as_array_f64(self) -> Result<RObject<Array, f64>, &'static str> {
         if self.is_array() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -170,7 +172,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_i32(self) -> Result<RObject<Array, TI32>, &'static str> {
+    pub fn as_array_i32(self) -> Result<RObject<Array, i32>, &'static str> {
         if self.is_array() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -240,13 +242,13 @@ impl<S: Sliceable, T> RObject<S, T> {
     }
 }
 
-impl<S: Sliceable> RObject<S, TF64> {
+impl<S: Sliceable> RObject<S, f64> {
     pub fn slice(&self) -> &'static [f64] {
         self.slice_engine(unsafe { REAL(self.sexp) })
     }
 }
 
-impl<S: Sliceable> RObject<S, TI32> {
+impl<S: Sliceable> RObject<S, i32> {
     pub fn slice(&self) -> &'static [i32] {
         self.slice_engine(unsafe { INTEGER(self.sexp) })
     }
@@ -347,58 +349,81 @@ impl RObject<Function, Unspecified> {
     }
 }
 
-impl Index<RObject<Vector, TF64>> for usize {
-    type Output = f64;
+impl RObject<Vector, f64> {
+    fn get(&self, index: usize) -> f64 {
+        unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
+    }
 
-    fn index(&self, x: RObject<Vector, TF64>) -> &Self::Output {
-        &x.slice()[*self]
+    fn set<RType, RMode>(&self, index: usize, value: f64) {
+        unsafe {
+            SET_REAL_ELT(self.sexp, index.try_into().unwrap(), value);
+        }
     }
 }
 
-impl Index<RObject<Vector, TI32>> for usize {
-    type Output = i32;
+impl RObject<Vector, i32> {
+    fn get(&self, index: usize) -> i32 {
+        unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
+    }
 
-    fn index(&self, x: RObject<Vector, TI32>) -> &Self::Output {
-        &x.slice()[*self]
+    fn set<RType, RMode>(&self, index: usize, value: i32) {
+        unsafe {
+            SET_INTEGER_ELT(self.sexp, index.try_into().unwrap(), value);
+        }
     }
 }
 
-impl Index<RObject<Matrix, TF64>> for (usize, usize) {
-    type Output = f64;
+impl RObject<Vector, Unspecified> {
+    fn get(&self, index: usize) -> RObject {
+        Self::new(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
+    }
 
-    fn index(&self, x: RObject<Matrix, TF64>) -> &Self::Output {
-        unimplemented!()
+    fn set<RType, RMode>(&self, index: usize, value: RObject<RType, RMode>) {
+        unsafe {
+            SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp);
+        }
     }
 }
 
-impl Index<RObject<Matrix, TI32>> for (usize, usize) {
-    type Output = i32;
-
-    fn index(&self, x: RObject<Matrix, TI32>) -> &Self::Output {
-        unimplemented!()
+impl<RMode> RObject<Matrix, RMode> {
+    fn index(&self, (i, j): (usize, usize)) -> isize {
+        let nrows = self.nrows();
+        (nrows * j + i).try_into().unwrap()
     }
 }
 
-impl<const N: usize> Index<RObject<Array, TF64>> for [usize; N] {
-    type Output = f64;
+impl RObject<Matrix, f64> {
+    fn get(&self, index: (usize, usize)) -> f64 {
+        unsafe { REAL_ELT(self.sexp, self.index(index)) }
+    }
 
-    fn index(&self, x: RObject<Array, TF64>) -> &Self::Output {
-        unimplemented!()
+    fn set<RType, RMode>(&self, index: (usize, usize), value: f64) {
+        unsafe {
+            SET_REAL_ELT(self.sexp, self.index(index), value);
+        }
     }
 }
 
-impl<const N: usize> Index<RObject<Array, TI32>> for [usize; N] {
-    type Output = i32;
+impl RObject<Matrix, i32> {
+    fn get(&self, index: (usize, usize)) -> i32 {
+        unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
+    }
 
-    fn index(&self, x: RObject<Array, TI32>) -> &Self::Output {
-        unimplemented!()
+    fn set<RType, RMode>(&self, index: (usize, usize), value: i32) {
+        unsafe {
+            SET_INTEGER_ELT(self.sexp, self.index(index), value);
+        }
     }
 }
 
-impl Index<RObject<Vector, Unspecified>> for usize {
-    type Output = RObject;
+impl RObject<Matrix, Unspecified> {
+    fn get(&self, index: (usize, usize)) -> RObject {
+        Self::new(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
+    }
 
-    fn index(&self, x: RObject<Vector, Unspecified>) -> &Self::Output {
-        unimplemented!()
+    fn set<RType, RMode>(&self, index: (usize, usize), value: RObject<RType, RMode>) {
+        unsafe {
+            SET_VECTOR_ELT(self.sexp, self.index(index), value.sexp);
+        }
     }
 }
