@@ -18,13 +18,17 @@
 //! This crate provides the Rust API for the cargo framework.  Of particular note
 //! is [R], [RObject], [RVector], [RMatrix], [RVectorCharacter], [RList], and [RFunction].
 
+pub mod pc;
 pub mod r;
+pub mod r2;
 pub mod rbindings;
 
 pub use r::{
-    AllocateProtected, Pc, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
+    AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
     TryAllocateProtected, R,
 };
+
+pub use pc::Pc;
 
 #[doc(hidden)]
 pub use r::RStopHelper;
