@@ -42,6 +42,32 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    fn new_vector<T>(code: u32, length: usize, pc: &mut Pc) -> RObject<Vector, T> {
+        Self::new(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
+    }
+
+    fn new_vector_f64(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
+        Self::new_vector::<f64>(REALSXP, length, pc)
+    }
+
+    fn new_vector_i32(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
+        Self::new_vector::<i32>(INTSXP, length, pc)
+    }
+
+    fn new_matrix<T>(code: u32, nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, T> {
+        Self::new(pc.protect(unsafe {
+            Rf_allocMatrix(code, nrows.try_into().unwrap(), ncols.try_into().unwrap())
+        }))
+    }
+
+    fn new_matrix_f64(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
+        Self::new_matrix::<f64>(REALSXP, nrows, ncols, pc)
+    }
+
+    fn new_matrix_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
+        Self::new_matrix::<i32>(INTSXP, nrows, ncols, pc)
+    }
+
     fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
         Self::new(self.sexp)
     }
@@ -139,11 +165,41 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &'static str> {
+        if self.is_vector_atomic() {
+            if self.is_f64() {
+                Ok(self.convert())
+            } else if self.is_i32() {
+                let x: RObject<Vector, i32> = self.convert();
+                Ok(x.to_f64(pc))
+            } else {
+                Err("Does not contain i32 or f64")
+            }
+        } else {
+            Err("Not an vector")
+        }
+    }
+
     pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &'static str> {
         if self.is_vector_atomic() && self.is_i32() {
             Ok(self.convert())
         } else {
             Err("Not an i32 vector")
+        }
+    }
+
+    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &'static str> {
+        if self.is_vector_atomic() {
+            if self.is_i32() {
+                Ok(self.convert())
+            } else if self.is_f64() {
+                let x: RObject<Vector, f64> = self.convert();
+                Ok(x.to_i32(pc))
+            } else {
+                Err("Does not contain i32 or f64")
+            }
+        } else {
+            Err("Not an vector")
         }
     }
 
@@ -155,11 +211,41 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &'static str> {
+        if self.is_matrix() {
+            if self.is_f64() {
+                Ok(self.convert())
+            } else if self.is_i32() {
+                let x: RObject<Matrix, i32> = self.convert();
+                Ok(x.to_f64(pc))
+            } else {
+                Err("Does not contain i32 or f64")
+            }
+        } else {
+            Err("Not a matrix")
+        }
+    }
+
     pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &'static str> {
         if self.is_matrix() && self.is_i32() {
             Ok(self.convert())
         } else {
             Err("Not an i32 matrix")
+        }
+    }
+
+    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &'static str> {
+        if self.is_matrix() {
+            if self.is_i32() {
+                Ok(self.convert())
+            } else if self.is_f64() {
+                let x: RObject<Matrix, f64> = self.convert();
+                Ok(x.to_i32(pc))
+            } else {
+                Err("Does not contain i32 or f64")
+            }
+        } else {
+            Err("Not a matrix")
         }
     }
 
@@ -349,6 +435,10 @@ impl RObject<Function, Unspecified> {
 }
 
 impl RObject<Vector, f64> {
+    fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+    }
+
     fn get(&self, index: usize) -> f64 {
         unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
     }
@@ -361,6 +451,10 @@ impl RObject<Vector, f64> {
 }
 
 impl RObject<Vector, i32> {
+    fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+    }
+
     fn get(&self, index: usize) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
     }
@@ -392,6 +486,10 @@ impl<RMode> RObject<Matrix, RMode> {
 }
 
 impl RObject<Matrix, f64> {
+    fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
+        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+    }
+
     fn get(&self, index: (usize, usize)) -> f64 {
         unsafe { REAL_ELT(self.sexp, self.index(index)) }
     }
@@ -404,6 +502,10 @@ impl RObject<Matrix, f64> {
 }
 
 impl RObject<Matrix, i32> {
+    fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
+        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+    }
+
     fn get(&self, index: (usize, usize)) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
     }
