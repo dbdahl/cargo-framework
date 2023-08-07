@@ -12,8 +12,9 @@
 use crate::pc::Pc;
 use crate::rbindings::*;
 
-use std::ffi::c_char;
+use std::ffi::{c_char, CStr};
 use std::marker::PhantomData;
+use std::str::Utf8Error;
 
 pub struct RObject<RType = AnyType, RMode = Unspecified> {
     pub sexp: SEXP,
@@ -26,7 +27,6 @@ pub struct Matrix(());
 pub struct Array(());
 pub struct Function(());
 pub struct Single(());
-pub struct Character(());
 pub struct Unspecified(());
 pub trait Sliceable {}
 
@@ -298,20 +298,15 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    /// Define a new element for a character vector.
-    ///
-    /// An element of a character vector should generally *not* be returned to a user, but this
-    /// function can be used in conjunction with [`RVectorCharacter::set`].
-    ///
-    pub fn new_character(x: &str, pc: &mut Pc) -> RObject<Single, Character> {
-        Self::new(pc.protect(unsafe {
-            Rf_mkCharLen(x.as_ptr() as *const c_char, x.len().try_into().unwrap())
-        }))
-    }
-
     /// Define a new symbol.
     pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject {
-        let sexp = Self::new_character(x, pc).sexp;
+        let sexp = pc.protect(unsafe {
+            Rf_mkCharLenCE(
+                x.as_ptr() as *const c_char,
+                x.len().try_into().unwrap(),
+                cetype_t_CE_UTF8,
+            )
+        });
         Self::new(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
@@ -483,6 +478,25 @@ impl RObject<Vector, i32> {
     }
 }
 
+impl RObject<Vector, &str> {
+    pub fn get(&self, index: usize) -> Result<&'static str, Utf8Error> {
+        let sexp = unsafe { STRING_ELT(self.sexp, index.try_into().unwrap()) };
+        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
+        c_str.to_str()
+    }
+
+    pub fn set<RType, RMode>(&self, index: usize, value: &'static str) {
+        unsafe {
+            let value = Rf_mkCharLenCE(
+                value.as_ptr() as *const c_char,
+                value.len().try_into().unwrap(),
+                cetype_t_CE_UTF8,
+            );
+            SET_STRING_ELT(self.sexp, index.try_into().unwrap(), value);
+        }
+    }
+}
+
 impl RObject<Vector, Unspecified> {
     pub fn get(&self, index: usize) -> RObject {
         Self::new(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
@@ -534,6 +548,25 @@ impl RObject<Matrix, i32> {
     }
 }
 
+impl RObject<Matrix, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<&'static str, Utf8Error> {
+        let sexp = unsafe { STRING_ELT(self.sexp, self.index(index)) };
+        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
+        c_str.to_str()
+    }
+
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &'static str) {
+        unsafe {
+            let value = Rf_mkCharLenCE(
+                value.as_ptr() as *const c_char,
+                value.len().try_into().unwrap(),
+                cetype_t_CE_UTF8,
+            );
+            SET_STRING_ELT(self.sexp, self.index(index), value);
+        }
+    }
+}
+
 impl RObject<Matrix, Unspecified> {
     pub fn get(&self, index: (usize, usize)) -> RObject {
         Self::new(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
@@ -543,5 +576,46 @@ impl RObject<Matrix, Unspecified> {
         unsafe {
             SET_VECTOR_ELT(self.sexp, self.index(index), value.sexp);
         }
+    }
+}
+
+trait IntoProtected<T> {
+    fn into(self, pc: &mut Pc) -> T;
+}
+
+impl IntoProtected<RObject<Vector, f64>> for f64 {
+    fn into(self, pc: &mut Pc) -> RObject<Vector, f64> {
+        RObject::<Vector, f64>::new(pc.protect(unsafe { Rf_ScalarReal(self) }))
+    }
+}
+
+impl IntoProtected<RObject<Vector, i32>> for i32 {
+    fn into(self, pc: &mut Pc) -> RObject<Vector, i32> {
+        RObject::<Vector, i32>::new(pc.protect(unsafe { Rf_ScalarInteger(self) }))
+    }
+}
+
+impl IntoProtected<RObject<Vector, &'static str>> for &'static str {
+    fn into(self, pc: &mut Pc) -> RObject<Vector, &'static str> {
+        let sexp = unsafe {
+            Rf_ScalarString(Rf_mkCharLenCE(
+                self.as_ptr() as *const c_char,
+                self.len().try_into().unwrap(),
+                cetype_t_CE_UTF8,
+            ))
+        };
+        RObject::<Vector, &'static str>::new(pc.protect(sexp))
+    }
+}
+
+impl From<RObject<Vector, f64>> for f64 {
+    fn from(x: RObject<Vector, f64>) -> Self {
+        unsafe { Rf_asReal(x.sexp) }
+    }
+}
+
+impl From<RObject<Vector, i32>> for i32 {
+    fn from(x: RObject<Vector, i32>) -> Self {
+        unsafe { Rf_asInteger(x.sexp) }
     }
 }
