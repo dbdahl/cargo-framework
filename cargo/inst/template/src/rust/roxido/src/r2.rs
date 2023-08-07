@@ -19,6 +19,18 @@ use std::str::Utf8Error;
 pub struct R {}
 pub struct Str;
 
+pub struct AnyType(());
+pub struct Vector(());
+pub struct Matrix(());
+pub struct Array(());
+pub struct Function(());
+pub struct Unspecified(());
+pub trait Sliceable {}
+
+impl Sliceable for Vector {}
+impl Sliceable for Matrix {}
+impl Sliceable for Array {}
+
 impl R {
     fn wrap<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
         RObject {
@@ -95,18 +107,6 @@ pub struct RObject<RType = AnyType, RMode = Unspecified> {
     pub sexp: SEXP,
     rtype: PhantomData<(RType, RMode)>,
 }
-
-pub struct AnyType(());
-pub struct Vector(());
-pub struct Matrix(());
-pub struct Array(());
-pub struct Function(());
-pub struct Unspecified(());
-pub trait Sliceable {}
-
-impl Sliceable for Vector {}
-impl Sliceable for Matrix {}
-impl Sliceable for Array {}
 
 impl<RType, RMode> RObject<RType, RMode> {
     fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
