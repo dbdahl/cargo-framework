@@ -625,6 +625,12 @@ impl IntoProtected<RObject<Vector, Str>> for &str {
 
 impl<const N: usize> IntoProtected<RObject<Vector, f64>> for [f64; N] {
     fn to(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+        self.as_ref().to(pc)
+    }
+}
+
+impl IntoProtected<RObject<Vector, f64>> for &[f64] {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         let result = R::new_vector_f64(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
@@ -633,6 +639,12 @@ impl<const N: usize> IntoProtected<RObject<Vector, f64>> for [f64; N] {
 }
 
 impl<const N: usize> IntoProtected<RObject<Vector, i32>> for [i32; N] {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        self.as_ref().to(pc)
+    }
+}
+
+impl IntoProtected<RObject<Vector, i32>> for &[i32] {
     fn to(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -643,22 +655,16 @@ impl<const N: usize> IntoProtected<RObject<Vector, i32>> for [i32; N] {
 
 impl<const N: usize> IntoProtected<RObject<Vector, Str>> for [&str; N] {
     fn to(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+        self.as_ref().to(pc)
+    }
+}
+
+impl IntoProtected<RObject<Vector, Str>> for &[&str] {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let result = R::new_vector_str(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
             result.set(index, s);
         }
         result
-    }
-}
-
-impl From<RObject<Vector, f64>> for f64 {
-    fn from(x: RObject<Vector, f64>) -> Self {
-        unsafe { Rf_asReal(x.sexp) }
-    }
-}
-
-impl From<RObject<Vector, i32>> for i32 {
-    fn from(x: RObject<Vector, i32>) -> Self {
-        unsafe { Rf_asInteger(x.sexp) }
     }
 }
