@@ -51,6 +51,10 @@ impl R {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
+    pub fn new_vector_bool(length: usize, pc: &mut Pc) -> RObject<Vector, bool> {
+        Self::new_vector::<bool>(LGLSXP, length, pc)
+    }
+
     pub fn new_vector_str(length: usize, pc: &mut Pc) -> RObject<Vector, Str> {
         Self::new_vector(STRSXP, length, pc)
     }
@@ -69,6 +73,10 @@ impl R {
         Self::new_matrix::<i32>(INTSXP, nrows, ncols, pc)
     }
 
+    pub fn new_matrix_bool(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
+        Self::new_matrix::<bool>(LGLSXP, nrows, ncols, pc)
+    }
+
     pub fn new_matrix_str(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
         Self::new_matrix::<Str>(STRSXP, nrows, ncols, pc)
     }
@@ -84,6 +92,10 @@ impl R {
 
     pub fn new_array_i32(dim: &[usize], pc: &mut Pc) -> RObject<Array, i32> {
         Self::new_array::<i32>(INTSXP, dim, pc)
+    }
+
+    pub fn new_array_bool(dim: &[usize], pc: &mut Pc) -> RObject<Array, bool> {
+        Self::new_array::<bool>(LGLSXP, dim, pc)
     }
 
     pub fn new_array_str(dim: &[usize], pc: &mut Pc) -> RObject<Array, Str> {
@@ -135,6 +147,10 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn is_i32(&self) -> bool {
         unsafe { Rf_isInteger(self.sexp) != 0 }
+    }
+
+    pub fn is_bool(&self) -> bool {
+        unsafe { Rf_isLogical(self.sexp) != 0 }
     }
 
     pub fn is_str(&self) -> bool {
@@ -207,8 +223,7 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn as_bool(&self) -> Result<bool, &str> {
         if self.is_scalar() {
-            let value = unsafe { Rf_asLogical(self.sexp) };
-            Ok(value != 0)
+            Ok(unsafe { Rf_asLogical(self.sexp) != 0 })
         } else {
             Err("Canot be interperated as an bool")
         }
@@ -252,6 +267,32 @@ impl<RType, RMode> RObject<RType, RMode> {
             } else if self.is_f64() {
                 let x: RObject<Vector, f64> = self.convert();
                 Ok(x.to_i32(pc))
+            } else {
+                Err("Does not contain i32 or f64")
+            }
+        } else {
+            Err("Not an vector")
+        }
+    }
+
+    pub fn as_vector_bool(&self) -> Result<RObject<Vector, bool>, &str> {
+        if self.is_vector_atomic() && self.is_bool() {
+            Ok(self.convert())
+        } else {
+            Err("Not a bool vector")
+        }
+    }
+
+    pub fn to_vector_bool(&self, pc: &mut Pc) -> Result<RObject<Vector, bool>, &str> {
+        if self.is_vector_atomic() {
+            if self.is_bool() {
+                Ok(self.convert())
+            } else if self.is_f64() {
+                let x: RObject<Vector, f64> = self.convert();
+                Ok(x.to_bool(pc))
+            } else if self.is_i32() {
+                let x: RObject<Vector, i32> = self.convert();
+                Ok(x.to_bool(pc))
             } else {
                 Err("Does not contain i32 or f64")
             }
@@ -306,6 +347,32 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn as_matrix_bool(&self) -> Result<RObject<Matrix, bool>, &str> {
+        if self.is_matrix() && self.is_bool() {
+            Ok(self.convert())
+        } else {
+            Err("Not a bool matrix")
+        }
+    }
+
+    pub fn to_matrix_bool(&self, pc: &mut Pc) -> Result<RObject<Matrix, bool>, &str> {
+        if self.is_matrix() {
+            if self.is_bool() {
+                Ok(self.convert())
+            } else if self.is_f64() {
+                let x: RObject<Matrix, f64> = self.convert();
+                Ok(x.to_bool(pc))
+            } else if self.is_i32() {
+                let x: RObject<Matrix, i32> = self.convert();
+                Ok(x.to_bool(pc))
+            } else {
+                Err("Does not contain i32 or f64")
+            }
+        } else {
+            Err("Not a matrix")
+        }
+    }
+
     pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &str> {
         if self.is_array() && self.is_f64() {
             Ok(self.convert())
@@ -319,6 +386,14 @@ impl<RType, RMode> RObject<RType, RMode> {
             Ok(self.convert())
         } else {
             Err("Not an i32 array")
+        }
+    }
+
+    pub fn as_array_bool(&self) -> Result<RObject<Array, bool>, &str> {
+        if self.is_array() && self.is_bool() {
+            Ok(self.convert())
+        } else {
+            Err("Not a bool array")
         }
     }
 
@@ -363,6 +438,12 @@ impl<S: Sliceable> RObject<S, f64> {
 impl<S: Sliceable> RObject<S, i32> {
     pub fn slice(&self) -> &'static mut [i32] {
         self.slice_engine(unsafe { INTEGER(self.sexp) })
+    }
+}
+
+impl<S: Sliceable> RObject<S, bool> {
+    pub fn slice(&self) -> &'static mut [i32] {
+        self.slice_engine(unsafe { LOGICAL(self.sexp) })
     }
 }
 
@@ -466,6 +547,10 @@ impl RObject<Vector, f64> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
+    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
+    }
+
     pub fn get(&self, index: usize) -> f64 {
         unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
     }
@@ -482,6 +567,10 @@ impl RObject<Vector, i32> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
+    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
+    }
+
     pub fn get(&self, index: usize) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
     }
@@ -489,6 +578,26 @@ impl RObject<Vector, i32> {
     pub fn set(&self, index: usize, value: i32) {
         unsafe {
             SET_INTEGER_ELT(self.sexp, index.try_into().unwrap(), value);
+        }
+    }
+}
+
+impl RObject<Vector, bool> {
+    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+    }
+
+    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+    }
+
+    pub fn get(&self, index: usize) -> i32 {
+        unsafe { LOGICAL_ELT(self.sexp, index.try_into().unwrap()) }
+    }
+
+    pub fn set(&self, index: usize, value: i32) {
+        unsafe {
+            SET_LOGICAL_ELT(self.sexp, index.try_into().unwrap(), value);
         }
     }
 }
@@ -525,7 +634,7 @@ impl RObject<Vector, Unspecified> {
 }
 
 impl<RMode> RObject<Matrix, RMode> {
-    fn index(&self, (i, j): (usize, usize)) -> isize {
+    pub fn index(&self, (i, j): (usize, usize)) -> isize {
         let nrows = self.nrows();
         (nrows * j + i).try_into().unwrap()
     }
@@ -534,6 +643,10 @@ impl<RMode> RObject<Matrix, RMode> {
 impl RObject<Matrix, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+    }
+
+    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Matrix, bool> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
     }
 
     pub fn get(&self, index: (usize, usize)) -> f64 {
@@ -552,6 +665,10 @@ impl RObject<Matrix, i32> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
+    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Matrix, bool> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
+    }
+
     pub fn get(&self, index: (usize, usize)) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
     }
@@ -559,6 +676,26 @@ impl RObject<Matrix, i32> {
     pub fn set(&self, index: (usize, usize), value: i32) {
         unsafe {
             SET_INTEGER_ELT(self.sexp, self.index(index), value);
+        }
+    }
+}
+
+impl RObject<Matrix, bool> {
+    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+    }
+
+    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+    }
+
+    pub fn get(&self, index: (usize, usize)) -> i32 {
+        unsafe { LOGICAL_ELT(self.sexp, self.index(index)) }
+    }
+
+    pub fn set(&self, index: (usize, usize), value: i32) {
+        unsafe {
+            SET_LOGICAL_ELT(self.sexp, self.index(index), value);
         }
     }
 }
@@ -607,6 +744,12 @@ impl IntoR<RObject<Vector, f64>> for f64 {
 impl IntoR<RObject<Vector, i32>> for i32 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         R::wrap(pc.protect(unsafe { Rf_ScalarInteger(*self) }))
+    }
+}
+
+impl IntoR<RObject<Vector, bool>> for bool {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarLogical(if *self { 1 } else { 0 }) }))
     }
 }
 
@@ -670,6 +813,23 @@ impl IntoR<RObject<Vector, i32>> for &[usize] {
     }
 }
 
+impl<const N: usize> IntoR<RObject<Vector, bool>> for [bool; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl IntoR<RObject<Vector, bool>> for &[bool] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        let result = R::new_vector_bool(self.len(), pc);
+        let slice = result.slice();
+        for (i, j) in slice.iter_mut().zip(self.iter()) {
+            *i = (*j).try_into().unwrap();
+        }
+        result
+    }
+}
+
 impl<const N: usize> IntoR<RObject<Vector, Str>> for [&str; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         self.as_ref().to_r(pc)
@@ -685,8 +845,3 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
         result
     }
 }
-
-// Logical -- bool
-// Array
-// List
-//
