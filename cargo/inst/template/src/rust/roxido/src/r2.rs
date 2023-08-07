@@ -1,6 +1,6 @@
 //! Extension Framework for R using Rust
 
-#![allow(dead_code)]
+//#![allow(dead_code)]
 
 // Helpful resources:
 //   https://cran.r-project.org/doc/manuals/r-release/R-ints.html
@@ -26,7 +26,6 @@ pub struct Vector(());
 pub struct Matrix(());
 pub struct Array(());
 pub struct Function(());
-pub struct Single(());
 pub struct Unspecified(());
 pub trait Sliceable {}
 
@@ -54,6 +53,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
+    pub fn new_vector_str(length: usize, pc: &mut Pc) -> RObject<Vector, &str> {
+        Self::new_vector(STRSXP, length, pc)
+    }
+
     fn new_matrix<T>(code: u32, nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, T> {
         Self::new(pc.protect(unsafe {
             Rf_allocMatrix(code, nrows.try_into().unwrap(), ncols.try_into().unwrap())
@@ -66,6 +69,10 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn new_matrix_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
         Self::new_matrix::<i32>(INTSXP, nrows, ncols, pc)
+    }
+
+    pub fn new_matrix_str(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, &str> {
+        Self::new_matrix::<&str>(INTSXP, nrows, ncols, pc)
     }
 
     /*
@@ -99,6 +106,10 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn is_i32(&self) -> bool {
         unsafe { Rf_isInteger(self.sexp) != 0 }
+    }
+
+    pub fn is_str(&self) -> bool {
+        unsafe { Rf_isString(self.sexp) != 0 }
     }
 
     pub fn is_vector(&self) -> bool {
@@ -137,7 +148,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_f64(&self) -> Result<f64, &'static str> {
+    pub fn as_f64(&self) -> Result<f64, &str> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asReal(self.sexp) })
         } else {
@@ -145,7 +156,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_i32(&self) -> Result<i32, &'static str> {
+    pub fn as_i32(&self) -> Result<i32, &str> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asInteger(self.sexp) })
         } else {
@@ -153,7 +164,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_usize(&self) -> Result<usize, &'static str> {
+    pub fn as_usize(&self) -> Result<usize, &str> {
         if self.is_scalar() {
             let value = unsafe { Rf_asInteger(self.sexp) };
             match usize::try_from(value) {
@@ -165,7 +176,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_bool(&self) -> Result<bool, &'static str> {
+    pub fn as_bool(&self) -> Result<bool, &str> {
         if self.is_scalar() {
             let value = unsafe { Rf_asLogical(self.sexp) };
             Ok(value != 0)
@@ -174,7 +185,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &'static str> {
+    pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &str> {
         if self.is_vector_atomic() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -182,7 +193,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &'static str> {
+    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &str> {
         if self.is_vector_atomic() {
             if self.is_f64() {
                 Ok(self.convert())
@@ -197,7 +208,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &'static str> {
+    pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &str> {
         if self.is_vector_atomic() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -205,7 +216,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &'static str> {
+    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &str> {
         if self.is_vector_atomic() {
             if self.is_i32() {
                 Ok(self.convert())
@@ -220,7 +231,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &'static str> {
+    pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &str> {
         if self.is_matrix() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -228,7 +239,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &'static str> {
+    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &str> {
         if self.is_matrix() {
             if self.is_f64() {
                 Ok(self.convert())
@@ -243,7 +254,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &'static str> {
+    pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &str> {
         if self.is_matrix() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -251,7 +262,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &'static str> {
+    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &str> {
         if self.is_matrix() {
             if self.is_i32() {
                 Ok(self.convert())
@@ -266,7 +277,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &'static str> {
+    pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &str> {
         if self.is_array() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -274,7 +285,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_i32(&self) -> Result<RObject<Array, i32>, &'static str> {
+    pub fn as_array_i32(&self) -> Result<RObject<Array, i32>, &str> {
         if self.is_array() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -282,7 +293,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_list(&self) -> Result<RObject<Vector, Unspecified>, &'static str> {
+    pub fn as_vector_list(&self) -> Result<RObject<Vector, Unspecified>, &str> {
         if self.is_vector_list() {
             Ok(self.convert())
         } else {
@@ -290,7 +301,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_function(&self) -> Result<RObject<Function, Unspecified>, &'static str> {
+    pub fn as_function(&self) -> Result<RObject<Function, Unspecified>, &str> {
         if self.is_function() {
             Ok(self.convert())
         } else {
@@ -479,13 +490,13 @@ impl RObject<Vector, i32> {
 }
 
 impl RObject<Vector, &str> {
-    pub fn get(&self, index: usize) -> Result<&'static str, Utf8Error> {
+    pub fn get(&self, index: usize) -> Result<&str, Utf8Error> {
         let sexp = unsafe { STRING_ELT(self.sexp, index.try_into().unwrap()) };
         let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
         c_str.to_str()
     }
 
-    pub fn set<RType, RMode>(&self, index: usize, value: &'static str) {
+    pub fn set<RType, RMode>(&self, index: usize, value: &str) {
         unsafe {
             let value = Rf_mkCharLenCE(
                 value.as_ptr() as *const c_char,
@@ -549,13 +560,13 @@ impl RObject<Matrix, i32> {
 }
 
 impl RObject<Matrix, &str> {
-    pub fn get(&self, index: (usize, usize)) -> Result<&'static str, Utf8Error> {
+    pub fn get(&self, index: (usize, usize)) -> Result<&str, Utf8Error> {
         let sexp = unsafe { STRING_ELT(self.sexp, self.index(index)) };
         let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
         c_str.to_str()
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &'static str) {
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &str) {
         unsafe {
             let value = Rf_mkCharLenCE(
                 value.as_ptr() as *const c_char,
@@ -595,7 +606,7 @@ impl IntoProtected<RObject<Vector, i32>> for i32 {
     }
 }
 
-impl IntoProtected<RObject<Vector, &'static str>> for &'static str {
+impl IntoProtected<RObject<Vector, &str>> for &str {
     fn into(self, pc: &mut Pc) -> RObject<Vector, &'static str> {
         let sexp = unsafe {
             Rf_ScalarString(Rf_mkCharLenCE(
