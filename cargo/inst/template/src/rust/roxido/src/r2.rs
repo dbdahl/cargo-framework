@@ -61,22 +61,22 @@ impl R {
         Self::new_matrix::<Str>(STRSXP, nrows, ncols, pc)
     }
 
-    /*
-        fn new_array<T>(code: u32, dim: [], pc: &mut Pc) -> RObject<Matrix, T> {
-            Self::new(pc.protect(unsafe {
-                let dim =
-                Rf_allocArray(code, dim)
-            }))
-        }
+    fn new_array<T>(code: u32, dim: &[usize], pc: &mut Pc) -> RObject<Array, T> {
+        let dim = dim.to_r(pc);
+        Self::wrap(pc.protect(unsafe { Rf_allocArray(code, dim.sexp) }))
+    }
 
-        fn new_array_f64(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
-            Self::new_array::<f64>(REALSXP, nrows, ncols, pc)
-        }
+    pub fn new_array_f64(dim: &[usize], pc: &mut Pc) -> RObject<Array, f64> {
+        Self::new_array::<f64>(REALSXP, dim, pc)
+    }
 
-        fn new_array_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
-            Self::new_array::<i32>(INTSXP, nrows, ncols, pc)
-        }
-    */
+    pub fn new_array_i32(dim: &[usize], pc: &mut Pc) -> RObject<Array, i32> {
+        Self::new_array::<i32>(INTSXP, dim, pc)
+    }
+
+    pub fn new_array_str(dim: &[usize], pc: &mut Pc) -> RObject<Array, Str> {
+        Self::new_array::<Str>(STRSXP, dim, pc)
+    }
 
     /// Define a new symbol.
     pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject {
@@ -653,6 +653,23 @@ impl IntoR<RObject<Vector, i32>> for &[i32] {
     }
 }
 
+impl<const N: usize> IntoR<RObject<Vector, i32>> for [usize; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl IntoR<RObject<Vector, i32>> for &[usize] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        let result = R::new_vector_i32(self.len(), pc);
+        let slice = result.slice();
+        for (i, j) in slice.iter_mut().zip(self.iter()) {
+            *i = (*j).try_into().unwrap();
+        }
+        result
+    }
+}
+
 impl<const N: usize> IntoR<RObject<Vector, Str>> for [&str; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         self.as_ref().to_r(pc)
@@ -668,3 +685,8 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
         result
     }
 }
+
+// Logical -- bool
+// Array
+// List
+//
