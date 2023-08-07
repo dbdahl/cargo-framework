@@ -615,7 +615,7 @@ impl IntoProtected<RObject<Vector, &str>> for &str {
                 cetype_t_CE_UTF8,
             ))
         };
-        RObject::<Vector, &'static str>::new(pc.protect(sexp))
+        RObject::<Vector, &str>::new(pc.protect(sexp))
     }
 }
 
