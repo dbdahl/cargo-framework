@@ -46,11 +46,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         Self::new(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
     }
 
-    fn new_vector_f64(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
+    pub fn new_vector_f64(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
         Self::new_vector::<f64>(REALSXP, length, pc)
     }
 
-    fn new_vector_i32(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
+    pub fn new_vector_i32(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
@@ -60,13 +60,30 @@ impl<RType, RMode> RObject<RType, RMode> {
         }))
     }
 
-    fn new_matrix_f64(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
+    pub fn new_matrix_f64(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
         Self::new_matrix::<f64>(REALSXP, nrows, ncols, pc)
     }
 
-    fn new_matrix_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
+    pub fn new_matrix_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
         Self::new_matrix::<i32>(INTSXP, nrows, ncols, pc)
     }
+
+    /*
+        fn new_array<T>(code: u32, dim: [], pc: &mut Pc) -> RObject<Matrix, T> {
+            Self::new(pc.protect(unsafe {
+                let dim =
+                Rf_allocArray(code, dim)
+            }))
+        }
+
+        fn new_array_f64(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
+            Self::new_array::<f64>(REALSXP, nrows, ncols, pc)
+        }
+
+        fn new_array_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
+            Self::new_array::<i32>(INTSXP, nrows, ncols, pc)
+        }
+    */
 
     fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
         Self::new(self.sexp)
@@ -435,15 +452,15 @@ impl RObject<Function, Unspecified> {
 }
 
 impl RObject<Vector, f64> {
-    fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
-    fn get(&self, index: usize) -> f64 {
+    pub fn get(&self, index: usize) -> f64 {
         unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
     }
 
-    fn set<RType, RMode>(&self, index: usize, value: f64) {
+    pub fn set<RType, RMode>(&self, index: usize, value: f64) {
         unsafe {
             SET_REAL_ELT(self.sexp, index.try_into().unwrap(), value);
         }
@@ -451,15 +468,15 @@ impl RObject<Vector, f64> {
 }
 
 impl RObject<Vector, i32> {
-    fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
-    fn get(&self, index: usize) -> i32 {
+    pub fn get(&self, index: usize) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
     }
 
-    fn set<RType, RMode>(&self, index: usize, value: i32) {
+    pub fn set<RType, RMode>(&self, index: usize, value: i32) {
         unsafe {
             SET_INTEGER_ELT(self.sexp, index.try_into().unwrap(), value);
         }
@@ -467,11 +484,11 @@ impl RObject<Vector, i32> {
 }
 
 impl RObject<Vector, Unspecified> {
-    fn get(&self, index: usize) -> RObject {
+    pub fn get(&self, index: usize) -> RObject {
         Self::new(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
     }
 
-    fn set<RType, RMode>(&self, index: usize, value: RObject<RType, RMode>) {
+    pub fn set<RType, RMode>(&self, index: usize, value: RObject<RType, RMode>) {
         unsafe {
             SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp);
         }
@@ -486,15 +503,15 @@ impl<RMode> RObject<Matrix, RMode> {
 }
 
 impl RObject<Matrix, f64> {
-    fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
+    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
         Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
-    fn get(&self, index: (usize, usize)) -> f64 {
+    pub fn get(&self, index: (usize, usize)) -> f64 {
         unsafe { REAL_ELT(self.sexp, self.index(index)) }
     }
 
-    fn set<RType, RMode>(&self, index: (usize, usize), value: f64) {
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: f64) {
         unsafe {
             SET_REAL_ELT(self.sexp, self.index(index), value);
         }
@@ -502,15 +519,15 @@ impl RObject<Matrix, f64> {
 }
 
 impl RObject<Matrix, i32> {
-    fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
+    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
         Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
-    fn get(&self, index: (usize, usize)) -> i32 {
+    pub fn get(&self, index: (usize, usize)) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
     }
 
-    fn set<RType, RMode>(&self, index: (usize, usize), value: i32) {
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: i32) {
         unsafe {
             SET_INTEGER_ELT(self.sexp, self.index(index), value);
         }
@@ -518,11 +535,11 @@ impl RObject<Matrix, i32> {
 }
 
 impl RObject<Matrix, Unspecified> {
-    fn get(&self, index: (usize, usize)) -> RObject {
+    pub fn get(&self, index: (usize, usize)) -> RObject {
         Self::new(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
     }
 
-    fn set<RType, RMode>(&self, index: (usize, usize), value: RObject<RType, RMode>) {
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: RObject<RType, RMode>) {
         unsafe {
             SET_VECTOR_ELT(self.sexp, self.index(index), value.sexp);
         }
