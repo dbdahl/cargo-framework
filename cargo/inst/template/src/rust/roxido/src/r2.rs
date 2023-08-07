@@ -15,25 +15,24 @@ use crate::rbindings::*;
 use std::ffi::c_char;
 use std::marker::PhantomData;
 
-struct AnyType(());
-struct Vector(());
-struct Matrix(());
-struct Array(());
-struct Function(());
-struct RString(());
+pub struct RObject<RType = AnyType, RMode = Unspecified> {
+    pub sexp: SEXP,
+    rtype: PhantomData<(RType, RMode)>,
+}
 
-struct Character(());
-struct Unspecified(());
+pub struct AnyType(());
+pub struct Vector(());
+pub struct Matrix(());
+pub struct Array(());
+pub struct Function(());
+pub struct Single(());
+pub struct Character(());
+pub struct Unspecified(());
+pub trait Sliceable {}
 
-trait Sliceable {}
 impl Sliceable for Vector {}
 impl Sliceable for Matrix {}
 impl Sliceable for Array {}
-
-struct RObject<RType = AnyType, RMode = Unspecified> {
-    sexp: SEXP,
-    rtype: PhantomData<(RType, RMode)>,
-}
 
 impl<RType, RMode> RObject<RType, RMode> {
     fn new<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
@@ -43,11 +42,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    fn convert<RTypeTo, RModeTo>(self) -> RObject<RTypeTo, RModeTo> {
+    fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
         Self::new(self.sexp)
     }
 
-    pub fn to_base(self) -> RObject {
+    pub fn to_base(&self) -> RObject {
         self.convert()
     }
 
@@ -132,7 +131,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_f64(self) -> Result<RObject<Vector, f64>, &'static str> {
+    pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &'static str> {
         if self.is_vector_atomic() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -140,7 +139,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_integer(self) -> Result<RObject<Vector, i32>, &'static str> {
+    pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &'static str> {
         if self.is_vector_atomic() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -148,7 +147,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_f64(self) -> Result<RObject<Matrix, f64>, &'static str> {
+    pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &'static str> {
         if self.is_matrix() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -156,7 +155,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_i32(self) -> Result<RObject<Matrix, i32>, &'static str> {
+    pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &'static str> {
         if self.is_matrix() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -164,7 +163,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_f64(self) -> Result<RObject<Array, f64>, &'static str> {
+    pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &'static str> {
         if self.is_array() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -172,7 +171,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_i32(self) -> Result<RObject<Array, i32>, &'static str> {
+    pub fn as_array_i32(&self) -> Result<RObject<Array, i32>, &'static str> {
         if self.is_array() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -180,7 +179,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_list(self) -> Result<RObject<Vector, Unspecified>, &'static str> {
+    pub fn as_vector_list(&self) -> Result<RObject<Vector, Unspecified>, &'static str> {
         if self.is_vector_list() {
             Ok(self.convert())
         } else {
@@ -188,7 +187,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_function(self) -> Result<RObject<Function, Unspecified>, &'static str> {
+    pub fn as_function(&self) -> Result<RObject<Function, Unspecified>, &'static str> {
         if self.is_function() {
             Ok(self.convert())
         } else {
@@ -201,7 +200,7 @@ impl<RType, RMode> RObject<RType, RMode> {
     /// An element of a character vector should generally *not* be returned to a user, but this
     /// function can be used in conjunction with [`RVectorCharacter::set`].
     ///
-    pub fn new_character(x: &str, pc: &mut Pc) -> RObject<RString, Character> {
+    pub fn new_character(x: &str, pc: &mut Pc) -> RObject<Single, Character> {
         Self::new(pc.protect(unsafe {
             Rf_mkCharLen(x.as_ptr() as *const c_char, x.len().try_into().unwrap())
         }))
@@ -214,12 +213,12 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     /// Get an attribute.
-    pub fn get_attribute(self, which: &str, pc: &mut Pc) -> RObject {
+    pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
         Self::new(unsafe { Rf_getAttrib(self.sexp, Self::new_symbol(which, pc).sexp) })
     }
 
     /// Set an attribute.
-    pub fn set_attribute(self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
+    pub fn set_attribute(&self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
         unsafe {
             Rf_setAttrib(
                 self.sexp,
@@ -288,18 +287,18 @@ impl RObject<Function, Unspecified> {
         }
     }
 
-    pub fn call0(self, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn call0(&self, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang1(self.sexp) };
         Self::eval(expression, pc)
     }
 
-    pub fn call1<T1, M1>(self, arg1: RObject<T1, M1>, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn call1<T1, M1>(&self, arg1: RObject<T1, M1>, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang2(self.sexp, arg1.sexp) };
         Self::eval(expression, pc)
     }
 
     pub fn call2<T1, M1, T2, M2>(
-        self,
+        &self,
         arg1: RObject<T1, M1>,
         arg2: RObject<T2, M2>,
         pc: &mut Pc,
@@ -309,7 +308,7 @@ impl RObject<Function, Unspecified> {
     }
 
     pub fn call3<T1, M1, T2, M2, T3, M3>(
-        self,
+        &self,
         arg1: RObject<T1, M1>,
         arg2: RObject<T2, M2>,
         arg3: RObject<T2, M3>,
@@ -320,7 +319,7 @@ impl RObject<Function, Unspecified> {
     }
 
     pub fn call4<T1, M1, T2, M2, T3, M3, T4, M4>(
-        self,
+        &self,
         arg1: RObject<T1, M1>,
         arg2: RObject<T2, M2>,
         arg3: RObject<T2, M3>,
@@ -332,7 +331,7 @@ impl RObject<Function, Unspecified> {
     }
 
     pub fn call5<T1, M1, T2, M2, T3, M3, T4, M4, T5, M5>(
-        self,
+        &self,
         arg1: RObject<T1, M1>,
         arg2: RObject<T2, M2>,
         arg3: RObject<T2, M3>,
