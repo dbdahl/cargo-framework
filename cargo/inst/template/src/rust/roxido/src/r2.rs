@@ -17,9 +17,10 @@ use std::marker::PhantomData;
 use std::str::Utf8Error;
 
 pub struct R {}
+pub struct Str;
 
 impl R {
-    fn new<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
+    fn wrap<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
         RObject {
             sexp,
             rtype: PhantomData,
@@ -27,7 +28,7 @@ impl R {
     }
 
     fn new_vector<T>(code: u32, length: usize, pc: &mut Pc) -> RObject<Vector, T> {
-        Self::new(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
+        Self::wrap(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
     }
 
     pub fn new_vector_f64(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
@@ -38,12 +39,12 @@ impl R {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
-    pub fn new_vector_str(length: usize, pc: &mut Pc) -> RObject<Vector, &str> {
+    pub fn new_vector_str(length: usize, pc: &mut Pc) -> RObject<Vector, Str> {
         Self::new_vector(STRSXP, length, pc)
     }
 
     fn new_matrix<T>(code: u32, nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, T> {
-        Self::new(pc.protect(unsafe {
+        Self::wrap(pc.protect(unsafe {
             Rf_allocMatrix(code, nrows.try_into().unwrap(), ncols.try_into().unwrap())
         }))
     }
@@ -56,8 +57,8 @@ impl R {
         Self::new_matrix::<i32>(INTSXP, nrows, ncols, pc)
     }
 
-    pub fn new_matrix_str(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, &str> {
-        Self::new_matrix::<&str>(STRSXP, nrows, ncols, pc)
+    pub fn new_matrix_str(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
+        Self::new_matrix::<Str>(STRSXP, nrows, ncols, pc)
     }
 
     /*
@@ -86,7 +87,7 @@ impl R {
                 cetype_t_CE_UTF8,
             )
         });
-        R::new(pc.protect(unsafe { Rf_installChar(sexp) }))
+        R::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 }
 
@@ -109,11 +110,23 @@ impl Sliceable for Array {}
 
 impl<RType, RMode> RObject<RType, RMode> {
     fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
-        R::new(self.sexp)
+        R::wrap(self.sexp)
     }
 
     pub fn to_base(&self) -> RObject {
         self.convert()
+    }
+
+    /// Get an attribute.
+    pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
+    }
+
+    /// Set an attribute.
+    pub fn set_attribute(&self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
+        unsafe {
+            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.into().sexp);
+        }
     }
 
     pub fn is_f64(&self) -> bool {
@@ -324,21 +337,12 @@ impl<RType, RMode> RObject<RType, RMode> {
             Err("Not a function")
         }
     }
-
-    /// Get an attribute.
-    pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
-        R::new(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
-    }
-
-    /// Set an attribute.
-    pub fn set_attribute(&self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
-        unsafe {
-            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.into().sexp);
-        }
-    }
 }
 
 impl<S: Sliceable, T> RObject<S, T> {
+    pub fn is_empty(&self) -> bool {
+        unsafe { Rf_xlength(self.sexp) == 0 }
+    }
     pub fn len(&self) -> usize {
         let len = unsafe { Rf_xlength(self.sexp) };
         len.try_into().unwrap() // Won't ever fail if R is sane.
@@ -459,14 +463,14 @@ impl RObject<Function, Unspecified> {
 
 impl RObject<Vector, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
     pub fn get(&self, index: usize) -> f64 {
         unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
     }
 
-    pub fn set<RType, RMode>(&self, index: usize, value: f64) {
+    pub fn set(&self, index: usize, value: f64) {
         unsafe {
             SET_REAL_ELT(self.sexp, index.try_into().unwrap(), value);
         }
@@ -475,28 +479,28 @@ impl RObject<Vector, f64> {
 
 impl RObject<Vector, i32> {
     pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
     pub fn get(&self, index: usize) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
     }
 
-    pub fn set<RType, RMode>(&self, index: usize, value: i32) {
+    pub fn set(&self, index: usize, value: i32) {
         unsafe {
             SET_INTEGER_ELT(self.sexp, index.try_into().unwrap(), value);
         }
     }
 }
 
-impl RObject<Vector, &str> {
+impl RObject<Vector, Str> {
     pub fn get(&self, index: usize) -> Result<&str, Utf8Error> {
         let sexp = unsafe { STRING_ELT(self.sexp, index.try_into().unwrap()) };
         let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
         c_str.to_str()
     }
 
-    pub fn set<RType, RMode>(&self, index: usize, value: &str) {
+    pub fn set(&self, index: usize, value: &str) {
         unsafe {
             let value = Rf_mkCharLenCE(
                 value.as_ptr() as *const c_char,
@@ -510,7 +514,7 @@ impl RObject<Vector, &str> {
 
 impl RObject<Vector, Unspecified> {
     pub fn get(&self, index: usize) -> RObject {
-        R::new(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
+        R::wrap(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
     }
 
     pub fn set<RType, RMode>(&self, index: usize, value: RObject<RType, RMode>) {
@@ -529,14 +533,14 @@ impl<RMode> RObject<Matrix, RMode> {
 
 impl RObject<Matrix, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
-        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
     pub fn get(&self, index: (usize, usize)) -> f64 {
         unsafe { REAL_ELT(self.sexp, self.index(index)) }
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: f64) {
+    pub fn set(&self, index: (usize, usize), value: f64) {
         unsafe {
             SET_REAL_ELT(self.sexp, self.index(index), value);
         }
@@ -545,21 +549,21 @@ impl RObject<Matrix, f64> {
 
 impl RObject<Matrix, i32> {
     pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
-        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
     pub fn get(&self, index: (usize, usize)) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: i32) {
+    pub fn set(&self, index: (usize, usize), value: i32) {
         unsafe {
             SET_INTEGER_ELT(self.sexp, self.index(index), value);
         }
     }
 }
 
-impl RObject<Matrix, &str> {
+impl RObject<Matrix, Str> {
     pub fn get(&self, index: (usize, usize)) -> Result<&str, Utf8Error> {
         let sexp = unsafe { STRING_ELT(self.sexp, self.index(index)) };
         let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
@@ -580,7 +584,7 @@ impl RObject<Matrix, &str> {
 
 impl RObject<Matrix, Unspecified> {
     pub fn get(&self, index: (usize, usize)) -> RObject {
-        R::new(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
+        R::wrap(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
     }
 
     pub fn set<RType, RMode>(&self, index: (usize, usize), value: RObject<RType, RMode>) {
@@ -591,23 +595,23 @@ impl RObject<Matrix, Unspecified> {
 }
 
 trait IntoProtected<T> {
-    fn into(self, pc: &mut Pc) -> T;
+    fn to(&self, pc: &mut Pc) -> T;
 }
 
 impl IntoProtected<RObject<Vector, f64>> for f64 {
-    fn into(self, pc: &mut Pc) -> RObject<Vector, f64> {
-        R::new(pc.protect(unsafe { Rf_ScalarReal(self) }))
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarReal(*self) }))
     }
 }
 
 impl IntoProtected<RObject<Vector, i32>> for i32 {
-    fn into(self, pc: &mut Pc) -> RObject<Vector, i32> {
-        R::new(pc.protect(unsafe { Rf_ScalarInteger(self) }))
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarInteger(*self) }))
     }
 }
 
-impl IntoProtected<RObject<Vector, &str>> for &str {
-    fn into(self, pc: &mut Pc) -> RObject<Vector, &'static str> {
+impl IntoProtected<RObject<Vector, Str>> for &str {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let sexp = unsafe {
             Rf_ScalarString(Rf_mkCharLenCE(
                 self.as_ptr() as *const c_char,
@@ -615,15 +619,34 @@ impl IntoProtected<RObject<Vector, &str>> for &str {
                 cetype_t_CE_UTF8,
             ))
         };
-        R::new(pc.protect(sexp))
+        R::wrap(pc.protect(sexp))
     }
 }
 
 impl<const N: usize> IntoProtected<RObject<Vector, f64>> for [f64; N] {
-    fn into(self, pc: &mut Pc) -> RObject<Vector, f64> {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         let result = R::new_vector_f64(self.len(), pc);
         let slice = result.slice();
-        slice.copy_from_slice(&self);
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
+impl<const N: usize> IntoProtected<RObject<Vector, i32>> for [i32; N] {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        let result = R::new_vector_i32(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
+impl<const N: usize> IntoProtected<RObject<Vector, Str>> for [&str; N] {
+    fn to(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+        let result = R::new_vector_str(self.len(), pc);
+        for (index, s) in self.iter().enumerate() {
+            result.set(index, s);
+        }
         result
     }
 }
