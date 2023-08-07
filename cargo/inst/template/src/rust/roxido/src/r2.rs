@@ -16,24 +16,9 @@ use std::ffi::{c_char, CStr};
 use std::marker::PhantomData;
 use std::str::Utf8Error;
 
-pub struct RObject<RType = AnyType, RMode = Unspecified> {
-    pub sexp: SEXP,
-    rtype: PhantomData<(RType, RMode)>,
-}
+pub struct R {}
 
-pub struct AnyType(());
-pub struct Vector(());
-pub struct Matrix(());
-pub struct Array(());
-pub struct Function(());
-pub struct Unspecified(());
-pub trait Sliceable {}
-
-impl Sliceable for Vector {}
-impl Sliceable for Matrix {}
-impl Sliceable for Array {}
-
-impl<RType, RMode> RObject<RType, RMode> {
+impl R {
     fn new<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
         RObject {
             sexp,
@@ -72,7 +57,7 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     pub fn new_matrix_str(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, &str> {
-        Self::new_matrix::<&str>(INTSXP, nrows, ncols, pc)
+        Self::new_matrix::<&str>(STRSXP, nrows, ncols, pc)
     }
 
     /*
@@ -92,8 +77,39 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     */
 
+    /// Define a new symbol.
+    pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject {
+        let sexp = pc.protect(unsafe {
+            Rf_mkCharLenCE(
+                x.as_ptr() as *const c_char,
+                x.len().try_into().unwrap(),
+                cetype_t_CE_UTF8,
+            )
+        });
+        R::new(pc.protect(unsafe { Rf_installChar(sexp) }))
+    }
+}
+
+pub struct RObject<RType = AnyType, RMode = Unspecified> {
+    pub sexp: SEXP,
+    rtype: PhantomData<(RType, RMode)>,
+}
+
+pub struct AnyType(());
+pub struct Vector(());
+pub struct Matrix(());
+pub struct Array(());
+pub struct Function(());
+pub struct Unspecified(());
+pub trait Sliceable {}
+
+impl Sliceable for Vector {}
+impl Sliceable for Matrix {}
+impl Sliceable for Array {}
+
+impl<RType, RMode> RObject<RType, RMode> {
     fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
-        Self::new(self.sexp)
+        R::new(self.sexp)
     }
 
     pub fn to_base(&self) -> RObject {
@@ -309,31 +325,15 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    /// Define a new symbol.
-    pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject {
-        let sexp = pc.protect(unsafe {
-            Rf_mkCharLenCE(
-                x.as_ptr() as *const c_char,
-                x.len().try_into().unwrap(),
-                cetype_t_CE_UTF8,
-            )
-        });
-        Self::new(pc.protect(unsafe { Rf_installChar(sexp) }))
-    }
-
     /// Get an attribute.
     pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
-        Self::new(unsafe { Rf_getAttrib(self.sexp, Self::new_symbol(which, pc).sexp) })
+        R::new(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
     }
 
     /// Set an attribute.
     pub fn set_attribute(&self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
         unsafe {
-            Rf_setAttrib(
-                self.sexp,
-                Self::new_symbol(which, pc).sexp,
-                value.into().sexp,
-            );
+            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.into().sexp);
         }
     }
 }
@@ -344,20 +344,20 @@ impl<S: Sliceable, T> RObject<S, T> {
         len.try_into().unwrap() // Won't ever fail if R is sane.
     }
 
-    fn slice_engine<U>(&self, data: *mut U) -> &'static [U] {
+    fn slice_engine<U>(&self, data: *mut U) -> &'static mut [U] {
         let len = self.len();
         unsafe { std::slice::from_raw_parts_mut(data, len) }
     }
 }
 
 impl<S: Sliceable> RObject<S, f64> {
-    pub fn slice(&self) -> &'static [f64] {
+    pub fn slice(&self) -> &'static mut [f64] {
         self.slice_engine(unsafe { REAL(self.sexp) })
     }
 }
 
 impl<S: Sliceable> RObject<S, i32> {
-    pub fn slice(&self) -> &'static [i32] {
+    pub fn slice(&self) -> &'static mut [i32] {
         self.slice_engine(unsafe { INTEGER(self.sexp) })
     }
 }
@@ -459,7 +459,7 @@ impl RObject<Function, Unspecified> {
 
 impl RObject<Vector, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
     pub fn get(&self, index: usize) -> f64 {
@@ -475,7 +475,7 @@ impl RObject<Vector, f64> {
 
 impl RObject<Vector, i32> {
     pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
     pub fn get(&self, index: usize) -> i32 {
@@ -510,7 +510,7 @@ impl RObject<Vector, &str> {
 
 impl RObject<Vector, Unspecified> {
     pub fn get(&self, index: usize) -> RObject {
-        Self::new(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
+        R::new(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
     }
 
     pub fn set<RType, RMode>(&self, index: usize, value: RObject<RType, RMode>) {
@@ -529,7 +529,7 @@ impl<RMode> RObject<Matrix, RMode> {
 
 impl RObject<Matrix, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
-        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
     pub fn get(&self, index: (usize, usize)) -> f64 {
@@ -545,7 +545,7 @@ impl RObject<Matrix, f64> {
 
 impl RObject<Matrix, i32> {
     pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
-        Self::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+        R::new(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
     pub fn get(&self, index: (usize, usize)) -> i32 {
@@ -580,7 +580,7 @@ impl RObject<Matrix, &str> {
 
 impl RObject<Matrix, Unspecified> {
     pub fn get(&self, index: (usize, usize)) -> RObject {
-        Self::new(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
+        R::new(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
     }
 
     pub fn set<RType, RMode>(&self, index: (usize, usize), value: RObject<RType, RMode>) {
@@ -596,13 +596,13 @@ trait IntoProtected<T> {
 
 impl IntoProtected<RObject<Vector, f64>> for f64 {
     fn into(self, pc: &mut Pc) -> RObject<Vector, f64> {
-        RObject::<Vector, f64>::new(pc.protect(unsafe { Rf_ScalarReal(self) }))
+        R::new(pc.protect(unsafe { Rf_ScalarReal(self) }))
     }
 }
 
 impl IntoProtected<RObject<Vector, i32>> for i32 {
     fn into(self, pc: &mut Pc) -> RObject<Vector, i32> {
-        RObject::<Vector, i32>::new(pc.protect(unsafe { Rf_ScalarInteger(self) }))
+        R::new(pc.protect(unsafe { Rf_ScalarInteger(self) }))
     }
 }
 
@@ -615,7 +615,16 @@ impl IntoProtected<RObject<Vector, &str>> for &str {
                 cetype_t_CE_UTF8,
             ))
         };
-        RObject::<Vector, &str>::new(pc.protect(sexp))
+        R::new(pc.protect(sexp))
+    }
+}
+
+impl<const N: usize> IntoProtected<RObject<Vector, f64>> for [f64; N] {
+    fn into(self, pc: &mut Pc) -> RObject<Vector, f64> {
+        let result = R::new_vector_f64(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(&self);
+        result
     }
 }
 
