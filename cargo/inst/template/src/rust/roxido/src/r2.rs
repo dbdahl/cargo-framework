@@ -114,6 +114,10 @@ impl R {
         R::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
+    pub fn null() -> RObject {
+        Self::wrap(unsafe { R_NilValue })
+    }
+
     pub fn positive_infinity() -> f64 {
         unsafe { R_PosInf }
     }
@@ -136,10 +140,6 @@ impl R {
 
     pub fn na_bool() -> i32 {
         unsafe { R_NaInt }
-    }
-
-    pub fn na_string() -> RObject {
-        Self::wrap(unsafe { R_NaString })
     }
 
     pub fn is_nan(x: f64) -> bool {
@@ -169,6 +169,16 @@ impl<RType, RMode> RObject<RType, RMode> {
         self.convert()
     }
 
+    /// Duplicate an object.
+    ///
+    /// Multiple symbols may be bound to the same object, so if the usual R semantics are to
+    /// apply, any code which alters one of them needs to make a copy first.
+    /// E.g, call this method on arguments pass via `.Call` before modifying them.
+    ///
+    pub fn duplicate(&self, pc: &mut Pc) -> RObject<RType, RMode> {
+        R::wrap(pc.protect(unsafe { Rf_duplicate(self.sexp) }))
+    }
+
     /// Get an attribute.
     pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
@@ -179,6 +189,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         unsafe {
             Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.into().sexp);
         }
+    }
+
+    pub fn is_null(&self) -> bool {
+        unsafe { Rf_isNull(self.sexp) != 0 }
     }
 
     pub fn is_f64(&self) -> bool {
@@ -659,6 +673,12 @@ impl RObject<Vector, Str> {
             SET_STRING_ELT(self.sexp, index.try_into().unwrap(), value);
         }
     }
+
+    pub fn set_na(&self, index: usize) {
+        unsafe {
+            SET_STRING_ELT(self.sexp, index.try_into().unwrap(), R_NaString);
+        }
+    }
 }
 
 impl RObject<Vector, Unspecified> {
@@ -888,5 +908,3 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
 
 // Support raw
 // Named vectors and lists
-// null
-// duplicate
