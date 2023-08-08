@@ -59,26 +59,26 @@ impl R {
         Self::new_vector(STRSXP, length, pc)
     }
 
-    fn new_matrix<T>(code: u32, nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, T> {
+    fn new_matrix<T>(code: u32, nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, T> {
         Self::wrap(pc.protect(unsafe {
-            Rf_allocMatrix(code, nrows.try_into().unwrap(), ncols.try_into().unwrap())
+            Rf_allocMatrix(code, nrow.try_into().unwrap(), ncol.try_into().unwrap())
         }))
     }
 
-    pub fn new_matrix_f64(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
-        Self::new_matrix::<f64>(REALSXP, nrows, ncols, pc)
+    pub fn new_matrix_f64(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
+        Self::new_matrix::<f64>(REALSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_i32(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
-        Self::new_matrix::<i32>(INTSXP, nrows, ncols, pc)
+    pub fn new_matrix_i32(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
+        Self::new_matrix::<i32>(INTSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_bool(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
-        Self::new_matrix::<bool>(LGLSXP, nrows, ncols, pc)
+    pub fn new_matrix_bool(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
+        Self::new_matrix::<bool>(LGLSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_str(nrows: usize, ncols: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
-        Self::new_matrix::<Str>(STRSXP, nrows, ncols, pc)
+    pub fn new_matrix_str(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
+        Self::new_matrix::<Str>(STRSXP, nrow, ncol, pc)
     }
 
     fn new_array<T>(code: u32, dim: &[usize], pc: &mut Pc) -> RObject<Array, T> {
@@ -502,10 +502,10 @@ impl<S: Sliceable> RObject<S, bool> {
 }
 
 impl<T> RObject<Matrix, T> {
-    pub fn nrows(&self) -> usize {
+    pub fn nrow(&self) -> usize {
         unsafe { Rf_nrows(self.sexp).try_into().unwrap() }
     }
-    pub fn ncols(&self) -> usize {
+    pub fn ncol(&self) -> usize {
         unsafe { Rf_ncols(self.sexp).try_into().unwrap() }
     }
 }
@@ -596,15 +596,21 @@ impl RObject<Function, Unspecified> {
     }
 }
 
-/* DBD
 impl<RMode> RObject<Vector, RMode> {
     pub fn get_names(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         self.get_attribute("names", pc).convert()
     }
 
-    pub fn set_names(&self, )
+    pub fn set_names(&self, names: RObject<Vector, Str>) -> Result<(), &str> {
+        if unsafe { Rf_length(names.sexp) != Rf_length(self.sexp) } {
+            return Err("Lengths do not match");
+        }
+        unsafe {
+            Rf_namesgets(self.sexp, names.sexp);
+        }
+        Ok(())
+    }
 }
-*/
 
 impl RObject<Vector, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
@@ -719,8 +725,41 @@ impl RObject<Vector, Unspecified> {
 
 impl<RMode> RObject<Matrix, RMode> {
     pub fn index(&self, (i, j): (usize, usize)) -> isize {
-        let nrows = self.nrows();
-        (nrows * j + i).try_into().unwrap()
+        let nrow = self.nrow();
+        (nrow * j + i).try_into().unwrap()
+    }
+
+    pub fn get_dimnames(&self, pc: &mut Pc) -> RObject<Vector, Unspecified> {
+        self.get_attribute("dimnames", pc).convert()
+    }
+
+    pub fn set_dimnames(&self, names: RObject<Vector, Unspecified>) -> Result<(), &str> {
+        if !names.is_vector_list() {
+            return Err("Not a list");
+        }
+        if names.len() != 2 {
+            return Err("Length should be two");
+        }
+        let rownames = names.get(0);
+        if !rownames.is_vector_atomic() || !rownames.is_str() {
+            return Err("Row names must be a character vector");
+        }
+        let rownames: RObject<Vector, Str> = rownames.convert();
+        if rownames.len() != self.nrow() {
+            return Err("Row names do not match the number of rows");
+        }
+        let colnames = names.get(1);
+        if !colnames.is_vector_atomic() || !colnames.is_str() {
+            return Err("Column names must be a character vector");
+        }
+        let colnames: RObject<Vector, Str> = colnames.convert();
+        if colnames.len() != self.ncol() {
+            return Err("Column names do not match the number of columns");
+        }
+        unsafe {
+            Rf_namesgets(self.sexp, names.sexp);
+        }
+        Ok(())
     }
 }
 
@@ -941,4 +980,3 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
 }
 
 // Support raw
-// Named vectors and lists
