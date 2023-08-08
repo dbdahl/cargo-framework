@@ -185,9 +185,9 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     /// Set an attribute.
-    pub fn set_attribute(&self, which: &str, value: impl Into<RObject<RType, RMode>>, pc: &mut Pc) {
+    pub fn set_attribute(&self, which: &str, value: RObject<RType, RMode>, pc: &mut Pc) {
         unsafe {
-            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.into().sexp);
+            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.sexp);
         }
     }
 
