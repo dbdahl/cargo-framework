@@ -596,6 +596,16 @@ impl RObject<Function, Unspecified> {
     }
 }
 
+/* DBD
+impl<RMode> RObject<Vector, RMode> {
+    pub fn get_names(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+        self.get_attribute("names", pc).convert()
+    }
+
+    pub fn set_names(&self, )
+}
+*/
+
 impl RObject<Vector, f64> {
     pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
@@ -645,11 +655,25 @@ impl RObject<Vector, bool> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
-    pub fn get(&self, index: usize) -> i32 {
+    pub fn get(&self, index: usize) -> bool {
+        unsafe { LOGICAL_ELT(self.sexp, index.try_into().unwrap()) != 0 }
+    }
+
+    pub fn get_i32(&self, index: usize) -> i32 {
         unsafe { LOGICAL_ELT(self.sexp, index.try_into().unwrap()) }
     }
 
-    pub fn set(&self, index: usize, value: i32) {
+    pub fn set(&self, index: usize, value: bool) {
+        unsafe {
+            SET_LOGICAL_ELT(
+                self.sexp,
+                index.try_into().unwrap(),
+                if value { 1 } else { 0 },
+            );
+        }
+    }
+
+    pub fn set_i32(&self, index: usize, value: i32) {
         unsafe {
             SET_LOGICAL_ELT(self.sexp, index.try_into().unwrap(), value);
         }
@@ -749,11 +773,21 @@ impl RObject<Matrix, bool> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
-    pub fn get(&self, index: (usize, usize)) -> i32 {
+    pub fn get(&self, index: (usize, usize)) -> bool {
+        unsafe { LOGICAL_ELT(self.sexp, self.index(index)) != 0 }
+    }
+
+    pub fn get_i32(&self, index: (usize, usize)) -> i32 {
         unsafe { LOGICAL_ELT(self.sexp, self.index(index)) }
     }
 
-    pub fn set(&self, index: (usize, usize), value: i32) {
+    pub fn set(&self, index: (usize, usize), value: bool) {
+        unsafe {
+            SET_LOGICAL_ELT(self.sexp, self.index(index), if value { 1 } else { 0 });
+        }
+    }
+
+    pub fn set_i32(&self, index: (usize, usize), value: i32) {
         unsafe {
             SET_LOGICAL_ELT(self.sexp, self.index(index), value);
         }
