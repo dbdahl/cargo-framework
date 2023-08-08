@@ -251,7 +251,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asReal(self.sexp) })
         } else {
-            Err("Canot be interperated as an f64")
+            Err("Cannot be interperated as an f64")
         }
     }
 
@@ -259,7 +259,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asInteger(self.sexp) })
         } else {
-            Err("Canot be interperated as an i32")
+            Err("Cannot be interperated as an i32")
         }
     }
 
@@ -268,10 +268,10 @@ impl<RType, RMode> RObject<RType, RMode> {
             let value = unsafe { Rf_asInteger(self.sexp) };
             match usize::try_from(value) {
                 Ok(e) => Ok(e),
-                _ => Err("Canot be interperated as a usize scalar"),
+                _ => Err("Cannot be interperated as a usize scalar"),
             }
         } else {
-            Err("Canot be interperated as a usize")
+            Err("Cannot be interperated as a usize")
         }
     }
 
@@ -279,7 +279,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asLogical(self.sexp) != 0 })
         } else {
-            Err("Canot be interperated as an bool")
+            Err("Cannot be interperated as an bool")
         }
     }
 
