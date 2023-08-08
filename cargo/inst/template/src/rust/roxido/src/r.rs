@@ -22,12 +22,6 @@ pub struct R;
 
 impl R {
     /// Generate random bytes using R's RNG.
-    ///
-    /// # Examples:
-    /// ```
-    /// let mut rng = rand_pcg::Pcg64Mcg::from_seed(crate::r::random_bytes::<16>());
-    /// ```
-    ///
     pub fn random_bytes<const LENGTH: usize>() -> [u8; LENGTH] {
         unsafe {
             let m = (u8::MAX as f64) + 1.0;

@@ -113,6 +113,46 @@ impl R {
         });
         R::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
+
+    pub fn positive_infinity() -> f64 {
+        unsafe { R_PosInf }
+    }
+
+    pub fn negative_infinity() -> f64 {
+        unsafe { R_NegInf }
+    }
+
+    pub fn nan() -> f64 {
+        unsafe { R_NaN }
+    }
+
+    pub fn na_f64() -> f64 {
+        unsafe { R_NaReal }
+    }
+
+    pub fn na_i32() -> i32 {
+        unsafe { R_NaInt }
+    }
+
+    pub fn na_bool() -> i32 {
+        unsafe { R_NaInt }
+    }
+
+    pub fn na_string() -> RObject {
+        Self::wrap(unsafe { R_NaString })
+    }
+
+    pub fn is_nan(x: f64) -> bool {
+        unsafe { R_IsNaN(x) != 0 }
+    }
+
+    pub fn is_na(x: f64) -> bool {
+        unsafe { R_IsNA(x) != 0 }
+    }
+
+    pub fn is_finite(x: f64) -> bool {
+        unsafe { R_finite(x) != 0 }
+    }
 }
 
 pub struct RObject<RType = AnyType, RMode = Unspecified> {
@@ -845,3 +885,8 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
         result
     }
 }
+
+// Support raw
+// Named vectors and lists
+// null
+// duplicate
