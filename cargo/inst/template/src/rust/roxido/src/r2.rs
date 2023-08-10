@@ -51,6 +51,10 @@ impl R {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
+    pub fn new_vector_u8(length: usize, pc: &mut Pc) -> RObject<Vector, u8> {
+        Self::new_vector::<u8>(RAWSXP, length, pc)
+    }
+
     pub fn new_vector_bool(length: usize, pc: &mut Pc) -> RObject<Vector, bool> {
         Self::new_vector::<bool>(LGLSXP, length, pc)
     }
@@ -73,6 +77,10 @@ impl R {
         Self::new_matrix::<i32>(INTSXP, nrow, ncol, pc)
     }
 
+    pub fn new_matrix_u8(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, u8> {
+        Self::new_matrix::<u8>(RAWSXP, nrow, ncol, pc)
+    }
+
     pub fn new_matrix_bool(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
         Self::new_matrix::<bool>(LGLSXP, nrow, ncol, pc)
     }
@@ -92,6 +100,10 @@ impl R {
 
     pub fn new_array_i32(dim: &[usize], pc: &mut Pc) -> RObject<Array, i32> {
         Self::new_array::<i32>(INTSXP, dim, pc)
+    }
+
+    pub fn new_array_u8(dim: &[usize], pc: &mut Pc) -> RObject<Array, u8> {
+        Self::new_array::<u8>(RAWSXP, dim, pc)
     }
 
     pub fn new_array_bool(dim: &[usize], pc: &mut Pc) -> RObject<Array, bool> {
@@ -201,6 +213,10 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn is_i32(&self) -> bool {
         unsafe { Rf_isInteger(self.sexp) != 0 }
+    }
+
+    pub fn is_u8(&self) -> bool {
+        unsafe { TYPEOF(self.sexp) == RAWSXP as i32 }
     }
 
     pub fn is_bool(&self) -> bool {
@@ -329,6 +345,14 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn as_vector_u8(&self) -> Result<RObject<Vector, u8>, &str> {
+        if self.is_vector_atomic() && self.is_u8() {
+            Ok(self.convert())
+        } else {
+            Err("Not a u8 vector")
+        }
+    }
+
     pub fn as_vector_bool(&self) -> Result<RObject<Vector, bool>, &str> {
         if self.is_vector_atomic() && self.is_bool() {
             Ok(self.convert())
@@ -401,6 +425,14 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn as_matrix_u8(&self) -> Result<RObject<Matrix, u8>, &str> {
+        if self.is_matrix() && self.is_u8() {
+            Ok(self.convert())
+        } else {
+            Err("Not a u8 matrix")
+        }
+    }
+
     pub fn as_matrix_bool(&self) -> Result<RObject<Matrix, bool>, &str> {
         if self.is_matrix() && self.is_bool() {
             Ok(self.convert())
@@ -440,6 +472,14 @@ impl<RType, RMode> RObject<RType, RMode> {
             Ok(self.convert())
         } else {
             Err("Not an i32 array")
+        }
+    }
+
+    pub fn as_array_u8(&self) -> Result<RObject<Array, u8>, &str> {
+        if self.is_array() && self.is_u8() {
+            Ok(self.convert())
+        } else {
+            Err("Not a u8 array")
         }
     }
 
@@ -492,6 +532,12 @@ impl<S: Sliceable> RObject<S, f64> {
 impl<S: Sliceable> RObject<S, i32> {
     pub fn slice(&self) -> &'static mut [i32] {
         self.slice_engine(unsafe { INTEGER(self.sexp) })
+    }
+}
+
+impl<S: Sliceable> RObject<S, u8> {
+    pub fn slice(&self) -> &'static mut [u8] {
+        self.slice_engine(unsafe { RAW(self.sexp) })
     }
 }
 
@@ -652,6 +698,18 @@ impl RObject<Vector, i32> {
     }
 }
 
+impl RObject<Vector, u8> {
+    pub fn get(&self, index: usize) -> u8 {
+        unsafe { RAW_ELT(self.sexp, index.try_into().unwrap()) }
+    }
+
+    pub fn set(&self, index: usize, value: u8) {
+        unsafe {
+            SET_RAW_ELT(self.sexp, index.try_into().unwrap(), value);
+        }
+    }
+}
+
 impl RObject<Vector, bool> {
     pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
@@ -803,6 +861,18 @@ impl RObject<Matrix, i32> {
     }
 }
 
+impl RObject<Matrix, u8> {
+    pub fn get(&self, index: (usize, usize)) -> u8 {
+        unsafe { RAW_ELT(self.sexp, self.index(index)) }
+    }
+
+    pub fn set(&self, index: (usize, usize), value: u8) {
+        unsafe {
+            SET_RAW_ELT(self.sexp, self.index(index), value);
+        }
+    }
+}
+
 impl RObject<Matrix, bool> {
     pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
@@ -880,6 +950,12 @@ impl IntoR<RObject<Vector, i32>> for i32 {
     }
 }
 
+impl IntoR<RObject<Vector, u8>> for u8 {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarRaw(*self) }))
+    }
+}
+
 impl IntoR<RObject<Vector, bool>> for bool {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         R::wrap(pc.protect(unsafe { Rf_ScalarLogical(if *self { 1 } else { 0 }) }))
@@ -923,6 +999,21 @@ impl<const N: usize> IntoR<RObject<Vector, i32>> for [i32; N] {
 impl IntoR<RObject<Vector, i32>> for &[i32] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
+impl<const N: usize> IntoR<RObject<Vector, u8>> for [u8; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl IntoR<RObject<Vector, u8>> for &[u8] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        let result = R::new_vector_u8(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
