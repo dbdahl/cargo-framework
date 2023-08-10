@@ -12,7 +12,7 @@
 use crate::pc::Pc;
 use crate::rbindings::*;
 
-use std::ffi::{c_char, CStr};
+use std::ffi::{c_char, c_void, CStr};
 use std::marker::PhantomData;
 use std::str::Utf8Error;
 
@@ -130,11 +130,11 @@ impl R {
         Self::wrap(unsafe { R_NilValue })
     }
 
-    pub fn positive_infinity() -> f64 {
+    pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
     }
 
-    pub fn negative_infinity() -> f64 {
+    pub fn infinity_negative() -> f64 {
         unsafe { R_NegInf }
     }
 
@@ -164,6 +164,33 @@ impl R {
 
     pub fn is_finite(x: f64) -> bool {
         unsafe { R_finite(x) != 0 }
+    }
+
+    /// Generate random bytes using R's RNG.
+    pub fn random_bytes<const LENGTH: usize>() -> [u8; LENGTH] {
+        unsafe {
+            let m = (u8::MAX as f64) + 1.0;
+            let mut bytes: [u8; LENGTH] = [0; LENGTH];
+            GetRNGstate();
+            for x in bytes.iter_mut() {
+                *x = R_unif_index(m) as u8;
+            }
+            PutRNGstate();
+            bytes
+        }
+    }
+
+    /// Flush the R console.
+    pub fn flush_console() {
+        unsafe { R_FlushConsole() };
+    }
+
+    /// Check to see if the user has attempted to interrupt the execution.
+    pub fn check_user_interrupt() -> bool {
+        extern "C" fn check_interrupt_fn(_: *mut c_void) {
+            unsafe { R_CheckUserInterrupt() };
+        }
+        unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
     }
 }
 
@@ -1070,4 +1097,3 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
     }
 }
 
-// Support raw

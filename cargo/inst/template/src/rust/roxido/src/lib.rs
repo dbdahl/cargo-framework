@@ -19,9 +19,11 @@
 //! is [R], [RObject], [RVector], [RMatrix], [RVectorCharacter], [RList], and [RFunction].
 
 pub mod pc;
+pub mod print;
 pub mod r;
 pub mod r2;
 pub mod rbindings;
+pub mod stop;
 
 pub use r::{
     AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
@@ -29,9 +31,10 @@ pub use r::{
 };
 
 pub use pc::Pc;
+pub use print::*;
 
 #[doc(hidden)]
-pub use r::RStopHelper;
+pub use stop::RStopHelper;
 
 /// A procedural macro to facilitate calling a Rust function from R.
 pub use roxido_macro::roxido;

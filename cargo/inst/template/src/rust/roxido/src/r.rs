@@ -11,6 +11,7 @@
 
 use crate::pc::*;
 use crate::rbindings::*;
+use crate::stop;
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::num::TryFromIntError;
@@ -101,115 +102,6 @@ impl R {
     /// Test if value is NA for storage mode `logical`.
     pub fn is_na_logical(x: i32) -> bool {
         unsafe { x == R_NaInt }
-    }
-}
-
-/// Print to the R console.
-///
-/// This is an implementation detail and *should not* be called directly!
-/// This returns `true` if the print statement swallowed a user interrupt.
-/// R checks for user interrupt every 100 print statements.
-/// See the `Rvprintf` function in `printutils.c` of R's source.
-///
-#[doc(hidden)]
-pub fn _print(x: &str, use_stdout: bool) -> bool {
-    #[repr(C)]
-    struct DummyFat {
-        len: usize,
-        ptr: *const c_char,
-        use_stdout: bool,
-    }
-    let mut y = DummyFat {
-        len: x.len(),
-        ptr: x.as_ptr() as *const c_char,
-        use_stdout,
-    };
-    let y_ptr = &mut y as *mut DummyFat as *mut c_void;
-    extern "C" fn print_fn(y_ptr: *mut c_void) {
-        unsafe {
-            let y_ptr = y_ptr as *mut DummyFat;
-            if (*y_ptr).use_stdout {
-                Rprintf(
-                    b"%.*s\0".as_ptr() as *const c_char,
-                    (*y_ptr).len,
-                    (*y_ptr).ptr,
-                );
-            } else {
-                REprintf(
-                    b"%.*s\0".as_ptr() as *const c_char,
-                    (*y_ptr).len,
-                    (*y_ptr).ptr,
-                );
-            }
-        }
-    }
-    unsafe { R_ToplevelExec(Some(print_fn), y_ptr) == 0 }
-}
-
-/// Just like Rust's usual `print!` macro, except output goes to the R console.
-#[macro_export]
-macro_rules! rprint {
-    ($fmt_string:expr) => {
-        r::_print(format!($fmt_string).as_str(), true)
-    };
-    ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!($fmt_string, $($arg),*).as_str(), true)
-    }
-}
-
-/// Just like Rust's usual `println!` macro, except output goes to the R console.
-#[macro_export]
-macro_rules! rprintln {
-    () => {
-        r::_print("\n", true)
-    };
-    ($fmt_string:expr) => {
-        r::_print(format!(concat!($fmt_string,"\n")).as_str(), true)
-    };
-    ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), true)
-    }
-}
-
-/// Just like Rust's usual `eprint!` macro, except output goes to the R console.
-#[macro_export]
-macro_rules! reprint {
-    ($fmt_string:expr) => {
-        r::_print(format!($fmt_string).as_str(), false)
-    };
-    ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!($fmt_string, $($arg),*).as_str(), false)
-    }
-}
-
-/// Just like Rust's usual `eprintln!` macro, except output goes to the R console.
-#[macro_export]
-macro_rules! reprintln {
-    () => {
-        r::_print("\n", false)
-    };
-    ($fmt_string:expr) => {
-        r::_print(format!(concat!($fmt_string,"\n")).as_str(), false)
-    };
-    ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), false)
-    }
-}
-
-#[doc(hidden)]
-pub struct RStopHelper(pub String);
-
-/// Throw an R error.
-#[macro_export]
-macro_rules! stop {
-    () => {
-        std::panic::panic_any(RStopHelper(String::new()))
-    };
-    ($fmt_string:expr) => {
-        std::panic::panic_any(RStopHelper(format!($fmt_string)))
-    };
-    ($fmt_string:expr, $( $arg:expr ),* ) => {
-        std::panic::panic_any(RStopHelper(format!($fmt_string, $($arg),*)))
     }
 }
 
@@ -1859,16 +1751,4 @@ impl TryFrom<RVectorCharacter> for &str {
             Err(_) => Err("Non UTF-8".to_string()),
         }
     }
-}
-
-#[doc(hidden)]
-#[no_mangle]
-pub extern "C" fn set_custom_panic_hook() -> SEXP {
-    let default_panic = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |panic_info| {
-        if panic_info.payload().downcast_ref::<RStopHelper>().is_none() {
-            default_panic(panic_info);
-        }
-    }));
-    unsafe { R_NilValue }
 }
