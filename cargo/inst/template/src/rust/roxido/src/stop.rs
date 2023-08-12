@@ -1,3 +1,4 @@
+use crate::r2::RObject;
 use crate::rbindings::*;
 
 #[doc(hidden)]
@@ -14,6 +15,26 @@ macro_rules! stop {
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
         std::panic::panic_any(crate::RStopHelper(format!($fmt_string, $($arg),*)))
+    }
+}
+
+pub trait UnwrapOrStop<T, M> {
+    fn stop(self, msg: &str) -> RObject<T, M>;
+    fn stop_default(self) -> RObject<T, M>;
+}
+
+impl<T, M> UnwrapOrStop<T, M> for Result<RObject<T, M>, &str> {
+    fn stop(self, msg: &str) -> RObject<T, M> {
+        match self {
+            Ok(t) => t,
+            Err(_) => stop!("{}", msg),
+        }
+    }
+    fn stop_default(self) -> RObject<T, M> {
+        match self {
+            Ok(t) => t,
+            Err(e) => stop!("{}", e),
+        }
     }
 }
 

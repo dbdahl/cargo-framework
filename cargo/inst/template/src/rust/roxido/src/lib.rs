@@ -34,7 +34,7 @@ pub use pc::Pc;
 pub use print::*;
 
 #[doc(hidden)]
-pub use stop::RStopHelper;
+pub use stop::{RStopHelper, UnwrapOrStop};
 
 /// A procedural macro to facilitate calling a Rust function from R.
 pub use roxido_macro::roxido;

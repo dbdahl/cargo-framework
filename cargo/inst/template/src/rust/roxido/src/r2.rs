@@ -32,6 +32,10 @@ impl Sliceable for Matrix {}
 impl Sliceable for Array {}
 
 impl R {
+    pub fn from_old(r: crate::r::RObject) -> RObject {
+        Self::wrap(r.0)
+    }
+
     fn wrap<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
         RObject {
             sexp,
