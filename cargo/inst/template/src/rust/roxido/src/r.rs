@@ -9,9 +9,9 @@
 //   https://www.tidyverse.org/blog/2019/05/resource-cleanup-in-c-and-the-r-api
 //   https://github.com/wch/r-source
 
-use crate::pc::*;
 use crate::rbindings::*;
 use crate::stop;
+use crate::Pc;
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::num::TryFromIntError;

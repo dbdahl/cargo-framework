@@ -47,10 +47,10 @@ pub fn _print(x: &str, use_stdout: bool) -> bool {
 #[macro_export]
 macro_rules! rprint {
     ($fmt_string:expr) => {
-        r::_print(format!($fmt_string).as_str(), true)
+        print::_print(format!($fmt_string).as_str(), true)
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!($fmt_string, $($arg),*).as_str(), true)
+        print::_print(format!($fmt_string, $($arg),*).as_str(), true)
     }
 }
 
@@ -58,13 +58,13 @@ macro_rules! rprint {
 #[macro_export]
 macro_rules! rprintln {
     () => {
-        r::_print("\n", true)
+        print::_print("\n", true)
     };
     ($fmt_string:expr) => {
-        r::_print(format!(concat!($fmt_string,"\n")).as_str(), true)
+        print::_print(format!(concat!($fmt_string,"\n")).as_str(), true)
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), true)
+        print::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), true)
     }
 }
 
@@ -72,10 +72,10 @@ macro_rules! rprintln {
 #[macro_export]
 macro_rules! reprint {
     ($fmt_string:expr) => {
-        r::_print(format!($fmt_string).as_str(), false)
+        print::_print(format!($fmt_string).as_str(), false)
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!($fmt_string, $($arg),*).as_str(), false)
+        print::_print(format!($fmt_string, $($arg),*).as_str(), false)
     }
 }
 
@@ -83,12 +83,12 @@ macro_rules! reprint {
 #[macro_export]
 macro_rules! reprintln {
     () => {
-        r::_print("\n", false)
+        print::_print("\n", false)
     };
     ($fmt_string:expr) => {
-        r::_print(format!(concat!($fmt_string,"\n")).as_str(), false)
+        print::_print(format!(concat!($fmt_string,"\n")).as_str(), false)
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        r::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), false)
+        print::_print(format!(concat!($fmt_string,"\n"), $($arg),*).as_str(), false)
     }
 }
