@@ -1100,4 +1100,3 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
         result
     }
 }
-
