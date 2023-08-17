@@ -1,4 +1,3 @@
-use crate::r2::RObject;
 use crate::rbindings::*;
 
 #[doc(hidden)]
@@ -18,19 +17,19 @@ macro_rules! stop {
     }
 }
 
-pub trait UnwrapOrStop<T, M> {
-    fn stop(self, msg: &str) -> RObject<T, M>;
-    fn stop_default(self) -> RObject<T, M>;
+pub trait UnwrapOrStop<T> {
+    fn stop(self, msg: &str) -> T;
+    fn stop_default(self) -> T;
 }
 
-impl<T, M> UnwrapOrStop<T, M> for Result<RObject<T, M>, &str> {
-    fn stop(self, msg: &str) -> RObject<T, M> {
+impl<T> UnwrapOrStop<T> for Result<T, &str> {
+    fn stop(self, msg: &str) -> T {
         match self {
             Ok(t) => t,
             Err(_) => stop!("{}", msg),
         }
     }
-    fn stop_default(self) -> RObject<T, M> {
+    fn stop_default(self) -> T {
         match self {
             Ok(t) => t,
             Err(e) => stop!("{}", e),

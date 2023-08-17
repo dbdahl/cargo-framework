@@ -14,19 +14,17 @@ use crate::rbindings::*;
 
 use std::ffi::{c_char, c_void, CStr};
 use std::marker::PhantomData;
+use std::ops::Deref;
 use std::str::Utf8Error;
 
 pub struct R {}
 pub struct Str;
 
-#[derive(Debug)]
 pub struct AnyType(());
 pub struct Vector(());
 pub struct Matrix(());
 pub struct Array(());
 pub struct Function(());
-
-#[derive(Debug)]
 pub struct Unspecified(());
 pub trait Sliceable {}
 
@@ -55,6 +53,10 @@ impl R {
             sexp,
             rtype: PhantomData,
         }
+    }
+
+    pub fn new(sexp: SEXP) -> RObject {
+        Self::wrap(sexp)
     }
 
     fn new_vector<T>(code: u32, length: usize, pc: &mut Pc) -> RObject<Vector, T> {
@@ -213,7 +215,6 @@ impl R {
 }
 
 #[repr(C)]
-#[derive(Debug)]
 pub struct RObject<RType = AnyType, RMode = Unspecified> {
     pub sexp: SEXP,
     rtype: PhantomData<(RType, RMode)>,
@@ -244,7 +245,7 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     /// Set an attribute.
-    pub fn set_attribute(&self, which: &str, value: RObject<RType, RMode>, pc: &mut Pc) {
+    pub fn set_attribute(&self, which: &str, value: &RObject<RType, RMode>, pc: &mut Pc) {
         unsafe {
             Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.sexp);
         }
@@ -633,15 +634,15 @@ impl RObject<Function, Unspecified> {
         Self::eval(expression, pc)
     }
 
-    pub fn call1<T1, M1>(&self, arg1: RObject<T1, M1>, pc: &mut Pc) -> Result<RObject, i32> {
+    pub fn call1<T1, M1>(&self, arg1: &RObject<T1, M1>, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang2(self.sexp, arg1.sexp) };
         Self::eval(expression, pc)
     }
 
     pub fn call2<T1, M1, T2, M2>(
         &self,
-        arg1: RObject<T1, M1>,
-        arg2: RObject<T2, M2>,
+        arg1: &RObject<T1, M1>,
+        arg2: &RObject<T2, M2>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang3(self.sexp, arg1.sexp, arg2.sexp) };
@@ -650,9 +651,9 @@ impl RObject<Function, Unspecified> {
 
     pub fn call3<T1, M1, T2, M2, T3, M3>(
         &self,
-        arg1: RObject<T1, M1>,
-        arg2: RObject<T2, M2>,
-        arg3: RObject<T2, M3>,
+        arg1: &RObject<T1, M1>,
+        arg2: &RObject<T2, M2>,
+        arg3: &RObject<T2, M3>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang4(self.sexp, arg1.sexp, arg2.sexp, arg3.sexp) };
@@ -661,10 +662,10 @@ impl RObject<Function, Unspecified> {
 
     pub fn call4<T1, M1, T2, M2, T3, M3, T4, M4>(
         &self,
-        arg1: RObject<T1, M1>,
-        arg2: RObject<T2, M2>,
-        arg3: RObject<T2, M3>,
-        arg4: RObject<T4, M4>,
+        arg1: &RObject<T1, M1>,
+        arg2: &RObject<T2, M2>,
+        arg3: &RObject<T2, M3>,
+        arg4: &RObject<T4, M4>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang5(self.sexp, arg1.sexp, arg2.sexp, arg3.sexp, arg4.sexp) };
@@ -673,11 +674,11 @@ impl RObject<Function, Unspecified> {
 
     pub fn call5<T1, M1, T2, M2, T3, M3, T4, M4, T5, M5>(
         &self,
-        arg1: RObject<T1, M1>,
-        arg2: RObject<T2, M2>,
-        arg3: RObject<T2, M3>,
-        arg4: RObject<T4, M4>,
-        arg5: RObject<T5, M5>,
+        arg1: &RObject<T1, M1>,
+        arg2: &RObject<T2, M2>,
+        arg3: &RObject<T2, M3>,
+        arg4: &RObject<T4, M4>,
+        arg5: &RObject<T5, M5>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         let expression = unsafe {
@@ -694,7 +695,7 @@ impl<RMode> RObject<Vector, RMode> {
         self.get_attribute("names", pc).convert()
     }
 
-    pub fn set_names(&self, names: RObject<Vector, Str>) -> Result<(), &str> {
+    pub fn set_names(&self, names: &RObject<Vector, Str>) -> Result<(), &str> {
         if unsafe { Rf_length(names.sexp) != Rf_length(self.sexp) } {
             return Err("Lengths do not match");
         }
@@ -821,7 +822,7 @@ impl RObject<Vector, Unspecified> {
         R::wrap(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
     }
 
-    pub fn set<RType, RMode>(&self, index: usize, value: RObject<RType, RMode>) {
+    pub fn set<RType, RMode>(&self, index: usize, value: &RObject<RType, RMode>) {
         unsafe {
             SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp);
         }
@@ -838,7 +839,7 @@ impl<RMode> RObject<Matrix, RMode> {
         self.get_attribute("dimnames", pc).convert()
     }
 
-    pub fn set_dimnames(&self, names: RObject<Vector, Unspecified>) -> Result<(), &str> {
+    pub fn set_dimnames(&self, names: &RObject<Vector, Unspecified>) -> Result<(), &str> {
         if !names.is_vector_list() {
             return Err("Not a list");
         }
@@ -974,42 +975,42 @@ impl RObject<Matrix, Unspecified> {
         R::wrap(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: RObject<RType, RMode>) {
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &RObject<RType, RMode>) {
         unsafe {
             SET_VECTOR_ELT(self.sexp, self.index(index), value.sexp);
         }
     }
 }
 
-trait IntoR<T> {
+pub trait ToR<T> {
     fn to_r(&self, pc: &mut Pc) -> T;
 }
 
-impl IntoR<RObject<Vector, f64>> for f64 {
+impl ToR<RObject<Vector, f64>> for f64 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         R::wrap(pc.protect(unsafe { Rf_ScalarReal(*self) }))
     }
 }
 
-impl IntoR<RObject<Vector, i32>> for i32 {
+impl ToR<RObject<Vector, i32>> for i32 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         R::wrap(pc.protect(unsafe { Rf_ScalarInteger(*self) }))
     }
 }
 
-impl IntoR<RObject<Vector, u8>> for u8 {
+impl ToR<RObject<Vector, u8>> for u8 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         R::wrap(pc.protect(unsafe { Rf_ScalarRaw(*self) }))
     }
 }
 
-impl IntoR<RObject<Vector, bool>> for bool {
+impl ToR<RObject<Vector, bool>> for bool {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         R::wrap(pc.protect(unsafe { Rf_ScalarLogical(if *self { 1 } else { 0 }) }))
     }
 }
 
-impl IntoR<RObject<Vector, Str>> for &str {
+impl ToR<RObject<Vector, Str>> for &str {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let sexp = unsafe {
             Rf_ScalarString(Rf_mkCharLenCE(
@@ -1022,13 +1023,13 @@ impl IntoR<RObject<Vector, Str>> for &str {
     }
 }
 
-impl<const N: usize> IntoR<RObject<Vector, f64>> for [f64; N] {
+impl<const N: usize> ToR<RObject<Vector, f64>> for [f64; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl IntoR<RObject<Vector, f64>> for &[f64] {
+impl ToR<RObject<Vector, f64>> for &[f64] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         let result = R::new_vector_f64(self.len(), pc);
         let slice = result.slice();
@@ -1037,13 +1038,13 @@ impl IntoR<RObject<Vector, f64>> for &[f64] {
     }
 }
 
-impl<const N: usize> IntoR<RObject<Vector, i32>> for [i32; N] {
+impl<const N: usize> ToR<RObject<Vector, i32>> for [i32; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl IntoR<RObject<Vector, i32>> for &[i32] {
+impl ToR<RObject<Vector, i32>> for &[i32] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -1052,13 +1053,13 @@ impl IntoR<RObject<Vector, i32>> for &[i32] {
     }
 }
 
-impl<const N: usize> IntoR<RObject<Vector, u8>> for [u8; N] {
+impl<const N: usize> ToR<RObject<Vector, u8>> for [u8; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl IntoR<RObject<Vector, u8>> for &[u8] {
+impl ToR<RObject<Vector, u8>> for &[u8] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_u8(self.len(), pc);
         let slice = result.slice();
@@ -1067,13 +1068,13 @@ impl IntoR<RObject<Vector, u8>> for &[u8] {
     }
 }
 
-impl<const N: usize> IntoR<RObject<Vector, i32>> for [usize; N] {
+impl<const N: usize> ToR<RObject<Vector, i32>> for [usize; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl IntoR<RObject<Vector, i32>> for &[usize] {
+impl ToR<RObject<Vector, i32>> for &[usize] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -1084,13 +1085,13 @@ impl IntoR<RObject<Vector, i32>> for &[usize] {
     }
 }
 
-impl<const N: usize> IntoR<RObject<Vector, bool>> for [bool; N] {
+impl<const N: usize> ToR<RObject<Vector, bool>> for [bool; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl IntoR<RObject<Vector, bool>> for &[bool] {
+impl ToR<RObject<Vector, bool>> for &[bool] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         let result = R::new_vector_bool(self.len(), pc);
         let slice = result.slice();
@@ -1101,13 +1102,13 @@ impl IntoR<RObject<Vector, bool>> for &[bool] {
     }
 }
 
-impl<const N: usize> IntoR<RObject<Vector, Str>> for [&str; N] {
+impl<const N: usize> ToR<RObject<Vector, Str>> for [&str; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl IntoR<RObject<Vector, Str>> for &[&str] {
+impl ToR<RObject<Vector, Str>> for &[&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let result = R::new_vector_str(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
@@ -1126,5 +1127,12 @@ impl From<RObject> for SEXP {
 impl<RType: Convertible, RMode> From<RObject<RType, RMode>> for RObject {
     fn from(x: RObject<RType, RMode>) -> Self {
         x.convert()
+    }
+}
+
+impl Deref for RObject {
+    type Target = SEXP;
+    fn deref(&self) -> &Self::Target {
+        &self.sexp
     }
 }

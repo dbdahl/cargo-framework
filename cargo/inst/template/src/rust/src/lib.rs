@@ -2,14 +2,8 @@ mod registration {
     include!(concat!(env!("OUT_DIR"), "/registration.rs"));
 }
 
+use r2::{RObject, ToR, R};
 use roxido::*;
-use r::{
-    AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
-    TryAllocateProtected, R,
-};
-
-/*
-use r2::{RObject, R};
 
 #[roxido]
 fn convolve2(a: RObject, b: RObject) -> RObject {
@@ -27,57 +21,48 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
     }
     r
 }
-*/
-
-#[roxido]
-fn convolve2(a: RObject, b: RObject) -> RObject {
-    let a = a.as_vector_or_stop("'a' not a vector.").coerce_double(pc).1;
-    let b = b.as_vector_or_stop("'b' not a vector.").coerce_double(pc).1;
-    let (r, ab) = RVector::new_double(a.len() + b.len() - 1, pc);
-    for abi in ab.iter_mut() {
-        *abi = 0.0;
-    }
-    for (i, ai) in a.iter().enumerate() {
-        for (j, bj) in b.iter().enumerate() {
-            ab[i + j] += ai * bj;
-        }
-    }
-    r
-}
 
 #[roxido]
 fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
-    let f = f.as_function_or_stop("'f' must be a function.");
-    let guesses = guesses.as_vector_or_stop("'guesses' must be a vector.");
+    let f = f.as_function().stop("'f' must be a function.");
+    let guesses = guesses
+        .to_vector_f64(pc)
+        .stop("'guesses' must be a vector.");
     if guesses.len() != 2 {
-        stop!("'guesses' must be a vector of length two.")
+        stop!("'guesses' must be a vector of length two.");
     }
-    let Ok(guesses) = guesses.slice_double() else {
-        stop!("'guesses' must have storage mode 'double'.")
-    };
-    let (mut x0, mut x1, tol) = (guesses[0], guesses[1], tol.as_f64());
+    let guesses = guesses
+        .as_vector_f64()
+        .stop("'guesses' must have storage mode 'double'.")
+        .slice();
+    if guesses.len() != 2 {
+        stop!("'guesses' should be of length two.");
+    }
+    let (mut x0, mut x1) = (guesses[0], guesses[1]);
+    let tol = tol.as_f64().stop("'tol' should be a numeric scalar.");
     if !tol.is_finite() || tol <= 0.0 {
         stop!("'tol' must be a strictly positive value.");
     }
-    let (x_rval, x_slice) = RVector::new_double(1, pc);
+    let x_rval = R::new_vector_f64(1, pc);
+    let x_slice = x_rval.slice();
     let mut g = |x: f64| {
         x_slice[0] = x;
-        let Ok(fx) = f.call1(x_rval, pc) else {
-            stop!("Error in function evaluation.")
+        let Ok(fx) = f.call1(&x_rval, pc) else {
+            stop!("Error in function evaluation.");
         };
-        let fx = fx.as_f64();
+        let fx = fx.as_f64().stop("Unexpected return value  from function.");
         if !fx.is_finite() {
-            stop!("Non-finite function evaluation.")
+            stop!("Non-finite return value from function.");
         }
         fx
     };
     let mut f0 = g(x0);
     if f0 == 0.0 {
-        return rvec!(x0);
+        return x0.to_r(pc);
     }
     let f1 = g(x1);
     if f1 == 0.0 {
-        return rvec!(x1);
+        return x1.to_r(pc);
     }
     if f0 * f1 > 0.0 {
         stop!("Oops, guesses[0] and guesses[1] have the same sign.");
@@ -85,11 +70,11 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     loop {
         let xc = 0.5 * (x0 + x1);
         if (x0 - x1).abs() < tol {
-            return rvec!(xc);
+            return xc.to_r(pc);
         }
         let fc = g(xc);
         if fc == 0.0 {
-            return rvec!(xc);
+            return xc.to_r(pc);
         }
         if f0 * fc > 0.0 {
             x0 = xc;
@@ -117,6 +102,6 @@ fn myrnorm(n: RObject, mean: RObject, sd: RObject) -> RObject {
         }
         PutRNGstate();
         Rf_unprotect(1);
-        RObject(vec)
+        R::new(vec)
     }
 }
