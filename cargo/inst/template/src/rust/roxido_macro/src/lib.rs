@@ -202,7 +202,8 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                     macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
                     #[allow(unused_macros)]
                     macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
-                    { #body }.into()
+                    let mut f = || { #body };
+                    f().into()
                 });
                 match result {
                     Ok(obj) => obj,
@@ -243,7 +244,8 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                     macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
                     #[allow(unused_macros)]
                     macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
-                    { #body }.into()
+                    let mut f = || { #body };
+                    f().into()
                 });
                 match result {
                     Ok(obj) => obj,
