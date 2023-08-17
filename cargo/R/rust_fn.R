@@ -25,7 +25,7 @@
 #' @importFrom utils packageDate packageVersion
 #' @export
 #'
-rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE) {
+rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE, api = 2) {
   # Parse arguments
   mc <- match.call(expand.dots = FALSE)
   args <- mc[["..."]]
@@ -33,7 +33,14 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   code <- args[[len]]
   args_with_type <- sapply(as.character(args[-len]), function(arg) paste0(arg, ": RObject"))
   all_args <- paste0(args_with_type, collapse = ", ")
-  code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) -> RObject { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse = "\n"))
+  use_header <- if ( api == 2 ) {
+    "pub use r::{AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter, TryAllocateProtected, R};"
+  } else if ( api == 3 ) {
+    "pub use r2::{R, RObject};"
+  } else {
+    stop("Unknown API number")
+  }
+  code <- sprintf("#[allow(unused_imports)] use roxido::*; %s #[roxido(longjmp = %s, invisible = %s)] fn func(%s) -> RObject { %s\n}", use_header, tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse = "\n"))
   # Set-up directories
   path_info <- get_lib_path(verbose, cached, force)
   if (is.null(path_info)) {

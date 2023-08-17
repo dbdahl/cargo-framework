@@ -134,10 +134,6 @@ impl R {
         R::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
-    pub fn null() -> RObject {
-        Self::wrap(unsafe { R_NilValue })
-    }
-
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
     }
@@ -296,6 +292,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         } else {
             false
         }
+    }
+
+    pub fn null() -> RObject {
+        R::wrap(unsafe { R_NilValue })
     }
 
     pub fn as_f64(&self) -> Result<f64, &str> {

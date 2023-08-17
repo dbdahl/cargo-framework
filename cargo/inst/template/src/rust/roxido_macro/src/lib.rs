@@ -229,7 +229,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                         unsafe {
                             crate::rbindings::Rf_error(b"%.*s\0".as_ptr() as *const std::os::raw::c_char, len, crate::rbindings::R_CHAR(sexp));
                         }
-                        crate::RObject::nil() // We never get here.
+                        crate::RObject::null() // We never get here.
                     }
                 }
             }

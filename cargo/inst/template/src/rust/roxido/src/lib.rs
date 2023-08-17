@@ -25,16 +25,23 @@ pub mod r2;
 pub mod rbindings;
 pub mod stop;
 
-pub use r::{
-    AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
-    TryAllocateProtected, R,
-};
+/// A procedural macro to facilitate calling a Rust function from R.
+pub use roxido_macro::roxido;
 
-pub use pc::Pc;
+/// A procedural macro to facilitate printing from Rust to R.
 pub use print::*;
 
 #[doc(hidden)]
 pub use stop::{RStopHelper, UnwrapOrStop};
 
-/// A procedural macro to facilitate calling a Rust function from R.
-pub use roxido_macro::roxido;
+pub use pc::Pc;
+
+// pub use r::{
+//     AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
+//     TryAllocateProtected, R,
+// };
+
+// pub use r2::{
+//     RObject,
+//     R
+// };

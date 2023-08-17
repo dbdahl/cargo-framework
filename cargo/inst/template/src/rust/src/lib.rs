@@ -3,6 +3,10 @@ mod registration {
 }
 
 use roxido::*;
+use r::{
+    AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
+    TryAllocateProtected, R,
+};
 
 #[roxido]
 fn convolve2(a: RObject, b: RObject) -> RObject {

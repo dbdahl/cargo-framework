@@ -186,6 +186,11 @@ impl RObject {
         Self(unsafe { R_NilValue })
     }
 
+    /// Get the value `NULL`.
+    pub fn null() -> Self {
+        Self(unsafe { R_NilValue })
+    }
+
     /// Get R's definition of the `NA` value for an element of an object of storage mode `character`.
     pub fn na_character() -> Self {
         Self(unsafe { R_NaString })
