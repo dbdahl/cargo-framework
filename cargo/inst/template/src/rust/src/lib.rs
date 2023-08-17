@@ -8,6 +8,27 @@ use r::{
     TryAllocateProtected, R,
 };
 
+/*
+use r2::{RObject, R};
+
+#[roxido]
+fn convolve2(a: RObject, b: RObject) -> RObject {
+    let a = a.to_vector_f64(pc).stop("'a' not a vector.").slice();
+    let b = b.to_vector_f64(pc).stop("'b' not a vector.").slice();
+    let r = R::new_vector_f64(a.len() + b.len() - 1, pc);
+    let ab = r.slice();
+    for abi in ab.iter_mut() {
+        *abi = 0.0;
+    }
+    for (i, ai) in a.iter().enumerate() {
+        for (j, bj) in b.iter().enumerate() {
+            ab[i + j] += ai * bj;
+        }
+    }
+    r
+}
+*/
+
 #[roxido]
 fn convolve2(a: RObject, b: RObject) -> RObject {
     let a = a.as_vector_or_stop("'a' not a vector.").coerce_double(pc).1;

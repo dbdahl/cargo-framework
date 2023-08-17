@@ -19,17 +19,27 @@ use std::str::Utf8Error;
 pub struct R {}
 pub struct Str;
 
+#[derive(Debug)]
 pub struct AnyType(());
 pub struct Vector(());
 pub struct Matrix(());
 pub struct Array(());
 pub struct Function(());
+
+#[derive(Debug)]
 pub struct Unspecified(());
 pub trait Sliceable {}
 
 impl Sliceable for Vector {}
 impl Sliceable for Matrix {}
 impl Sliceable for Array {}
+
+pub trait Convertible {}
+
+impl Convertible for Vector {}
+impl Convertible for Matrix {}
+impl Convertible for Array {}
+impl Convertible for Function {}
 
 impl R {
     pub fn from_old(r: crate::r::RObject) -> RObject {
@@ -134,6 +144,10 @@ impl R {
         R::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
+    pub fn null() -> RObject {
+        Self::wrap(unsafe { R_NilValue })
+    }
+
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
     }
@@ -198,6 +212,8 @@ impl R {
     }
 }
 
+#[repr(C)]
+#[derive(Debug)]
 pub struct RObject<RType = AnyType, RMode = Unspecified> {
     pub sexp: SEXP,
     rtype: PhantomData<(RType, RMode)>,
@@ -292,10 +308,6 @@ impl<RType, RMode> RObject<RType, RMode> {
         } else {
             false
         }
-    }
-
-    pub fn null() -> RObject {
-        R::wrap(unsafe { R_NilValue })
     }
 
     pub fn as_f64(&self) -> Result<f64, &str> {
@@ -1102,5 +1114,17 @@ impl IntoR<RObject<Vector, Str>> for &[&str] {
             result.set(index, s);
         }
         result
+    }
+}
+
+impl From<RObject> for SEXP {
+    fn from(x: RObject) -> Self {
+        x.sexp
+    }
+}
+
+impl<RType: Convertible, RMode> From<RObject<RType, RMode>> for RObject {
+    fn from(x: RObject<RType, RMode>) -> Self {
+        x.convert()
     }
 }

@@ -49,6 +49,11 @@ impl R {
         unsafe { R_ToplevelExec(Some(check_interrupt_fn), std::ptr::null_mut()) == 0 }
     }
 
+    /// Get the value `NULL`.
+    pub fn null() -> RObject {
+        RObject(unsafe { R_NilValue })
+    }
+
     /// Get R's definition of the `Inf` value.
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
@@ -183,11 +188,6 @@ impl RObject {
 
     /// Get the value `NULL`.
     pub fn nil() -> Self {
-        Self(unsafe { R_NilValue })
-    }
-
-    /// Get the value `NULL`.
-    pub fn null() -> Self {
         Self(unsafe { R_NilValue })
     }
 

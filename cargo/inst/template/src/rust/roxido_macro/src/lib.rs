@@ -196,14 +196,13 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         TokenStream::from(quote! {
             #[no_mangle]
             extern "C" fn #name(#args) #output {
-                let result: Result<RObject, _> = std::panic::catch_unwind(|| {
+                let result = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
                     #[allow(unused_macros)]
                     macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
                     #[allow(unused_macros)]
                     macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
-                    let mut f = || { #body };
-                    f().into()
+                    { #body }.into()
                 });
                 match result {
                     Ok(obj) => obj,
@@ -229,7 +228,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                         unsafe {
                             crate::rbindings::Rf_error(b"%.*s\0".as_ptr() as *const std::os::raw::c_char, len, crate::rbindings::R_CHAR(sexp));
                         }
-                        crate::RObject::null() // We never get here.
+                        crate::R::null() // We never get here.
                     }
                 }
             }
@@ -244,8 +243,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                     macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
                     #[allow(unused_macros)]
                     macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
-                    let mut f = || { #body };
-                    f().into()
+                    { #body }.into()
                 });
                 match result {
                     Ok(obj) => obj,
