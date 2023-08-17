@@ -1124,6 +1124,12 @@ impl From<RObject> for SEXP {
     }
 }
 
+impl From<()> for RObject {
+    fn from(_: ()) -> Self {
+        R::null()
+    }
+}
+
 impl<RType: Convertible, RMode> From<RObject<RType, RMode>> for RObject {
     fn from(x: RObject<RType, RMode>) -> Self {
         x.convert()
