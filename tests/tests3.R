@@ -168,8 +168,8 @@ test_that("i32", {
   expect_error(f(NaN))
   expect_error(f(NA))
   expect_error(f(NULL))
-  expect_error(f(-(.Machine$integer.max+1)))
-  expect_error(f(+(.Machine$integer.max+1)))
+  expect_error(f(-(.Machine$integer.max + 1)))
+  expect_error(f(+(.Machine$integer.max + 1)))
   expect_equal(f(+.Machine$integer.max), +.Machine$integer.max)
   expect_equal(f(-.Machine$integer.max), -.Machine$integer.max)
   expect_error(f(c(7, 6, 5, 4)))
@@ -192,7 +192,7 @@ test_that("usize", {
   expect_error(f(-1))
   expect_true(f(0))
   expect_true(f(3))
-  expect_true(f(.Machine$integer.max+100))
+  expect_true(f(.Machine$integer.max + 100))
   expect_error(f(.Machine$double.xmax))
   expect_error(f(Inf))
   expect_error(f(-Inf))
@@ -221,8 +221,20 @@ test_that("bool", {
   expect_equal(f(-Inf), as.logical(-Inf))
 })
 
-
-
+test_that("random_bytes", {
+  f <- rust_fn("
+    let a: [u8; 1_000_000] = R::random_bytes();
+    a.to_r(pc)
+  ")
+  x <- f()
+  k <- 256
+  expected <- length(x) / k
+  observed <- table(as.character(x))
+  statistic <- sum((observed - expected)^2 / expected)
+  df <- k - 1
+  p_value <- pchisq(statistic, df, lower.tail = FALSE)
+  expect_gte(p_value, 0.0001)
+})
 
 
 
