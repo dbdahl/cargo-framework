@@ -251,7 +251,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                     Ok(obj) => obj,
                     Err(_) => {
                         let pc = &mut crate::Pc::new();
-                        crate::RObject::new_error(format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name)).as_str(), pc)
+                        crate::R::new_error(format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name)).as_str(), pc)
                     }
                 }
             }

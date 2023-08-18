@@ -54,6 +54,19 @@ impl R {
         RObject(unsafe { R_NilValue })
     }
 
+    /// Define a new error.
+    ///
+    /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
+    ///
+    pub fn new_error(message: &str, pc: &mut Pc) -> RObject {
+        let list = RList::new(2, pc);
+        let _ = list.set(0, RVectorCharacter::allocate(message, pc));
+        let _ = list.set(1, Self::null());
+        let _ = list.names_gets(RVectorCharacter::allocate(["message", "calls"], pc));
+        list.class_gets(RVectorCharacter::allocate(["error", "condition"], pc));
+        list.into()
+    }
+
     /// Get R's definition of the `Inf` value.
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
