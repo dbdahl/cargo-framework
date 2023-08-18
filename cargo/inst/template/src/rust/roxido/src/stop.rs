@@ -5,6 +5,7 @@ pub struct RStopHelper(pub String);
 
 /// Throw an R error.
 #[macro_export]
+#[allow(clippy::crate_in_macro_def)]
 macro_rules! stop {
     () => {
         std::panic::panic_any(crate::RStopHelper(String::new()))

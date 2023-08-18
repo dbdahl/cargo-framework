@@ -55,7 +55,7 @@ impl R {
         }
     }
 
-    pub fn new(sexp: SEXP) -> RObject {
+    pub fn new_object(sexp: SEXP) -> RObject {
         Self::wrap(sexp)
     }
 
@@ -144,8 +144,8 @@ impl R {
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> RObject {
         let list = R::new_vector_list(2, pc);
-        let _ = list.set(0, &message.to_r(pc));
-        let _ = list.set(1, &R::null());
+        list.set(0, &message.to_r(pc));
+        list.set(1, &R::null());
         let _ = list.set_names(&["message", "calls"].to_r(pc));
         list.set_class(&["error", "condition"].to_r(pc));
         list.into()
