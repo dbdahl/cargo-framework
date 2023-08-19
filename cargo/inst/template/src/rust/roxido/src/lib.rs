@@ -41,4 +41,4 @@ pub use pc::Pc;
 //     TryAllocateProtected, R,
 // };
 
-// pub use r2::{RObject, ToR, R};
+// pub use r2::{RObject, ToR1, ToR2, ToR3, ToR4, R};

@@ -37,7 +37,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   header <- if ( api == "2" ) {
     "pub use r::{AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter, TryAllocateProtected, R};"
   } else if ( api == "3" ) {
-    "pub use r2::{R, RObject, ToR};"
+    "pub use r2::{R, RObject, ToR1, ToR2, ToR3, ToR4};"
   } else {
     stop("Unknown API number.")
   }
