@@ -236,6 +236,46 @@ test_that("random_bytes", {
   expect_gte(p_value, 0.0001)
 })
 
+test_that("f64 slice", {
+  f <- rust_fn(a, "
+    a.as_vector_f64().stop_default().slice().to_r(pc)
+  ")
+  x <- numeric(0)
+  expect_equal(f(x), x)
+  x <- 2
+  expect_equal(f(x), x)
+  x <- c(1, 2, 3)
+  expect_equal(f(x), x)
+  expect_error(f(as.integer(x)))
+})
+
+test_that("i32 slice", {
+  f <- rust_fn(a, "
+    a.as_vector_i32().stop_default().slice().to_r(pc)
+  ")
+  x <- integer(0)
+  expect_equal(f(x), x)
+  x <- 2L
+  expect_equal(f(x), x)
+  x <- c(1L, 2L, 3L)
+  expect_equal(f(x), x)
+  expect_error(f(as.double(x)))
+})
+
+test_that("bool slice", {
+  f <- rust_fn(a, "
+    a.as_vector_bool().stop_default().slice().iter().map(|&x| x != 0).to_r(pc)
+  ")
+  x <- logical(0)
+  expect_equal(f(x), x)
+  x <- 2L
+  expect_equal(f(x), x)
+  x <- c(1L, 2L, 3L)
+  expect_equal(f(x), x)
+  expect_error(f(as.double(x)))
+})
+
+
 
 
 

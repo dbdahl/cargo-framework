@@ -868,6 +868,15 @@ impl RObject<Vector, f64> {
             SET_REAL_ELT(self.sexp, index.try_into().unwrap(), value);
         }
     }
+
+    pub fn fill_from_iter<T: Iterator<Item = f64> + ExactSizeIterator>(x: T, pc: &mut Pc) -> Self {
+        let result = R::new_vector_f64(x.len(), pc);
+        let slice = result.slice();
+        for (to, from) in slice.iter_mut().zip(x) {
+            *to = from;
+        }
+        result
+    }
 }
 
 impl RObject<Vector, i32> {
@@ -888,6 +897,15 @@ impl RObject<Vector, i32> {
             SET_INTEGER_ELT(self.sexp, index.try_into().unwrap(), value);
         }
     }
+
+    pub fn fill_from_iter<T: Iterator<Item = i32> + ExactSizeIterator>(x: T, pc: &mut Pc) -> Self {
+        let result = R::new_vector_i32(x.len(), pc);
+        let slice = result.slice();
+        for (to, from) in slice.iter_mut().zip(x) {
+            *to = from;
+        }
+        result
+    }
 }
 
 impl RObject<Vector, u8> {
@@ -899,6 +917,15 @@ impl RObject<Vector, u8> {
         unsafe {
             SET_RAW_ELT(self.sexp, index.try_into().unwrap(), value);
         }
+    }
+
+    pub fn fill_from_iter<T: Iterator<Item = u8> + ExactSizeIterator>(x: T, pc: &mut Pc) -> Self {
+        let result = R::new_vector_u8(x.len(), pc);
+        let slice = result.slice();
+        for (to, from) in slice.iter_mut().zip(x) {
+            *to = from;
+        }
+        result
     }
 }
 
@@ -924,7 +951,11 @@ impl RObject<Vector, bool> {
             SET_LOGICAL_ELT(
                 self.sexp,
                 index.try_into().unwrap(),
-                if value { 1 } else { 0 },
+                if value {
+                    Rboolean_TRUE as i32
+                } else {
+                    Rboolean_FALSE as i32
+                },
             );
         }
     }
@@ -933,6 +964,19 @@ impl RObject<Vector, bool> {
         unsafe {
             SET_LOGICAL_ELT(self.sexp, index.try_into().unwrap(), value);
         }
+    }
+
+    pub fn fill_from_iter<T: Iterator<Item = bool> + ExactSizeIterator>(x: T, pc: &mut Pc) -> Self {
+        let result = R::new_vector_bool(x.len(), pc);
+        let slice = result.slice();
+        for (to, from) in slice.iter_mut().zip(x) {
+            *to = if from {
+                Rboolean_TRUE as i32
+            } else {
+                Rboolean_FALSE as i32
+            };
+        }
+        result
     }
 }
 
@@ -1084,7 +1128,15 @@ impl RObject<Matrix, bool> {
 
     pub fn set(&self, index: (usize, usize), value: bool) {
         unsafe {
-            SET_LOGICAL_ELT(self.sexp, self.index(index), if value { 1 } else { 0 });
+            SET_LOGICAL_ELT(
+                self.sexp,
+                self.index(index),
+                if value {
+                    Rboolean_TRUE as i32
+                } else {
+                    Rboolean_FALSE as i32
+                },
+            );
         }
     }
 
@@ -1150,7 +1202,13 @@ impl ToR<RObject<Vector, u8>> for u8 {
 
 impl ToR<RObject<Vector, bool>> for bool {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        R::wrap(pc.protect(unsafe { Rf_ScalarLogical(if *self { 1 } else { 0 }) }))
+        R::wrap(pc.protect(unsafe {
+            Rf_ScalarLogical(if *self {
+                Rboolean_TRUE as i32
+            } else {
+                Rboolean_FALSE as i32
+            })
+        }))
     }
 }
 
