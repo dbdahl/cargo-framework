@@ -286,14 +286,19 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     /// Set an attribute.
-    pub fn set_attribute(&self, which: &str, value: &RObject<RType, RMode>, pc: &mut Pc) {
+    pub fn set_attribute<RTypeValue, RModeValue>(
+        &self,
+        which: &str,
+        value: &RObject<RTypeValue, RModeValue>,
+        pc: &mut Pc,
+    ) {
         unsafe {
             Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.sexp);
         }
     }
 
-    pub fn get_class(&self, pc: &mut Pc) -> RObject<Vector, Str> {
-        self.get_attribute("class", pc).convert()
+    pub fn get_class(&self) -> RObject<Vector, Str> {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_ClassSymbol) })
     }
 
     pub fn set_class(&self, names: &RObject<Vector, Str>) {
@@ -304,6 +309,14 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn is_null(&self) -> bool {
         unsafe { Rf_isNull(self.sexp) != 0 }
+    }
+
+    pub fn is_number(&self) -> bool {
+        unsafe { Rf_isNumber(self.sexp) != 0 }
+    }
+
+    pub fn is_scalar(&self) -> bool {
+        unsafe { Rf_xlength(self.sexp) == 1 }
     }
 
     pub fn is_na(&self) -> bool {
@@ -374,14 +387,6 @@ impl<RType, RMode> RObject<RType, RMode> {
 
     pub fn is_function(&self) -> bool {
         unsafe { Rf_isFunction(self.sexp) != 0 }
-    }
-
-    pub fn is_number(&self) -> bool {
-        unsafe { Rf_isNumber(self.sexp) != 0 }
-    }
-
-    pub fn is_scalar(&self) -> bool {
-        unsafe { Rf_xlength(self.sexp) == 1 }
     }
 
     pub fn as_f64(&self) -> Result<f64, &str> {
@@ -499,43 +504,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &str> {
-        if self.is_vector_atomic() {
-            if self.is_f64() {
-                Ok(self.convert())
-            } else if self.is_i32() || self.is_u8() || self.is_bool() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not an vector")
-        }
-    }
-
     pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &str> {
         if self.is_vector_atomic() && self.is_i32() {
             Ok(self.convert())
         } else {
             Err("Not an i32 vector")
-        }
-    }
-
-    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &str> {
-        if self.is_vector_atomic() {
-            if self.is_i32() {
-                Ok(self.convert())
-            } else if self.is_f64() || self.is_u8() || self.is_bool() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not an vector")
         }
     }
 
@@ -547,43 +520,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_u8(&self, pc: &mut Pc) -> Result<RObject<Vector, u8>, &str> {
-        if self.is_vector_atomic() {
-            if self.is_u8() {
-                Ok(self.convert())
-            } else if self.is_f64() || self.is_i32() || self.is_bool() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not an vector")
-        }
-    }
-
     pub fn as_vector_bool(&self) -> Result<RObject<Vector, bool>, &str> {
         if self.is_vector_atomic() && self.is_bool() {
             Ok(self.convert())
         } else {
             Err("Not a bool vector")
-        }
-    }
-
-    pub fn to_vector_bool(&self, pc: &mut Pc) -> Result<RObject<Vector, bool>, &str> {
-        if self.is_vector_atomic() {
-            if self.is_bool() {
-                Ok(self.convert())
-            } else if self.is_f64() || self.is_i32() || self.is_u8() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not an vector")
         }
     }
 
@@ -595,43 +536,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &str> {
-        if self.is_matrix() {
-            if self.is_f64() {
-                Ok(self.convert())
-            } else if self.is_i32() || self.is_u8() || self.is_bool() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not a matrix")
-        }
-    }
-
     pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &str> {
         if self.is_matrix() && self.is_i32() {
             Ok(self.convert())
         } else {
             Err("Not an i32 matrix")
-        }
-    }
-
-    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &str> {
-        if self.is_matrix() {
-            if self.is_i32() {
-                Ok(self.convert())
-            } else if self.is_f64() || self.is_u8() || self.is_bool() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not a matrix")
         }
     }
 
@@ -643,42 +552,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_u8(&self, pc: &mut Pc) -> Result<RObject<Matrix, u8>, &str> {
-        if self.is_matrix() {
-            if self.is_u8() {
-                Ok(self.convert())
-            } else if self.is_f64() || self.is_i32() || self.is_bool() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not a matrix")
-        }
-    }
-
     pub fn as_matrix_bool(&self) -> Result<RObject<Matrix, bool>, &str> {
         if self.is_matrix() && self.is_bool() {
             Ok(self.convert())
         } else {
             Err("Not a bool matrix")
-        }
-    }
-    pub fn to_matrix_bool(&self, pc: &mut Pc) -> Result<RObject<Matrix, bool>, &str> {
-        if self.is_matrix() {
-            if self.is_bool() {
-                Ok(self.convert())
-            } else if self.is_f64() || self.is_i32() || self.is_u8() {
-                Ok(R::wrap(
-                    pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }),
-                ))
-            } else {
-                Err("Does not contain i32, f64, u8, or bool")
-            }
-        } else {
-            Err("Not a matrix")
         }
     }
 
@@ -729,6 +607,134 @@ impl<RType, RMode> RObject<RType, RMode> {
             Err("Not a function")
         }
     }
+
+    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &str> {
+        if self.is_vector_atomic() {
+            if self.is_f64() {
+                Ok(self.convert())
+            } else if self.is_i32() || self.is_u8() || self.is_bool() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not an vector")
+        }
+    }
+
+    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &str> {
+        if self.is_vector_atomic() {
+            if self.is_i32() {
+                Ok(self.convert())
+            } else if self.is_f64() || self.is_u8() || self.is_bool() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not an vector")
+        }
+    }
+
+    pub fn to_vector_u8(&self, pc: &mut Pc) -> Result<RObject<Vector, u8>, &str> {
+        if self.is_vector_atomic() {
+            if self.is_u8() {
+                Ok(self.convert())
+            } else if self.is_f64() || self.is_i32() || self.is_bool() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not an vector")
+        }
+    }
+
+    pub fn to_vector_bool(&self, pc: &mut Pc) -> Result<RObject<Vector, bool>, &str> {
+        if self.is_vector_atomic() {
+            if self.is_bool() {
+                Ok(self.convert())
+            } else if self.is_f64() || self.is_i32() || self.is_u8() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not an vector")
+        }
+    }
+
+    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &str> {
+        if self.is_matrix() {
+            if self.is_f64() {
+                Ok(self.convert())
+            } else if self.is_i32() || self.is_u8() || self.is_bool() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not a matrix")
+        }
+    }
+
+    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &str> {
+        if self.is_matrix() {
+            if self.is_i32() {
+                Ok(self.convert())
+            } else if self.is_f64() || self.is_u8() || self.is_bool() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not a matrix")
+        }
+    }
+
+    pub fn to_matrix_u8(&self, pc: &mut Pc) -> Result<RObject<Matrix, u8>, &str> {
+        if self.is_matrix() {
+            if self.is_u8() {
+                Ok(self.convert())
+            } else if self.is_f64() || self.is_i32() || self.is_bool() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not a matrix")
+        }
+    }
+
+    pub fn to_matrix_bool(&self, pc: &mut Pc) -> Result<RObject<Matrix, bool>, &str> {
+        if self.is_matrix() {
+            if self.is_bool() {
+                Ok(self.convert())
+            } else if self.is_f64() || self.is_i32() || self.is_u8() {
+                Ok(R::wrap(
+                    pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }),
+                ))
+            } else {
+                Err("Does not contain i32, f64, u8, or bool")
+            }
+        } else {
+            Err("Not a matrix")
+        }
+    }
 }
 
 impl<S: Sliceable, T> RObject<S, T> {
@@ -774,14 +780,25 @@ impl<T> RObject<Matrix, T> {
     pub fn nrow(&self) -> usize {
         unsafe { Rf_nrows(self.sexp).try_into().unwrap() }
     }
+
     pub fn ncol(&self) -> usize {
         unsafe { Rf_ncols(self.sexp).try_into().unwrap() }
+    }
+
+    pub fn dim(&self) -> [usize; 2] {
+        [self.nrow(), self.ncol()]
+    }
+
+    pub fn to_vector(&self) -> RObject<Vector, T> {
+        unsafe { Rf_setAttrib(self.sexp, R_DimSymbol, R_NilValue) };
+        self.convert()
     }
 }
 
 impl<T> RObject<Array, T> {
     pub fn dim(&self) -> Vec<usize> {
-        unimplemented!()
+        let d = R::wrap::<Vector, i32>(unsafe { Rf_getAttrib(self.sexp, R_DimSymbol) });
+        d.slice().iter().map(|&x| x.try_into().unwrap()).collect()
     }
 }
 
@@ -866,8 +883,8 @@ impl RObject<Function, Unspecified> {
 }
 
 impl<RMode> RObject<Vector, RMode> {
-    pub fn get_names(&self, pc: &mut Pc) -> RObject<Vector, Str> {
-        self.get_attribute("names", pc).convert()
+    pub fn get_names(&self) -> RObject<Vector, Str> {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_NamesSymbol) })
     }
 
     pub fn set_names(&self, names: &RObject<Vector, Str>) -> Result<(), &str> {
@@ -1014,8 +1031,8 @@ impl<RMode> RObject<Matrix, RMode> {
         (nrow * j + i).try_into().unwrap()
     }
 
-    pub fn get_dimnames(&self, pc: &mut Pc) -> RObject<Vector, Unspecified> {
-        self.get_attribute("dimnames", pc).convert()
+    pub fn get_dimnames(&self) -> RObject<Vector, Unspecified> {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_DimNamesSymbol) })
     }
 
     pub fn set_dimnames(&self, names: &RObject<Vector, Unspecified>) -> Result<(), &str> {
