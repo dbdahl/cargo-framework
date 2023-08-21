@@ -473,6 +473,273 @@ test_that("u8 slice", {
   expect_equal(f(as.raw(x)), x)
 })
 
+test_that("attributes", {
+  a <- 1
+  f <- rust_fn(a, '
+    a.set_attribute("bill", &"bob".to_r(pc), pc);
+    a
+  ')
+  expect_equal(attr(f(a), "bill"), "bob")
+  f <- rust_fn(a, '
+    a.get_attribute("dim", pc)
+  ')
+  a <- c(1, 2)
+  attr(a, "dim") <- c(2, 1)
+  expect_equal(f(a), c(2, 1))
+  f <- rust_fn(a, "
+    let b = a.to_matrix_f64(pc).stop_default().dim();
+    [b[0] as i32, b[1] as i32].to_r(pc)
+  ")
+  expect_equal(f(a), c(2, 1))
+  f <- rust_fn(a, "
+    a.to_matrix_f64(pc).stop_default().get_class()
+  ")
+  class(a) <- c("billy", "bob")
+  expect_equal(f(a), c("billy", "bob"))
+  f <- rust_fn(a, '
+    let a = a.to_matrix_f64(pc).stop_default();
+    a.set_class(&"asdf".to_r(pc));
+    a
+  ')
+  expect_equal(class(f(a)), "asdf")
+})
+
+test_that("new vectors with names", {
+  f <-  rust_fn('
+    let a = R::new_vector_f64(3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = i as f64;
+    }
+    let _ = a.set_names(&["a", "b", "c"].to_r(pc));
+    a
+  ')
+  expect_true(identical(f(), c(a = 0, b = 1, c = 2)))
+  f <-  rust_fn('
+    let a = R::new_vector_i32(3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = i as i32;
+    }
+    let _ = a.set_names(&["a", "b", "c"].to_r(pc));
+    a
+  ')
+  expect_true(identical(f(), c(a = 0L, b = 1L, c = 2L)))
+  f <-  rust_fn('
+    let a = R::new_vector_u8(3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = i as u8;
+    }
+    let _ = a.set_names(&["a", "b", "c"].to_r(pc));
+    a
+  ')
+  b <- as.raw(c(0, 1, 2))
+  names(b) <- c("a", "b", "c")
+  expect_true(identical(f(), b))
+  f <-  rust_fn('
+    let a = R::new_vector_bool(3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = if i != 0 { 1 } else { 0 };
+    }
+    let _ = a.set_names(&["a", "b", "c"].to_r(pc));
+    a
+  ')
+  expect_true(identical(f(), c(a = FALSE, b = TRUE, c = TRUE)))
+  f <-  rust_fn('
+    let a = R::new_vector_i32(3, pc);
+    a.set_names(&["a", "b"].to_r(pc)).stop_default();
+  ')
+  expect_error(f())
+})
+
+test_that("new matrix with names", {
+  f <-  rust_fn('
+    let a = R::new_matrix_f64(1, 3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = i as f64;
+    }
+    let dimnames = R::new_vector_list(2, pc);
+    dimnames.set(0, &["row1"].to_r(pc));
+    dimnames.set(1, &["col1", "col2", "col3"].to_r(pc));
+    a.set_dimnames(&dimnames).stop("Problem setting dimnames");
+    a
+  ')
+  expect_no_error(f())
+  f <-  rust_fn("
+    let a = R::new_matrix_i32(1, 3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = i as i32;
+    }
+  ")
+  expect_no_error(f())
+  f <-  rust_fn("
+    let a = R::new_matrix_u8(1, 3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = i as u8;
+    }
+  ")
+  expect_no_error(f())
+  f <-  rust_fn("
+    let a = R::new_matrix_bool(1, 3, pc);
+    let slice = a.slice();
+    for (i, x) in slice.iter_mut().enumerate() {
+      *x = if i != 0 { 1 } else { 0 };
+    }
+  ")
+  expect_no_error(f())
+})
+
+test_that("new arrary", {
+  f <-  rust_fn("
+    let _: &[f64] = R::new_matrix_f64(1, 3, pc).slice();
+    let _: &[i32] = R::new_matrix_i32(1, 3, pc).slice();
+    let _: &[u8] = R::new_matrix_u8(1, 3, pc).slice();
+    let _: &[i32] = R::new_matrix_bool(1, 3, pc).slice();
+  ")
+  expect_no_error(f())
+})
+
+test_that("matrix", {
+  f <-  rust_fn(a, "
+    let a = a.to_matrix_f64(pc).stop_default();
+    let b = a.dim();
+    [b[0] as i32, b[1] as i32].to_r(pc)
+  ")
+  a <- matrix(1:8, nrow = 2)
+  expect_equal(f(a), c(2, 4))
+  f <- rust_fn(a, "
+    a.to_matrix_f64(pc).stop_default().to_vector()
+  ")
+  expect_equal(f(a), as.vector(a))
+  expect_true(is.matrix(a))
+  f <- rust_fn(a, '
+    let a = a.duplicate(pc);
+    a.set_attribute("dim", &R::null(), pc);
+    a
+  ')
+  expect_false(is.matrix(f(a)))
+  f <-  rust_fn(a, "
+    let a = a.to_matrix_f64(pc).stop_default();
+    a.to_i32(pc)
+  ")
+  b <- a
+  storage.mode(b) <- "integer"
+  expect_true(identical(f(a), b))
+  f <-  rust_fn(a, "
+    let a = a.to_matrix_i32(pc).stop_default();
+    a.to_f64(pc)
+  ")
+  b <- a
+  storage.mode(b) <- "double"
+  expect_true(identical(f(a), b))
+  f <-  rust_fn(a, "
+    let a = a.to_matrix_u8(pc).stop_default();
+    a.to_bool(pc)
+  ")
+  b <- a
+  storage.mode(b) <- "logical"
+  expect_true(identical(f(a), b))
+  f <-  rust_fn(a, "
+    let a = a.to_matrix_bool(pc).stop_default();
+    a.to_u8(pc)
+  ")
+  b <- a
+  storage.mode(b) <- "logical"
+  storage.mode(b) <- "raw"
+  expect_true(identical(f(a), b))
+})
+
+test_that("array", {
+  f <-  rust_fn(a, "
+    let a = a.as_array_i32().stop_default();
+    let b = a.dim();
+    (&b[..]).to_r(pc)
+  ")
+  a <- array(1:24, dim = c(2, 3, 4))
+  expect_equal(f(a), c(2, 3, 4))
+  f <-  rust_fn(a, "
+    let a = a.as_array_f64().stop_default();
+    let b = a.dim();
+    (&b[..]).to_r(pc)
+  ")
+  expect_error(f(a))
+})
+
+test_that("symbol", {
+  f <- rust_fn('
+    R::new_symbol("bill", pc)
+  ')
+  expect_equal(class(f()), "name")
+})
+
+test_that("external_ptr", {
+  f <- rust_fn("
+    let a = vec![10_i32, 11, 13];
+    let b = R::encode(a, &R::null());
+    let d = b.decode_as_val();
+    let e: i32 = d[1];
+    e.to_r(pc)
+  ")
+  expect_equal(f(), 11)
+  f1_i32 <- rust_fn('
+    let a = vec![10_i32, 11, 13];
+    R::encode(a, &"vec_i32".to_r(pc))
+  ')
+  f2_i32 <- rust_fn(b, "
+    let b = b.as_external_ptr().stop_default();
+    let c = b.set_type::<Vec<i32>>();
+    let d = c.decode_as_ref();
+    let e: i32 = d[1];
+    e.to_r(pc)
+  ")
+  expect_equal(f2_i32(f1_i32()), 11)
+  f1_f64 <- rust_fn('
+    let a = vec![10.0, 11.0, 13.0];
+    R::encode(a, &"vec_f64".to_r(pc))
+  ')
+  f1_u8 <- rust_fn('
+    let a = vec![10_u8, 11, 13];
+    R::encode(a, &"vec_u8".to_r(pc))
+  ')
+  f3 <- rust_fn(b, '
+    let b = b.as_external_ptr().stop_default();
+    let tag = b.tag().as_vector_str().stop_default();
+    let s = tag.get(0).unwrap();
+    let result: RObject = if s == "vec_i32" {
+      let c = b.set_type::<Vec<i32>>();
+      let d = c.decode_as_ref();
+      let e: i32 = d[1];
+      e.to_r(pc).into()
+    } else if s == "vec_f64" {
+      let c = b.set_type::<Vec<f64>>();
+      let d = c.decode_as_ref();
+      let e: f64 = d[1];
+      e.to_r(pc).into()
+    } else {
+      stop!("Unsupported type")
+    };
+    result
+  ')
+  expect_identical(f3(f1_i32()), 11L)
+  expect_false(identical(f3(f1_i32()), 11))
+  expect_identical(f3(f1_f64()), 11)
+  expect_error(f3(f1_u8()))
+  expect_error(f3(3))
+})
+
+
+
+
+
+
+
+
+
 
 
 

@@ -102,6 +102,6 @@ fn myrnorm(n: RObject, mean: RObject, sd: RObject) -> RObject {
         }
         PutRNGstate();
         Rf_unprotect(1);
-        R::new(vec)
+        vec
     }
 }

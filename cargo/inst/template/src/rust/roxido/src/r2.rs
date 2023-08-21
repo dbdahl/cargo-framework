@@ -25,6 +25,7 @@ pub struct Vector(());
 pub struct Matrix(());
 pub struct Array(());
 pub struct Function(());
+pub struct ExternalPtr(());
 pub struct Unspecified(());
 pub trait Sliceable {}
 
@@ -38,6 +39,7 @@ impl Convertible for Vector {}
 impl Convertible for Matrix {}
 impl Convertible for Array {}
 impl Convertible for Function {}
+impl Convertible for ExternalPtr {}
 
 impl R {
     pub fn from_old(r: crate::r::RObject) -> RObject {
@@ -143,9 +145,9 @@ impl R {
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> RObject {
-        let list = R::new_vector_list(2, pc);
+        let list = Self::new_vector_list(2, pc);
         list.set(0, &message.to_r(pc));
-        list.set(1, &R::null());
+        list.set(1, &Self::null());
         let _ = list.set_names(&["message", "calls"].to_r(pc));
         list.set_class(&["error", "condition"].to_r(pc));
         list.into()
@@ -160,7 +162,20 @@ impl R {
                 cetype_t_CE_UTF8,
             )
         });
-        R::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
+        Self::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
+    }
+
+    /// Move Rust object to an R external pointer
+    ///
+    /// This method moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
+    /// Thus the programmer is then responsible to release the memory by calling [`RObject::decode_as_val`].
+    ///
+    pub fn encode<T, RType, RMode>(x: T, tag: &RObject<RType, RMode>) -> RObject<ExternalPtr, T> {
+        unsafe {
+            // Move to Box<_> and then forget about it.
+            let ptr = Box::into_raw(Box::new(x)) as *mut c_void;
+            Self::wrap(R_MakeExternalPtr(ptr, tag.sexp, R_NilValue))
+        }
     }
 
     pub fn null() -> RObject {
@@ -216,7 +231,7 @@ impl R {
     }
 
     pub fn new_na_bool(pc: &mut Pc) -> RObject<Vector, bool> {
-        R::wrap(pc.protect(unsafe { Rf_ScalarLogical(Self::na_bool()) }))
+        Self::wrap(pc.protect(unsafe { Rf_ScalarLogical(Self::na_bool()) }))
     }
 
     pub fn is_na_bool(x: i32) -> bool {
@@ -389,6 +404,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         unsafe { Rf_isFunction(self.sexp) != 0 }
     }
 
+    pub fn is_external_ptr(&self) -> bool {
+        unsafe { TYPEOF(self.sexp) == EXTPTRSXP as i32 }
+    }
+
     pub fn as_f64(&self) -> Result<f64, &str> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asReal(self.sexp) })
@@ -528,6 +547,14 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn as_vector_str(&self) -> Result<RObject<Vector, Str>, &str> {
+        if self.is_vector_atomic() && self.is_str() {
+            Ok(self.convert())
+        } else {
+            Err("Not a str vector")
+        }
+    }
+
     pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &str> {
         if self.is_matrix() && self.is_f64() {
             Ok(self.convert())
@@ -605,6 +632,14 @@ impl<RType, RMode> RObject<RType, RMode> {
             Ok(self.convert())
         } else {
             Err("Not a function")
+        }
+    }
+
+    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unspecified>, &str> {
+        if self.is_external_ptr() {
+            Ok(self.convert())
+        } else {
+            Err("Not an external pointer")
         }
     }
 
@@ -750,6 +785,22 @@ impl<S: Sliceable, T> RObject<S, T> {
         let len = self.len();
         unsafe { std::slice::from_raw_parts_mut(data, len) }
     }
+
+    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
+    }
+
+    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
+    }
+
+    pub fn to_u8(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }))
+    }
+
+    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
+    }
 }
 
 impl<S: Sliceable> RObject<S, f64> {
@@ -789,6 +840,7 @@ impl<T> RObject<Matrix, T> {
         [self.nrow(), self.ncol()]
     }
 
+    // Create a new vector from a matrix.
     pub fn to_vector(&self) -> RObject<Vector, T> {
         unsafe { Rf_setAttrib(self.sexp, R_DimSymbol, R_NilValue) };
         self.convert()
@@ -799,6 +851,12 @@ impl<T> RObject<Array, T> {
     pub fn dim(&self) -> Vec<usize> {
         let d = R::wrap::<Vector, i32>(unsafe { Rf_getAttrib(self.sexp, R_DimSymbol) });
         d.slice().iter().map(|&x| x.try_into().unwrap()).collect()
+    }
+
+    // Create a new vector from a matrix.
+    pub fn to_vector(&self) -> RObject<Vector, T> {
+        unsafe { Rf_setAttrib(self.sexp, R_DimSymbol, R_NilValue) };
+        self.convert()
     }
 }
 
@@ -899,14 +957,6 @@ impl<RMode> RObject<Vector, RMode> {
 }
 
 impl RObject<Vector, f64> {
-    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
-    }
-
-    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
-    }
-
     pub fn get(&self, index: usize) -> f64 {
         unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
     }
@@ -919,14 +969,6 @@ impl RObject<Vector, f64> {
 }
 
 impl RObject<Vector, i32> {
-    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
-    }
-
-    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
-    }
-
     pub fn get(&self, index: usize) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
     }
@@ -951,14 +993,6 @@ impl RObject<Vector, u8> {
 }
 
 impl RObject<Vector, bool> {
-    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
-    }
-
-    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
-    }
-
     pub fn get(&self, index: usize) -> bool {
         unsafe { LOGICAL_ELT(self.sexp, index.try_into().unwrap()) != 0 }
     }
@@ -1059,21 +1093,13 @@ impl<RMode> RObject<Matrix, RMode> {
             return Err("Column names do not match the number of columns");
         }
         unsafe {
-            Rf_namesgets(self.sexp, names.sexp);
+            Rf_dimnamesgets(self.sexp, names.sexp);
         }
         Ok(())
     }
 }
 
 impl RObject<Matrix, f64> {
-    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
-    }
-
-    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Matrix, bool> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
-    }
-
     pub fn get(&self, index: (usize, usize)) -> f64 {
         unsafe { REAL_ELT(self.sexp, self.index(index)) }
     }
@@ -1086,14 +1112,6 @@ impl RObject<Matrix, f64> {
 }
 
 impl RObject<Matrix, i32> {
-    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
-    }
-
-    pub fn to_bool(&self, pc: &mut Pc) -> RObject<Matrix, bool> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
-    }
-
     pub fn get(&self, index: (usize, usize)) -> i32 {
         unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
     }
@@ -1118,14 +1136,6 @@ impl RObject<Matrix, u8> {
 }
 
 impl RObject<Matrix, bool> {
-    pub fn to_f64(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
-    }
-
-    pub fn to_i32(&self, pc: &mut Pc) -> RObject<Matrix, i32> {
-        R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
-    }
-
     pub fn get(&self, index: (usize, usize)) -> bool {
         unsafe { LOGICAL_ELT(self.sexp, self.index(index)) != 0 }
     }
@@ -1182,6 +1192,53 @@ impl RObject<Matrix, Unspecified> {
     pub fn set<RType, RMode>(&self, index: (usize, usize), value: &RObject<RType, RMode>) {
         unsafe {
             SET_VECTOR_ELT(self.sexp, self.index(index), value.sexp);
+        }
+    }
+}
+
+impl<T> RObject<ExternalPtr, T> {
+    /// Get tag for an R external pointer
+    ///
+    /// This method get the tag associated with an R external pointer, which was set by [`Self::external_pointer_encode`].
+    ///
+    pub fn tag(&self) -> RObject {
+        R::wrap(unsafe { R_ExternalPtrTag(self.sexp) })
+    }
+
+    pub fn set_type<ToT>(&self) -> RObject<ExternalPtr, ToT> {
+        self.convert()
+    }
+
+    /// Move an R external pointer to a Rust object
+    ///
+    /// This method moves an R external pointer created by [`Self::external_pointer_encode`] to a Rust object and Rust will then manage its memory.
+    ///
+    pub fn decode_as_val(&self) -> T {
+        unsafe {
+            let ptr = R_ExternalPtrAddr(self.sexp) as *mut T;
+            *Box::from_raw(ptr)
+        }
+    }
+
+    /// Obtain a reference to a Rust object from an R external pointer
+    ///
+    /// This method obtained a reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
+    ///
+    pub fn decode_as_ref(&self) -> &T {
+        unsafe {
+            let ptr = R_ExternalPtrAddr(self.sexp) as *mut T;
+            ptr.as_ref().unwrap()
+        }
+    }
+
+    /// Obtain a mutable reference to a Rust object from an R external pointer
+    ///
+    /// This method obtained a mutable reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
+    ///
+    pub fn decode_as_mut_ref(&self) -> &mut T {
+        unsafe {
+            let ptr = R_ExternalPtrAddr(self.sexp) as *mut T;
+            ptr.as_mut().unwrap()
         }
     }
 }
@@ -1540,6 +1597,12 @@ impl<T: Iterator<Item = bool> + ExactSizeIterator> ToR4<RObject<Vector, bool>> f
             };
         }
         result
+    }
+}
+
+impl From<SEXP> for RObject {
+    fn from(x: SEXP) -> Self {
+        R::new_object(x)
     }
 }
 
