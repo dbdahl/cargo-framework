@@ -400,6 +400,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         unsafe { Rf_isArray(self.sexp) != 0 }
     }
 
+    pub fn is_data_frame(&self) -> bool {
+        unsafe { Rf_isFrame(self.sexp) != 0 }
+    }
+
     pub fn is_function(&self) -> bool {
         unsafe { Rf_isFunction(self.sexp) != 0 }
     }
@@ -624,6 +628,14 @@ impl<RType, RMode> RObject<RType, RMode> {
             Ok(self.convert())
         } else {
             Err("Not a vector list")
+        }
+    }
+
+    pub fn as_data_frame(&self) -> Result<RObject<Vector, Unspecified>, &str> {
+        if self.is_data_frame() {
+            Ok(self.convert())
+        } else {
+            Err("Not a function")
         }
     }
 
