@@ -732,7 +732,24 @@ test_that("external_ptr", {
   expect_error(f3(3))
 })
 
-
+test_that("data frame", {
+  f <- rust_fn(a, "
+    let b = a.as_data_frame().stop_default();
+    b.get_names()
+  ")
+  a <- data.frame(a = 1:3, b = c(10, 11, 12))
+  expect_identical(f(a), c("a", "b"))
+  f <- rust_fn(a, "
+    let b = a.as_data_frame().stop_default();
+    b.get(0)
+  ")
+  expect_identical(f(a), 1:3)
+  f <- rust_fn(a, "
+    let b = a.as_data_frame().stop_default();
+    b.get(1)
+  ")
+  expect_identical(f(a), c(10, 11, 12))
+})
 
 
 
