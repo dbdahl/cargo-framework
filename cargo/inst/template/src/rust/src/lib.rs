@@ -7,8 +7,8 @@ use roxido::*;
 
 #[roxido]
 fn convolve2(a: RObject, b: RObject) -> RObject {
-    let a = a.to_vector_f64(pc).stop("'a' not a vector.").slice();
-    let b = b.to_vector_f64(pc).stop("'b' not a vector.").slice();
+    let a = a.to_vector_f64(pc).stop_str("'a' not a vector.").slice();
+    let b = b.to_vector_f64(pc).stop_str("'b' not a vector.").slice();
     let r = R::new_vector_f64(a.len() + b.len() - 1, pc);
     let ab = r.slice();
     for abi in ab.iter_mut() {
@@ -24,22 +24,22 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
 
 #[roxido]
 fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
-    let f = f.as_function().stop("'f' must be a function.");
+    let f = f.as_function().stop_str("'f' must be a function.");
     let guesses = guesses
         .to_vector_f64(pc)
-        .stop("'guesses' must be a vector.");
+        .stop_str("'guesses' must be a vector.");
     if guesses.len() != 2 {
         stop!("'guesses' must be a vector of length two.");
     }
     let guesses = guesses
         .as_vector_f64()
-        .stop("'guesses' must have storage mode 'double'.")
+        .stop_str("'guesses' must have storage mode 'double'.")
         .slice();
     if guesses.len() != 2 {
         stop!("'guesses' should be of length two.");
     }
     let (mut x0, mut x1) = (guesses[0], guesses[1]);
-    let tol = tol.as_f64().stop("'tol' should be a numeric scalar.");
+    let tol = tol.as_f64().stop_str("'tol' should be a numeric scalar.");
     if !tol.is_finite() || tol <= 0.0 {
         stop!("'tol' must be a strictly positive value.");
     }
@@ -50,7 +50,9 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
         let Ok(fx) = f.call1(&x_rval, pc) else {
             stop!("Error in function evaluation.");
         };
-        let fx = fx.as_f64().stop("Unexpected return value  from function.");
+        let fx = fx
+            .as_f64()
+            .stop_str("Unexpected return value  from function.");
         if !fx.is_finite() {
             stop!("Non-finite return value from function.");
         }
