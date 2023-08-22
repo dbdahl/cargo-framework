@@ -885,10 +885,16 @@ test_that("stop", {
     ()
   ')
   expect_identical(as.character(capture_error(f(1))), "Error in f(1): apple\n")
+  f <- rust_fn(a, '
+    a.as_function().unwrap();
+    ()
+  ')
+  expect_error(f(1))
 })
 
 test_that("call", {
-  f <- rust_fn(a, "a.as_function().stop().call0(pc).unwrap()")
+  f <- rust_fn(a, "a.as_function().stop().call0(pc).stop()")
+  expect_error(f(3))
   expect_identical(f(function() 4), 4)
   expect_false(f(function() 4) == 3)
   f <- rust_fn(a, "a.as_function().stop().call0(pc).is_err().to_r(pc)")
@@ -896,7 +902,7 @@ test_that("call", {
   expect_true(f(errfn))
   okfn <- function() 1 + 2
   expect_false(f(okfn))
-  f <- rust_fn(a, b, "a.as_function().stop().call1(&b, pc).unwrap()")
+  f <- rust_fn(a, b, "a.as_function().stop().call1(&b, pc).stop()")
   expect_identical(f(\(x) 2 * x, 10), 20)
 })
 
