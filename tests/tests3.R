@@ -9,6 +9,15 @@ test_that("force", {
   expect_identical(f(), NULL)
 })
 
+test_that("verbose / cached", {
+  expect_silent(rust_fn(a, "a", verbose = FALSE))
+  expect_output(rust_fn(a, "a", verbose = TRUE))
+  expect_silent(rust_fn(a, "a", verbose = "never"))
+  expect_output(rust_fn(a, "a", cached = FALSE, verbose = FALSE))
+  expect_output(rust_fn(a, "a", cached = FALSE, verbose = TRUE))
+  expect_silent(rust_fn(a, "a", cached = FALSE, verbose = "never"))
+})
+
 test_that("printing", {
   f <- rust_fn("
       rprintln!();
@@ -840,6 +849,7 @@ test_that("string", {
     (&c[..]).to_r(pc)
   ")
   expect_identical(f("billy"), "BILLY")
+  expect_error(f(1))
   f <- rust_fn('
     "adf".to_r(pc)
   ')
@@ -877,7 +887,18 @@ test_that("stop", {
   expect_identical(as.character(capture_error(f(1))), "Error in f(1): apple\n")
 })
 
-
+test_that("call", {
+  f <- rust_fn(a, "a.as_function().stop().call0(pc).unwrap()")
+  expect_identical(f(function() 4), 4)
+  expect_false(f(function() 4) == 3)
+  f <- rust_fn(a, "a.as_function().stop().call0(pc).is_err().to_r(pc)")
+  errfn <- function() stop("An error was thrown!")
+  expect_true(f(errfn))
+  okfn <- function() 1 + 2
+  expect_false(f(okfn))
+  f <- rust_fn(a, b, "a.as_function().stop().call1(&b, pc).unwrap()")
+  expect_identical(f(\(x) 2 * x, 10), 20)
+})
 
 
 
@@ -903,184 +924,10 @@ test_that("stop", {
 #   expect_identical(f(a), c(10, 11, 12))
 # })
 # 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# test_that("vectors", {
-#   f <- rust_fn(len, "RVector::new_double(len.as_usize(), pc).0")
-#   expect_true(is.double(f(4)))
-#   expect_equal(length(f(0)), 0)
-#   expect_equal(length(f(5)), 5)
-#   f <- rust_fn(len, "RVector::new_integer(len.as_usize(), pc).0")
-#   expect_true(is.integer(f(4)))
-#   expect_equal(length(f(0)), 0)
-#   expect_equal(length(f(5)), 5)
-#   f <- rust_fn(len, "RVector::new_logical(len.as_usize(), pc).0")
-#   expect_true(is.logical(f(4)))
-#   expect_equal(length(f(0)), 0)
-#   expect_equal(length(f(5)), 5)
-#   f <- rust_fn(len, "RVector::new_raw(len.as_usize(), pc).0")
-#   expect_true(is.raw(f(4)))
-#   expect_equal(length(f(0)), 0)
-#   expect_equal(length(f(5)), 5)
-#   f <- rust_fn(len, "RVectorCharacter::new(len.as_usize(), pc)")
-#   expect_true(is.character(f(4)))
-#   expect_equal(length(f(0)), 0)
-#   expect_equal(length(f(5)), 5)
-#   f <- rust_fn('
-#       let a = RVectorCharacter::new(1, pc);
-#       let _ = a.set(0, "David", pc);
-#       if a.set(1, "Lisa", pc).is_err() {
-#           panic!("Oh no!");
-#       }
-#       a
-#   ')
-#   expect_error(f())
-#   f <- rust_fn('
-#       let a = RVectorCharacter::new(2, pc);
-#       let _ = a.set(0, "David", pc);
-#       let _ = a.set(1, "Lisa", pc);
-#       a
-#   ')
-#   expect_equal(f(), c("David", "Lisa"))
-#   f <- rust_fn('rstr!(["David", "Lisa"])')
-#   expect_equal(f(), c("David", "Lisa"))
-#   f <- rust_fn('let a = ["David", "Lisa"]; rstr!(&a[..])')
-#   expect_equal(f(), c("David", "Lisa"))
-# })
-# 
 # test_that("data.frame", {
 #   f <- rust_fn(x, "rvec!(x.is_data_frame())")
 #   expect_true(f(data.frame(x = 1:2, y = 4:5)))
 #   expect_false(f(matrix(1:4, nrow = 2)))
 # })
 # 
-# test_that("matrices", {
-#   f <- rust_fn(nrow, ncol, "RMatrix::new_double(nrow.as_usize(),ncol.as_usize(), pc).0")
-#   expect_equal(dim(f(2, 3)), c(2, 3))
-#   expect_equal(dim(f(-2, 3)), c(0, 3))
-#   expect_true(is.double(f(2, 3)))
-#   f <- rust_fn(nrow, ncol, "RMatrix::new_integer(nrow.as_usize(),ncol.as_usize(), pc).0")
-#   expect_equal(dim(f(2, 3)), c(2, 3))
-#   expect_equal(dim(f(-2, -3)), c(0, 0))
-#   expect_true(is.integer(f(2, 3)))
-#   f <- rust_fn(nrow, ncol, "RMatrix::new_logical(nrow.as_usize(),ncol.as_usize(), pc).0")
-#   expect_equal(dim(f(2, 3)), c(2, 3))
-#   expect_equal(dim(f(2, -3)), c(2, 0))
-#   expect_true(is.logical(f(2, 3)))
-#   f <- rust_fn(x, "x.as_matrix().unwrap().transpose(pc)")
-#   x <- matrix(1:6, nrow = 3)
-#   expect_identical(t(x), f(x))
-#   x <- matrix(as.character(1:12), nrow = 3)
-#   expect_identical(t(x), f(x))
-# })
-# 
-# test_that("lists", {
-#   f <- rust_fn(len, "RList::new(len.as_usize(), pc)")
-#   expect_true(is.list(f(4)))
-#   expect_equal(length(f(0)), 0)
-#   expect_equal(length(f(5)), 5)
-#   f <- rust_fn('
-#       let result = RList::new(1, pc);
-#       if result.set(1, rvec!(1)).is_err() {
-#          panic!("Oops!");
-#       }
-#       result
-#   ')
-#   expect_error(f())
-# })
-# 
-# test_that("attr", {
-#   f <- rust_fn(a, '
-#       a.set_attribute("names", RVectorCharacter::allocate(["name","age"], pc), pc);
-#       a
-#   ')
-#   expect_equal(f(c("Sally", "17")), c(name = "Sally", age = "17"))
-#   f <- rust_fn(a, '
-#       a.get_attribute("names", pc)
-#   ')
-#   x <- c(name = "Sally", age = "17")
-#   expect_equal(f(x), names(x))
-# })
-# 
-# test_that("names_gets", {
-#   f <- rust_fn(a, '
-#       if a.as_vector().unwrap().names_gets(rstr!(["name","age"])).is_err() {
-#         panic!("No way.")
-#       }
-#       a
-#   ')
-#   expect_equal(f(c("Sally", "17")), c(name = "Sally", age = "17"))
-#   expect_equal(f(list("Sally", 17)), list(name = "Sally", age = 17))
-#   expect_error(f(list("Sally")))
-#   expect_error(f(function(x) x))
-# })
-# 
-# test_that("class_gets", {
-#   f <- rust_fn(a, '
-#       let _ = a.class_gets(rstr!(["dog","animal"]));
-#       a
-#   ')
-#   expect_true(inherits(f(c("Sally", "17")), "dog"))
-#   expect_true(inherits(f(c("Sally", "17")), "animal"))
-#   expect_false(inherits(f(c("Sally", "17")), "cat"))
-# })
-# 
-# test_that("len", {
-#   f <- rust_fn(a, "
-#       RVector::try_allocate(a.len(), pc).unwrap()
-#   ")
-#   expect_equal(f(NA), 1)
-#   expect_equal(f(c()), 0)
-#   expect_equal(f(new.env()), 0)
-#   expect_equal(f(function(x, y) x + y), 1)
-# })
-# 
-# test_that("call", {
-#   f <- rust_fn(a, "a.as_function().unwrap().call0(pc).unwrap()")
-#   expect_equal(f(function() 4), 4)
-#   expect_false(f(function() 4) == 3)
-#   expect_false(f(function() 4) == 3)
-#   f <- rust_fn(a, "rvec!(a.as_function().unwrap().call0(pc).is_err())")
-#   errfn <- function() stop("An error was thrown!")
-#   expect_true(f(errfn))
-#   okfn <- function() 1 + 2
-#   expect_false(f(okfn))
-# })
-# 
-# test_that("string", {
-#   f <- rust_fn(a, "
-#       rstr!(a.as_string().unwrap())
-#   ")
-#   expect_equal(f(c("David")), "David")
-#   expect_equal(f(c("David", "Lisa")), "David")
-#   expect_equal(f(1L), "1")
-#   expect_equal(f(c(1L, 3L)), "1")
-#   expect_equal(f(1), "1")
-#   expect_equal(f(NA), "NA")
-#   expect_equal(f(c()), "NA")
-#   expect_equal(f(new.env()), "NA")
-#   expect_equal(f(function(x, y) x + y), "NA")
-# })
-# 
-# test_that("verbose", {
-#   expect_silent(rust_fn(a, "a", verbose = FALSE))
-#   expect_output(rust_fn(a, "a", verbose = TRUE))
-#   expect_silent(rust_fn(a, "a", verbose = "never"))
-#   expect_output(rust_fn(a, "a", cached = FALSE, verbose = FALSE))
-#   expect_output(rust_fn(a, "a", cached = FALSE, verbose = TRUE))
-#   expect_silent(rust_fn(a, "a", cached = FALSE, verbose = "never"))
-# })
-# 
+
