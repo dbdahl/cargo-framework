@@ -146,8 +146,8 @@ impl R {
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> RObject {
         let list = Self::new_vector_list(2, pc);
-        list.set(0, &message.to_r(pc));
-        list.set(1, &Self::null());
+        let _ = list.set(0, &message.to_r(pc));
+        let _ = list.set(1, &Self::null());
         let _ = list.set_names(&["message", "calls"].to_r(pc));
         list.set_class(&["error", "condition"].to_r(pc));
         list.into()
@@ -953,6 +953,31 @@ impl RObject<Function, Unspecified> {
 }
 
 impl<RMode> RObject<Vector, RMode> {
+    fn get_engine<'a, T>(
+        &self,
+        index: usize,
+        f: unsafe extern "C" fn(SEXP, isize) -> T,
+    ) -> Result<T, &'a str> {
+        if index < self.len() {
+            Ok(unsafe { f(self.sexp, index.try_into().unwrap()) })
+        } else {
+            Err("Index out of bounds.")
+        }
+    }
+
+    fn set_engine<'a, T>(
+        &self,
+        index: usize,
+        value: T,
+        f: unsafe extern "C" fn(SEXP, isize, T),
+    ) -> Result<(), &'a str> {
+        if index < self.len() {
+            Ok(unsafe { f(self.sexp, index.try_into().unwrap(), value) })
+        } else {
+            Err("Index out of bounds.")
+        }
+    }
+
     pub fn get_names(&self) -> RObject<Vector, Str> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_NamesSymbol) })
     }
@@ -969,86 +994,74 @@ impl<RMode> RObject<Vector, RMode> {
 }
 
 impl RObject<Vector, f64> {
-    pub fn get(&self, index: usize) -> f64 {
-        unsafe { REAL_ELT(self.sexp, index.try_into().unwrap()) }
+    pub fn get<'a>(&self, index: usize) -> Result<f64, &'a str> {
+        self.get_engine(index, REAL_ELT)
     }
 
-    pub fn set(&self, index: usize, value: f64) {
-        unsafe {
-            SET_REAL_ELT(self.sexp, index.try_into().unwrap(), value);
-        }
+    pub fn set<'a>(&self, index: usize, value: f64) -> Result<(), &'a str> {
+        self.set_engine(index, value, SET_REAL_ELT)
     }
 }
 
 impl RObject<Vector, i32> {
-    pub fn get(&self, index: usize) -> i32 {
-        unsafe { INTEGER_ELT(self.sexp, index.try_into().unwrap()) }
+    pub fn get<'a>(&self, index: usize) -> Result<i32, &'a str> {
+        self.get_engine(index, INTEGER_ELT)
     }
 
-    pub fn set(&self, index: usize, value: i32) {
-        unsafe {
-            SET_INTEGER_ELT(self.sexp, index.try_into().unwrap(), value);
-        }
+    pub fn set<'a>(&self, index: usize, value: i32) -> Result<(), &'a str> {
+        self.set_engine(index, value, SET_INTEGER_ELT)
     }
 }
 
 impl RObject<Vector, u8> {
-    pub fn get(&self, index: usize) -> u8 {
-        unsafe { RAW_ELT(self.sexp, index.try_into().unwrap()) }
+    pub fn get<'a>(&self, index: usize) -> Result<u8, &'a str> {
+        self.get_engine(index, RAW_ELT)
     }
 
-    pub fn set(&self, index: usize, value: u8) {
-        unsafe {
-            SET_RAW_ELT(self.sexp, index.try_into().unwrap(), value);
-        }
+    pub fn set<'a>(&self, index: usize, value: u8) -> Result<(), &'a str> {
+        self.set_engine(index, value, SET_RAW_ELT)
     }
 }
 
 impl RObject<Vector, bool> {
-    pub fn get(&self, index: usize) -> bool {
-        unsafe { LOGICAL_ELT(self.sexp, index.try_into().unwrap()) != 0 }
+    pub fn get<'a>(&self, index: usize) -> Result<bool, &'a str> {
+        self.get_engine(index, LOGICAL_ELT).map(|x| x != 0)
     }
 
-    pub fn get_i32(&self, index: usize) -> i32 {
-        unsafe { LOGICAL_ELT(self.sexp, index.try_into().unwrap()) }
+    pub fn get_i32<'a>(&self, index: usize) -> Result<i32, &'a str> {
+        self.get_engine(index, LOGICAL_ELT)
     }
 
-    pub fn set(&self, index: usize, value: bool) {
-        unsafe {
-            SET_LOGICAL_ELT(
-                self.sexp,
-                index.try_into().unwrap(),
-                if value {
-                    Rboolean_TRUE as i32
-                } else {
-                    Rboolean_FALSE as i32
-                },
-            );
-        }
+    pub fn set<'a>(&self, index: usize, value: bool) -> Result<(), &'a str> {
+        let value = if value {
+            Rboolean_TRUE as i32
+        } else {
+            Rboolean_FALSE as i32
+        };
+        self.set_engine(index, value, SET_LOGICAL_ELT)
     }
 
-    pub fn set_i32(&self, index: usize, value: i32) {
-        unsafe {
-            SET_LOGICAL_ELT(self.sexp, index.try_into().unwrap(), value);
-        }
+    pub fn set_i32<'a>(&self, index: usize, value: i32) -> Result<(), &'a str> {
+        self.set_engine(index, value, SET_LOGICAL_ELT)
     }
 }
 
 impl RObject<Vector, Str> {
-    pub fn get(&self, index: usize) -> Result<&str, Utf8Error> {
-        let sexp = unsafe { STRING_ELT(self.sexp, index.try_into().unwrap()) };
-        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
-        c_str.to_str()
+    pub fn get<'a, 'b>(&self, index: usize) -> Result<Result<&'a str, Utf8Error>, &'b str> {
+        self.get_engine(index, STRING_ELT).map(|sexp| {
+            let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
+            c_str.to_str()
+        })
     }
 
-    pub fn set(&self, index: usize, value: &str) {
+    pub fn set<'a>(&self, index: usize, value: &str) -> Result<(), &'a str> {
         unsafe {
             let value = Rf_mkCharLenCE(
                 value.as_ptr() as *const c_char,
                 value.len().try_into().unwrap(),
                 cetype_t_CE_UTF8,
             );
-            SET_STRING_ELT(self.sexp, index.try_into().unwrap(), value);
+            self.set_engine(index, value, SET_STRING_ELT)
         }
     }
 
@@ -1060,21 +1073,28 @@ impl RObject<Vector, Str> {
 }
 
 impl RObject<Vector, Unspecified> {
-    pub fn get(&self, index: usize) -> RObject {
-        R::wrap(unsafe { VECTOR_ELT(self.sexp, index.try_into().unwrap()) })
+    pub fn get<'a>(&self, index: usize) -> Result<RObject, &'a str> {
+        self.get_engine(index, VECTOR_ELT).map(|x| R::wrap(x))
     }
 
-    pub fn set<RType, RMode>(&self, index: usize, value: &RObject<RType, RMode>) {
-        unsafe {
-            SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp);
+    pub fn set<'a, RType, RMode>(
+        &self,
+        index: usize,
+        value: &RObject<RType, RMode>,
+    ) -> Result<(), &'a str> {
+        if index < self.len() {
+            unsafe { SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp) };
+            Ok(())
+        } else {
+            Err("Index out of bounds.")
         }
     }
 }
 
 impl<RMode> RObject<Matrix, RMode> {
-    pub fn index(&self, (i, j): (usize, usize)) -> isize {
+    pub fn index(&self, (i, j): (usize, usize)) -> usize {
         let nrow = self.nrow();
-        (nrow * j + i).try_into().unwrap()
+        nrow * j + i
     }
 
     pub fn get_dimnames(&self) -> RObject<Vector, Unspecified> {
@@ -1088,7 +1108,7 @@ impl<RMode> RObject<Matrix, RMode> {
         if names.len() != 2 {
             return Err("Length should be two");
         }
-        let rownames = names.get(0);
+        let rownames = names.get(0).unwrap();
         if !rownames.is_vector_atomic() || !rownames.is_str() {
             return Err("Row names must be a character vector");
         }
@@ -1096,7 +1116,7 @@ impl<RMode> RObject<Matrix, RMode> {
         if rownames.len() != self.nrow() {
             return Err("Row names do not match the number of rows");
         }
-        let colnames = names.get(1);
+        let colnames = names.get(1).unwrap();
         if !colnames.is_vector_atomic() || !colnames.is_str() {
             return Err("Column names must be a character vector");
         }
@@ -1112,99 +1132,76 @@ impl<RMode> RObject<Matrix, RMode> {
 }
 
 impl RObject<Matrix, f64> {
-    pub fn get(&self, index: (usize, usize)) -> f64 {
-        unsafe { REAL_ELT(self.sexp, self.index(index)) }
+    pub fn get(&self, index: (usize, usize)) -> Result<f64, &str> {
+        self.convert::<Vector, f64>().get(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: f64) {
-        unsafe {
-            SET_REAL_ELT(self.sexp, self.index(index), value);
-        }
+    pub fn set(&self, index: (usize, usize), value: f64) -> Result<(), &str> {
+        self.convert::<Vector, f64>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, i32> {
-    pub fn get(&self, index: (usize, usize)) -> i32 {
-        unsafe { INTEGER_ELT(self.sexp, self.index(index)) }
+    pub fn get(&self, index: (usize, usize)) -> Result<i32, &str> {
+        self.convert::<Vector, i32>().get(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: i32) {
-        unsafe {
-            SET_INTEGER_ELT(self.sexp, self.index(index), value);
-        }
+    pub fn set(&self, index: (usize, usize), value: i32) -> Result<(), &str> {
+        self.convert::<Vector, i32>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, u8> {
-    pub fn get(&self, index: (usize, usize)) -> u8 {
-        unsafe { RAW_ELT(self.sexp, self.index(index)) }
+    pub fn get(&self, index: (usize, usize)) -> Result<u8, &str> {
+        self.convert::<Vector, u8>().get(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: u8) {
-        unsafe {
-            SET_RAW_ELT(self.sexp, self.index(index), value);
-        }
+    pub fn set(&self, index: (usize, usize), value: u8) -> Result<(), &str> {
+        self.convert::<Vector, u8>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, bool> {
-    pub fn get(&self, index: (usize, usize)) -> bool {
-        unsafe { LOGICAL_ELT(self.sexp, self.index(index)) != 0 }
+    pub fn get(&self, index: (usize, usize)) -> Result<bool, &str> {
+        self.convert::<Vector, bool>().get(self.index(index))
     }
 
-    pub fn get_i32(&self, index: (usize, usize)) -> i32 {
-        unsafe { LOGICAL_ELT(self.sexp, self.index(index)) }
+    pub fn get_i32(&self, index: (usize, usize)) -> Result<i32, &str> {
+        self.convert::<Vector, bool>().get_i32(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: bool) {
-        unsafe {
-            SET_LOGICAL_ELT(
-                self.sexp,
-                self.index(index),
-                if value {
-                    Rboolean_TRUE as i32
-                } else {
-                    Rboolean_FALSE as i32
-                },
-            );
-        }
+    pub fn set(&self, index: (usize, usize), value: bool) -> Result<(), &str> {
+        self.convert::<Vector, bool>().set(self.index(index), value)
     }
 
-    pub fn set_i32(&self, index: (usize, usize), value: i32) {
-        unsafe {
-            SET_LOGICAL_ELT(self.sexp, self.index(index), value);
-        }
+    pub fn set_i32(&self, index: (usize, usize), value: i32) -> Result<(), &str> {
+        self.convert::<Vector, bool>()
+            .set_i32(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, Str> {
-    pub fn get(&self, index: (usize, usize)) -> Result<&str, Utf8Error> {
-        let sexp = unsafe { STRING_ELT(self.sexp, self.index(index)) };
-        let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
-        c_str.to_str()
+    pub fn get(&self, index: (usize, usize)) -> Result<Result<&str, Utf8Error>, &str> {
+        self.convert::<Vector, Str>().get(self.index(index))
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &str) {
-        unsafe {
-            let value = Rf_mkCharLenCE(
-                value.as_ptr() as *const c_char,
-                value.len().try_into().unwrap(),
-                cetype_t_CE_UTF8,
-            );
-            SET_STRING_ELT(self.sexp, self.index(index), value);
-        }
+    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &str) -> Result<(), &str> {
+        self.convert::<Vector, Str>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, Unspecified> {
-    pub fn get(&self, index: (usize, usize)) -> RObject {
-        R::wrap(unsafe { VECTOR_ELT(self.sexp, self.index(index)) })
+    pub fn get(&self, index: (usize, usize)) -> Result<RObject, &str> {
+        self.convert::<Vector, Unspecified>().get(self.index(index))
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &RObject<RType, RMode>) {
-        unsafe {
-            SET_VECTOR_ELT(self.sexp, self.index(index), value.sexp);
-        }
+    pub fn set<RType, RMode>(
+        &self,
+        index: (usize, usize),
+        value: &RObject<RType, RMode>,
+    ) -> Result<(), &str> {
+        self.convert::<Vector, Unspecified>()
+            .set(self.index(index), value)
     }
 }
 
@@ -1452,7 +1449,7 @@ impl ToR1<RObject<Vector, Str>> for &[&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let result = R::new_vector_str(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
-            result.set(index, s);
+            let _ = result.set(index, s);
         }
         result
     }
@@ -1462,7 +1459,7 @@ impl ToR1<RObject<Vector, Str>> for &mut [&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let result = R::new_vector_str(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
-            result.set(index, s);
+            let _ = result.set(index, s);
         }
         result
     }
