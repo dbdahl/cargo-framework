@@ -1042,6 +1042,11 @@ impl RObject<Vector, bool> {
     }
 
     pub fn set_i32(&self, index: usize, value: i32) -> Result<(), &'static str> {
+        let value = if value != 0 {
+            Rboolean_TRUE as i32
+        } else {
+            Rboolean_FALSE as i32
+        };
         self.set_engine(index, value, SET_LOGICAL_ELT)
     }
 }

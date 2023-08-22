@@ -512,6 +512,23 @@ test_that("new vectors with names", {
   ')
   expect_identical(f(), c(a = 0, b = 1, c = 2))
   f <-  rust_fn('
+    let a = R::new_vector_f64(3, pc);
+    a.set_names(&["a", "b", "c", "d"].to_r(pc)).stop_default();
+    a
+  ')
+  expect_error(f())
+  f <-  rust_fn('
+    let a = R::new_vector_f64(3, pc);
+    a.set_names(&["a", "b"].to_r(pc)).stop_default();
+    a
+  ')
+  expect_error(f())
+  expect_error(rust_fn('
+    let a = R::new_vector_f64(3, pc);
+    a.set_names(&[1, 2, 3].to_r(pc)).stop_default();
+    a
+  '))
+  f <-  rust_fn('
     let a = R::new_vector_i32(3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
@@ -547,6 +564,94 @@ test_that("new vectors with names", {
     let a = R::new_vector_i32(3, pc);
     a.set_names(&["a", "b"].to_r(pc)).stop_default();
   ')
+  expect_error(f())
+})
+
+test_that("index into vector", {
+  f <- rust_fn("
+    let a = R::new_vector_f64(3, pc);
+    a.set(2, 4.0).stop_default();
+    a.get(2).stop_default().to_r(pc)
+  ")
+  expect_identical(f(), 4)
+  f <- rust_fn("
+    let a = R::new_vector_f64(3, pc);
+    a.set(3, 4.0).stop_default();
+    a.get(3).stop_default().to_r(pc)
+  ")
+  expect_error(f())
+  f <- rust_fn("
+    let a = R::new_vector_f64(3, pc);
+    a.set(2, 4.0).stop_default();
+    a.get(3).stop_default().to_r(pc)
+  ")
+  expect_error(f())
+  f <- rust_fn("
+    let a = R::new_vector_i32(3, pc);
+    a.set(2, 4).stop_default();
+    a.get(2).stop_default().to_r(pc)
+  ")
+  expect_identical(f(), 4L)
+  f <- rust_fn("
+    let a = R::new_vector_u8(3, pc);
+    a.set(2, 4).stop_default();
+    a.get(2).stop_default().to_r(pc)
+  ")
+  expect_identical(f(), as.raw(4))
+  f <- rust_fn("
+    let a = R::new_vector_bool(3, pc);
+    a.set(0, false).stop_default();
+    a.set(2, true).stop_default();
+    assert!(a.get(2).stop_default() == true);
+    a.set_i32(1, 2).stop_default();
+    assert!(a.get_i32(1).stop_default() == 1);
+    a
+  ")
+  expect_equal(f(), c(FALSE, TRUE, TRUE))
+})
+
+test_that("index into matrix", {
+  f <- rust_fn("
+    let a = R::new_matrix_f64(2, 3, pc);
+    a.set((1, 2), 4.0).stop_default();
+    a.get((1, 2)).stop_default().to_r(pc)
+  ")
+  expect_identical(f(), 4)
+  f <- rust_fn("
+    let a = R::new_matrix_f64(2, 3, pc);
+    a.set((2, 2), 4.0).stop_default();
+    a.get((2, 2)).stop_default().to_r(pc)
+  ")
+  expect_error(f())
+  f <- rust_fn("
+    let a = R::new_matrix_f64(2, 3, pc);
+    a.set((1, 2), 4.0).stop_default();
+    a.get((2, 2)).stop_default().to_r(pc)
+  ")
+  expect_error(f())
+})
+
+test_that("index into list", {
+  f <- rust_fn(index, '
+    let index = index.as_usize().stop_default();
+    let a = R::new_vector_list(3, pc);
+    a.set(1, &"bill".to_r(pc)).stop_default();
+    a.set(2, &4.0.to_r(pc)).stop_default();
+    a.get(index).stop_default()
+  ')
+  expect_identical(f(1), "bill")
+  expect_identical(f(2), 4)
+  f <- rust_fn("
+    let a = R::new_vector_list(3, pc);
+    a.set(3, &4.0.to_r(pc)).stop_default();
+    a.get(3).stop_default()
+  ")
+  expect_error(f())
+  f <- rust_fn("
+    let a = R::new_vector_list(3, pc);
+    a.set(2, &4.0.to_r(pc)).stop_default();
+    a.get(3).stop_default()
+  ")
   expect_error(f())
 })
 
@@ -727,6 +832,16 @@ test_that("external_ptr", {
   expect_error(f3(f1_u8()))
   expect_error(f3(3))
 })
+
+
+
+
+
+
+
+
+
+
 
 test_that("data frame", {
   f <- rust_fn(a, "
