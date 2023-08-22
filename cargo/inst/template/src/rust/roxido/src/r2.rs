@@ -412,7 +412,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         unsafe { TYPEOF(self.sexp) == EXTPTRSXP as i32 }
     }
 
-    pub fn as_f64(&self) -> Result<f64, &str> {
+    pub fn as_f64(&self) -> Result<f64, &'static str> {
         if self.is_scalar() {
             Ok(unsafe { Rf_asReal(self.sexp) })
         } else {
@@ -420,7 +420,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_i32(&self) -> Result<i32, &str> {
+    pub fn as_i32(&self) -> Result<i32, &'static str> {
         if self.is_scalar() {
             if self.is_i32() {
                 Ok(unsafe { Rf_asInteger(self.sexp) })
@@ -452,7 +452,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_usize(&self) -> Result<usize, &str> {
+    pub fn as_usize(&self) -> Result<usize, &'static str> {
         if self.is_scalar() {
             if self.is_i32() {
                 let y = unsafe { Rf_asInteger(self.sexp) };
@@ -486,7 +486,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_bool(&self) -> Result<bool, &str> {
+    pub fn as_bool(&self) -> Result<bool, &'static str> {
         if self.is_scalar() {
             if self.is_bool() {
                 let y = unsafe { Rf_asLogical(self.sexp) };
@@ -519,7 +519,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &str> {
+    pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &'static str> {
         if self.is_vector_atomic() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -527,7 +527,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &str> {
+    pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &'static str> {
         if self.is_vector_atomic() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -535,7 +535,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_u8(&self) -> Result<RObject<Vector, u8>, &str> {
+    pub fn as_vector_u8(&self) -> Result<RObject<Vector, u8>, &'static str> {
         if self.is_vector_atomic() && self.is_u8() {
             Ok(self.convert())
         } else {
@@ -543,7 +543,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_bool(&self) -> Result<RObject<Vector, bool>, &str> {
+    pub fn as_vector_bool(&self) -> Result<RObject<Vector, bool>, &'static str> {
         if self.is_vector_atomic() && self.is_bool() {
             Ok(self.convert())
         } else {
@@ -551,7 +551,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_str(&self) -> Result<RObject<Vector, Str>, &str> {
+    pub fn as_vector_str(&self) -> Result<RObject<Vector, Str>, &'static str> {
         if self.is_vector_atomic() && self.is_str() {
             Ok(self.convert())
         } else {
@@ -559,7 +559,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &str> {
+    pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &'static str> {
         if self.is_matrix() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -567,7 +567,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &str> {
+    pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &'static str> {
         if self.is_matrix() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -575,7 +575,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_u8(&self) -> Result<RObject<Matrix, u8>, &str> {
+    pub fn as_matrix_u8(&self) -> Result<RObject<Matrix, u8>, &'static str> {
         if self.is_matrix() && self.is_u8() {
             Ok(self.convert())
         } else {
@@ -583,7 +583,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_bool(&self) -> Result<RObject<Matrix, bool>, &str> {
+    pub fn as_matrix_bool(&self) -> Result<RObject<Matrix, bool>, &'static str> {
         if self.is_matrix() && self.is_bool() {
             Ok(self.convert())
         } else {
@@ -591,7 +591,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &str> {
+    pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &'static str> {
         if self.is_array() && self.is_f64() {
             Ok(self.convert())
         } else {
@@ -599,7 +599,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_i32(&self) -> Result<RObject<Array, i32>, &str> {
+    pub fn as_array_i32(&self) -> Result<RObject<Array, i32>, &'static str> {
         if self.is_array() && self.is_i32() {
             Ok(self.convert())
         } else {
@@ -607,7 +607,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_u8(&self) -> Result<RObject<Array, u8>, &str> {
+    pub fn as_array_u8(&self) -> Result<RObject<Array, u8>, &'static str> {
         if self.is_array() && self.is_u8() {
             Ok(self.convert())
         } else {
@@ -615,7 +615,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_array_bool(&self) -> Result<RObject<Array, bool>, &str> {
+    pub fn as_array_bool(&self) -> Result<RObject<Array, bool>, &'static str> {
         if self.is_array() && self.is_bool() {
             Ok(self.convert())
         } else {
@@ -623,7 +623,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_list(&self) -> Result<RObject<Vector, Unspecified>, &str> {
+    pub fn as_vector_list(&self) -> Result<RObject<Vector, Unspecified>, &'static str> {
         if self.is_vector_list() {
             Ok(self.convert())
         } else {
@@ -631,7 +631,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_data_frame(&self) -> Result<RObject<Vector, Unspecified>, &str> {
+    pub fn as_data_frame(&self) -> Result<RObject<Vector, Unspecified>, &'static str> {
         if self.is_data_frame() {
             Ok(self.convert())
         } else {
@@ -639,7 +639,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_function(&self) -> Result<RObject<Function, Unspecified>, &str> {
+    pub fn as_function(&self) -> Result<RObject<Function, Unspecified>, &'static str> {
         if self.is_function() {
             Ok(self.convert())
         } else {
@@ -647,7 +647,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unspecified>, &str> {
+    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unspecified>, &'static str> {
         if self.is_external_ptr() {
             Ok(self.convert())
         } else {
@@ -655,7 +655,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &str> {
+    pub fn to_vector_f64(&self, pc: &mut Pc) -> Result<RObject<Vector, f64>, &'static str> {
         if self.is_vector_atomic() {
             if self.is_f64() {
                 Ok(self.convert())
@@ -671,7 +671,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &str> {
+    pub fn to_vector_i32(&self, pc: &mut Pc) -> Result<RObject<Vector, i32>, &'static str> {
         if self.is_vector_atomic() {
             if self.is_i32() {
                 Ok(self.convert())
@@ -687,7 +687,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_u8(&self, pc: &mut Pc) -> Result<RObject<Vector, u8>, &str> {
+    pub fn to_vector_u8(&self, pc: &mut Pc) -> Result<RObject<Vector, u8>, &'static str> {
         if self.is_vector_atomic() {
             if self.is_u8() {
                 Ok(self.convert())
@@ -703,7 +703,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_vector_bool(&self, pc: &mut Pc) -> Result<RObject<Vector, bool>, &str> {
+    pub fn to_vector_bool(&self, pc: &mut Pc) -> Result<RObject<Vector, bool>, &'static str> {
         if self.is_vector_atomic() {
             if self.is_bool() {
                 Ok(self.convert())
@@ -719,7 +719,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &str> {
+    pub fn to_matrix_f64(&self, pc: &mut Pc) -> Result<RObject<Matrix, f64>, &'static str> {
         if self.is_matrix() {
             if self.is_f64() {
                 Ok(self.convert())
@@ -735,7 +735,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &str> {
+    pub fn to_matrix_i32(&self, pc: &mut Pc) -> Result<RObject<Matrix, i32>, &'static str> {
         if self.is_matrix() {
             if self.is_i32() {
                 Ok(self.convert())
@@ -751,7 +751,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_u8(&self, pc: &mut Pc) -> Result<RObject<Matrix, u8>, &str> {
+    pub fn to_matrix_u8(&self, pc: &mut Pc) -> Result<RObject<Matrix, u8>, &'static str> {
         if self.is_matrix() {
             if self.is_u8() {
                 Ok(self.convert())
@@ -767,7 +767,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn to_matrix_bool(&self, pc: &mut Pc) -> Result<RObject<Matrix, bool>, &str> {
+    pub fn to_matrix_bool(&self, pc: &mut Pc) -> Result<RObject<Matrix, bool>, &'static str> {
         if self.is_matrix() {
             if self.is_bool() {
                 Ok(self.convert())
@@ -953,11 +953,11 @@ impl RObject<Function, Unspecified> {
 }
 
 impl<RMode> RObject<Vector, RMode> {
-    fn get_engine<'a, T>(
+    fn get_engine<T>(
         &self,
         index: usize,
         f: unsafe extern "C" fn(SEXP, isize) -> T,
-    ) -> Result<T, &'a str> {
+    ) -> Result<T, &'static str> {
         if index < self.len() {
             Ok(unsafe { f(self.sexp, index.try_into().unwrap()) })
         } else {
@@ -965,12 +965,12 @@ impl<RMode> RObject<Vector, RMode> {
         }
     }
 
-    fn set_engine<'a, T>(
+    fn set_engine<T>(
         &self,
         index: usize,
         value: T,
         f: unsafe extern "C" fn(SEXP, isize, T),
-    ) -> Result<(), &'a str> {
+    ) -> Result<(), &'static str> {
         if index < self.len() {
             Ok(unsafe { f(self.sexp, index.try_into().unwrap(), value) })
         } else {
@@ -982,7 +982,7 @@ impl<RMode> RObject<Vector, RMode> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_NamesSymbol) })
     }
 
-    pub fn set_names(&self, names: &RObject<Vector, Str>) -> Result<(), &str> {
+    pub fn set_names(&self, names: &RObject<Vector, Str>) -> Result<(), &'static str> {
         if unsafe { Rf_length(names.sexp) != Rf_length(self.sexp) } {
             return Err("Lengths do not match");
         }
@@ -994,45 +994,45 @@ impl<RMode> RObject<Vector, RMode> {
 }
 
 impl RObject<Vector, f64> {
-    pub fn get<'a>(&self, index: usize) -> Result<f64, &'a str> {
+    pub fn get(&self, index: usize) -> Result<f64, &'static str> {
         self.get_engine(index, REAL_ELT)
     }
 
-    pub fn set<'a>(&self, index: usize, value: f64) -> Result<(), &'a str> {
+    pub fn set(&self, index: usize, value: f64) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_REAL_ELT)
     }
 }
 
 impl RObject<Vector, i32> {
-    pub fn get<'a>(&self, index: usize) -> Result<i32, &'a str> {
+    pub fn get(&self, index: usize) -> Result<i32, &'static str> {
         self.get_engine(index, INTEGER_ELT)
     }
 
-    pub fn set<'a>(&self, index: usize, value: i32) -> Result<(), &'a str> {
+    pub fn set(&self, index: usize, value: i32) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_INTEGER_ELT)
     }
 }
 
 impl RObject<Vector, u8> {
-    pub fn get<'a>(&self, index: usize) -> Result<u8, &'a str> {
+    pub fn get(&self, index: usize) -> Result<u8, &'static str> {
         self.get_engine(index, RAW_ELT)
     }
 
-    pub fn set<'a>(&self, index: usize, value: u8) -> Result<(), &'a str> {
+    pub fn set(&self, index: usize, value: u8) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_RAW_ELT)
     }
 }
 
 impl RObject<Vector, bool> {
-    pub fn get<'a>(&self, index: usize) -> Result<bool, &'a str> {
+    pub fn get(&self, index: usize) -> Result<bool, &'static str> {
         self.get_engine(index, LOGICAL_ELT).map(|x| x != 0)
     }
 
-    pub fn get_i32<'a>(&self, index: usize) -> Result<i32, &'a str> {
+    pub fn get_i32(&self, index: usize) -> Result<i32, &'static str> {
         self.get_engine(index, LOGICAL_ELT)
     }
 
-    pub fn set<'a>(&self, index: usize, value: bool) -> Result<(), &'a str> {
+    pub fn set(&self, index: usize, value: bool) -> Result<(), &'static str> {
         let value = if value {
             Rboolean_TRUE as i32
         } else {
@@ -1041,20 +1041,20 @@ impl RObject<Vector, bool> {
         self.set_engine(index, value, SET_LOGICAL_ELT)
     }
 
-    pub fn set_i32<'a>(&self, index: usize, value: i32) -> Result<(), &'a str> {
+    pub fn set_i32(&self, index: usize, value: i32) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_LOGICAL_ELT)
     }
 }
 
 impl RObject<Vector, Str> {
-    pub fn get<'a, 'b>(&self, index: usize) -> Result<Result<&'a str, Utf8Error>, &'b str> {
+    pub fn get<'a>(&self, index: usize) -> Result<Result<&'a str, Utf8Error>, &'static str> {
         self.get_engine(index, STRING_ELT).map(|sexp| {
             let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
             c_str.to_str()
         })
     }
 
-    pub fn set<'a>(&self, index: usize, value: &str) -> Result<(), &'a str> {
+    pub fn set(&self, index: usize, value: &str) -> Result<(), &'static str> {
         unsafe {
             let value = Rf_mkCharLenCE(
                 value.as_ptr() as *const c_char,
@@ -1073,15 +1073,15 @@ impl RObject<Vector, Str> {
 }
 
 impl RObject<Vector, Unspecified> {
-    pub fn get<'a>(&self, index: usize) -> Result<RObject, &'a str> {
+    pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
         self.get_engine(index, VECTOR_ELT).map(|x| R::wrap(x))
     }
 
-    pub fn set<'a, RType, RMode>(
+    pub fn set<RType, RMode>(
         &self,
         index: usize,
         value: &RObject<RType, RMode>,
-    ) -> Result<(), &'a str> {
+    ) -> Result<(), &'static str> {
         if index < self.len() {
             unsafe { SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp) };
             Ok(())
@@ -1101,7 +1101,7 @@ impl<RMode> RObject<Matrix, RMode> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_DimNamesSymbol) })
     }
 
-    pub fn set_dimnames(&self, names: &RObject<Vector, Unspecified>) -> Result<(), &str> {
+    pub fn set_dimnames(&self, names: &RObject<Vector, Unspecified>) -> Result<(), &'static str> {
         if !names.is_vector_list() {
             return Err("Not a list");
         }
@@ -1132,66 +1132,70 @@ impl<RMode> RObject<Matrix, RMode> {
 }
 
 impl RObject<Matrix, f64> {
-    pub fn get(&self, index: (usize, usize)) -> Result<f64, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<f64, &'static str> {
         self.convert::<Vector, f64>().get(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: f64) -> Result<(), &str> {
+    pub fn set(&self, index: (usize, usize), value: f64) -> Result<(), &'static str> {
         self.convert::<Vector, f64>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, i32> {
-    pub fn get(&self, index: (usize, usize)) -> Result<i32, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<i32, &'static str> {
         self.convert::<Vector, i32>().get(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: i32) -> Result<(), &str> {
+    pub fn set(&self, index: (usize, usize), value: i32) -> Result<(), &'static str> {
         self.convert::<Vector, i32>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, u8> {
-    pub fn get(&self, index: (usize, usize)) -> Result<u8, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<u8, &'static str> {
         self.convert::<Vector, u8>().get(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: u8) -> Result<(), &str> {
+    pub fn set(&self, index: (usize, usize), value: u8) -> Result<(), &'static str> {
         self.convert::<Vector, u8>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, bool> {
-    pub fn get(&self, index: (usize, usize)) -> Result<bool, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<bool, &'static str> {
         self.convert::<Vector, bool>().get(self.index(index))
     }
 
-    pub fn get_i32(&self, index: (usize, usize)) -> Result<i32, &str> {
+    pub fn get_i32(&self, index: (usize, usize)) -> Result<i32, &'static str> {
         self.convert::<Vector, bool>().get_i32(self.index(index))
     }
 
-    pub fn set(&self, index: (usize, usize), value: bool) -> Result<(), &str> {
+    pub fn set(&self, index: (usize, usize), value: bool) -> Result<(), &'static str> {
         self.convert::<Vector, bool>().set(self.index(index), value)
     }
 
-    pub fn set_i32(&self, index: (usize, usize), value: i32) -> Result<(), &str> {
+    pub fn set_i32(&self, index: (usize, usize), value: i32) -> Result<(), &'static str> {
         self.convert::<Vector, bool>()
             .set_i32(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, Str> {
-    pub fn get(&self, index: (usize, usize)) -> Result<Result<&str, Utf8Error>, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<Result<&str, Utf8Error>, &'static str> {
         self.convert::<Vector, Str>().get(self.index(index))
     }
 
-    pub fn set<RType, RMode>(&self, index: (usize, usize), value: &str) -> Result<(), &str> {
+    pub fn set<RType, RMode>(
+        &self,
+        index: (usize, usize),
+        value: &str,
+    ) -> Result<(), &'static str> {
         self.convert::<Vector, Str>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, Unspecified> {
-    pub fn get(&self, index: (usize, usize)) -> Result<RObject, &str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<RObject, &'static str> {
         self.convert::<Vector, Unspecified>().get(self.index(index))
     }
 
@@ -1199,7 +1203,7 @@ impl RObject<Matrix, Unspecified> {
         &self,
         index: (usize, usize),
         value: &RObject<RType, RMode>,
-    ) -> Result<(), &str> {
+    ) -> Result<(), &'static str> {
         self.convert::<Vector, Unspecified>()
             .set(self.index(index), value)
     }
