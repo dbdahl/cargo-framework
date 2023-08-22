@@ -519,6 +519,14 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
+    pub fn as_str(&self) -> Result<Result<&str, Utf8Error>, &'static str> {
+        if self.is_scalar() {
+            self.convert::<Vector, Str>().get(0)
+        } else {
+            Err("Cannot be interperated as a str")
+        }
+    }
+
     pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &'static str> {
         if self.is_vector_atomic() && self.is_f64() {
             Ok(self.convert())

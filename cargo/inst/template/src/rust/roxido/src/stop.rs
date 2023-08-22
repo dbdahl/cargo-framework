@@ -1,4 +1,5 @@
 use crate::rbindings::*;
+use std::str::Utf8Error;
 
 #[doc(hidden)]
 pub struct RStopHelper(pub String);
@@ -24,6 +25,21 @@ pub trait UnwrapOrStop<T> {
 }
 
 impl<T> UnwrapOrStop<T> for Result<T, &str> {
+    fn stop(self, msg: &str) -> T {
+        match self {
+            Ok(t) => t,
+            Err(_) => stop!("{}", msg),
+        }
+    }
+    fn stop_default(self) -> T {
+        match self {
+            Ok(t) => t,
+            Err(e) => stop!("{}", e),
+        }
+    }
+}
+
+impl<T> UnwrapOrStop<T> for Result<T, Utf8Error> {
     fn stop(self, msg: &str) -> T {
         match self {
             Ok(t) => t,

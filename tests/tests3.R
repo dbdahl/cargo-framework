@@ -833,6 +833,38 @@ test_that("external_ptr", {
   expect_error(f3(3))
 })
 
+test_that("string", {
+  f <- rust_fn(a, "
+    let b = a.as_str().stop_default().stop_default();
+    let c = b.to_uppercase();
+    (&c[..]).to_r(pc)
+  ")
+  expect_identical(f("billy"), "BILLY")
+  f <- rust_fn('
+    "adf".to_r(pc)
+  ')
+  expect_identical(f(), "adf")
+  f <- rust_fn('
+    ["adf", "billy", "bob"].to_r(pc)
+  ')
+  expect_identical(f(), c("adf", "billy", "bob"))
+  f <- rust_fn(a, "
+    let b = a.as_vector_str().stop_default();
+    b.get(1).stop_default().stop_default().to_r(pc)
+  ")
+  expect_identical(f(c("adf", "billy", "bob")), "billy")
+  f <- rust_fn('
+    let mut a = Vec::new();
+    a.push("adf");
+    a.push("billy");
+    a.push("bob");
+    (&a[..]).to_r(pc)
+  ')
+  expect_identical(f(), c("adf", "billy", "bob"))
+})
+
+
+
 
 
 
