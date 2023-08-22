@@ -863,10 +863,19 @@ test_that("string", {
   expect_identical(f(), c("adf", "billy", "bob"))
 })
 
-
-
-
-
+test_that("stop", {
+  f <- rust_fn(a, "
+    a.as_function().stop_default();
+    ()
+  ")
+  expect_error(f(1))
+  f <- rust_fn(a, '
+    let b = "apple".to_owned();
+    a.as_function().stop(b.as_str());
+    ()
+  ')
+  expect_identical(as.character(capture_error(f(1))), "Error in f(1): apple\n")
+})
 
 
 
