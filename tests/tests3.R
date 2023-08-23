@@ -906,7 +906,7 @@ test_that("call", {
   expect_identical(f(\(x) 2 * x, 10), 20)
 })
 
-test_that("data frame", {
+test_that("data.frame", {
   f <- rust_fn(a, "
     let b = a.as_data_frame().stop();
     b.get_names()
@@ -921,6 +921,12 @@ test_that("data frame", {
   expect_error(f(a, 3))
   expect_identical(f(a, 0), 1:3)
   expect_identical(f(a, 1), c(10, 11, 12))
+  f <- rust_fn(a, index, "
+    let b = a.as_data_frame().stop();
+    b.set(index.as_usize().stop(), &[0, -1, -22].to_r(pc)).stop();
+    b
+  ")
+  expect_identical(f(a, 1)[, 2], c(0L, -1L, -22L))
   f <- rust_fn('
     let a = R::new_vector_list(2, pc);
     let _ = a.set(0, &[   1,    2,    3].to_r(pc));

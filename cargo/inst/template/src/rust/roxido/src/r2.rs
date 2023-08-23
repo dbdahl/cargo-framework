@@ -1142,7 +1142,7 @@ impl RObject<Vector, Unspecified> {
 
 impl RObject<Vector, DataFrame> {
     pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
-        self.get_engine(index, VECTOR_ELT).map(|x| R::wrap(x))
+        self.convert::<Vector, Unspecified>().get(index)
     }
 
     pub fn set<RType, RMode>(
@@ -1150,12 +1150,7 @@ impl RObject<Vector, DataFrame> {
         index: usize,
         value: &RObject<RType, RMode>,
     ) -> Result<(), &'static str> {
-        if index < self.len() {
-            unsafe { SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp) };
-            Ok(())
-        } else {
-            Err("Index out of bounds")
-        }
+        self.convert::<Vector, Unspecified>().set(index, value)
     }
 
     pub fn get_row_names(&self) -> RObject<Vector, Str> {
