@@ -107,7 +107,7 @@ impl R {
         Self::new_vector(STRSXP, length, pc)
     }
 
-    pub fn new_vector_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
+    pub fn new_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
         Self::new_vector(VECSXP, length, pc)
     }
 
@@ -167,7 +167,7 @@ impl R {
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
     ///
     pub fn new_error(message: &str, pc: &mut Pc) -> RObject {
-        let list = Self::new_vector_list(2, pc);
+        let list = Self::new_list(2, pc);
         let _ = list.set(0, &message.to_r(pc));
         let _ = list.set(1, &Self::null());
         let _ = list.set_names(&["message", "calls"].to_r(pc));
@@ -301,10 +301,6 @@ pub struct RObject<RType = AnyType, RMode = Unknown> {
 impl<RType, RMode> RObject<RType, RMode> {
     fn convert<RTypeTo, RModeTo>(&self) -> RObject<RTypeTo, RModeTo> {
         R::wrap(self.sexp)
-    }
-
-    pub fn to_base(&self) -> RObject {
-        self.convert()
     }
 
     /// Duplicate an object.

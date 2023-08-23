@@ -642,7 +642,7 @@ test_that("index into matrix", {
 test_that("index into list", {
   f <- rust_fn(index, '
     let index = index.as_usize().stop();
-    let a = R::new_vector_list(3, pc);
+    let a = R::new_list(3, pc);
     a.set(1, &"bill".to_r(pc)).stop();
     a.set(2, &4.0.to_r(pc)).stop();
     a.get(index).stop()
@@ -650,13 +650,13 @@ test_that("index into list", {
   expect_identical(f(1), "bill")
   expect_identical(f(2), 4)
   f <- rust_fn("
-    let a = R::new_vector_list(3, pc);
+    let a = R::new_list(3, pc);
     a.set(3, &4.0.to_r(pc)).stop();
     a.get(3).stop()
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = R::new_vector_list(3, pc);
+    let a = R::new_list(3, pc);
     a.set(2, &4.0.to_r(pc)).stop();
     a.get(3).stop()
   ")
@@ -670,7 +670,7 @@ test_that("new matrix with names", {
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as f64;
     }
-    let dimnames = R::new_vector_list(2, pc);
+    let dimnames = R::new_list(2, pc);
     dimnames.set(0, &["row1"].to_r(pc)).stop();
     dimnames.set(1, &["col1", "col2", "col3"].to_r(pc)).stop();
     a.set_dimnames(&dimnames).stop();
@@ -928,7 +928,7 @@ test_that("data.frame", {
   ")
   expect_identical(f(a, 1)[, 2], c(0L, -1L, -22L))
   f <- rust_fn('
-    let a = R::new_vector_list(2, pc);
+    let a = R::new_list(2, pc);
     let _ = a.set(0, &[   1,    2,    3].to_r(pc));
     let _ = a.set(1, &[10.0, 20.0, 30.0].to_r(pc));
     let names = ["i32", "f64"].to_r(pc);
