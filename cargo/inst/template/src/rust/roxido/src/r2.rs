@@ -18,17 +18,38 @@ use std::ops::Deref;
 use std::str::Utf8Error;
 
 pub struct R {}
+
+#[doc(hidden)]
+pub struct AnyType(());
+
+#[doc(hidden)]
+pub struct Vector(());
+
+#[doc(hidden)]
+pub struct Matrix(());
+
+#[doc(hidden)]
+pub struct Array(());
+
+#[doc(hidden)]
+pub struct Function(());
+
+#[doc(hidden)]
+pub struct ExternalPtr(());
+
+#[doc(hidden)]
+pub struct Unknown(());
+
+#[doc(hidden)]
 pub struct Str;
 
-pub struct AnyType(());
-pub struct Vector(());
-pub struct Matrix(());
-pub struct Array(());
-pub struct Function(());
-pub struct ExternalPtr(());
-pub struct Unspecified(());
+#[doc(hidden)]
+pub struct List(());
+
+#[doc(hidden)]
 pub struct DataFrame(());
 
+#[doc(hidden)]
 pub trait HasLength {}
 impl HasLength for Vector {}
 impl HasLength for Matrix {}
@@ -39,9 +60,10 @@ impl Atomic for f64 {}
 impl Atomic for i32 {}
 impl Atomic for u8 {}
 impl Atomic for bool {}
+impl Atomic for Str {}
 
+#[doc(hidden)]
 pub trait Convertible {}
-
 impl Convertible for Vector {}
 impl Convertible for Matrix {}
 impl Convertible for Array {}
@@ -92,7 +114,7 @@ impl R {
         Self::new_vector(STRSXP, length, pc)
     }
 
-    pub fn new_vector_list(length: usize, pc: &mut Pc) -> RObject<Vector, Unspecified> {
+    pub fn new_vector_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
         Self::new_vector(VECSXP, length, pc)
     }
 
@@ -278,7 +300,7 @@ impl R {
 }
 
 #[repr(C)]
-pub struct RObject<RType = AnyType, RMode = Unspecified> {
+pub struct RObject<RType = AnyType, RMode = Unknown> {
     pub sexp: SEXP,
     rtype: PhantomData<(RType, RMode)>,
 }
@@ -638,7 +660,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_list(&self) -> Result<RObject<Vector, Unspecified>, &'static str> {
+    pub fn as_vector_list(&self) -> Result<RObject<Vector, List>, &'static str> {
         if self.is_vector_list() {
             Ok(self.convert())
         } else {
@@ -654,7 +676,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_function(&self) -> Result<RObject<Function, Unspecified>, &'static str> {
+    pub fn as_function(&self) -> Result<RObject<Function, Unknown>, &'static str> {
         if self.is_function() {
             Ok(self.convert())
         } else {
@@ -662,7 +684,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unspecified>, &'static str> {
+    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unknown>, &'static str> {
         if self.is_external_ptr() {
             Ok(self.convert())
         } else {
@@ -889,7 +911,7 @@ impl<T> RObject<Array, T> {
     }
 }
 
-impl RObject<Function, Unspecified> {
+impl RObject<Function, Unknown> {
     fn eval(expression: SEXP, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = pc.protect(expression);
         let mut p_out_error: i32 = 0;
@@ -1094,7 +1116,7 @@ impl RObject<Vector, Str> {
     }
 }
 
-impl RObject<Vector, Unspecified> {
+impl RObject<Vector, List> {
     pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
         self.get_engine(index, VECTOR_ELT).map(|x| R::wrap(x))
     }
@@ -1150,7 +1172,7 @@ impl RObject<Vector, Unspecified> {
 
 impl RObject<Vector, DataFrame> {
     pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
-        self.convert::<Vector, Unspecified>().get(index)
+        self.convert::<Vector, List>().get(index)
     }
 
     pub fn set<RType, RMode>(
@@ -1158,7 +1180,7 @@ impl RObject<Vector, DataFrame> {
         index: usize,
         value: &RObject<RType, RMode>,
     ) -> Result<(), &'static str> {
-        self.convert::<Vector, Unspecified>().set(index, value)
+        self.convert::<Vector, List>().set(index, value)
     }
 
     pub fn get_row_names(&self) -> RObject<Vector, Str> {
@@ -1180,11 +1202,11 @@ impl<RMode> RObject<Matrix, RMode> {
         nrow * j + i
     }
 
-    pub fn get_dimnames(&self) -> RObject<Vector, Unspecified> {
+    pub fn get_dimnames(&self) -> RObject<Vector, Str> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_DimNamesSymbol) })
     }
 
-    pub fn set_dimnames(&self, names: &RObject<Vector, Unspecified>) -> Result<(), &'static str> {
+    pub fn set_dimnames(&self, names: &RObject<Vector, List>) -> Result<(), &'static str> {
         if !names.is_vector_list() {
             return Err("Not a list");
         }
@@ -1274,21 +1296,6 @@ impl RObject<Matrix, Str> {
         value: &str,
     ) -> Result<(), &'static str> {
         self.convert::<Vector, Str>().set(self.index(index), value)
-    }
-}
-
-impl RObject<Matrix, Unspecified> {
-    pub fn get(&self, index: (usize, usize)) -> Result<RObject, &'static str> {
-        self.convert::<Vector, Unspecified>().get(self.index(index))
-    }
-
-    pub fn set<RType, RMode>(
-        &self,
-        index: (usize, usize),
-        value: &RObject<RType, RMode>,
-    ) -> Result<(), &'static str> {
-        self.convert::<Vector, Unspecified>()
-            .set(self.index(index), value)
     }
 }
 
