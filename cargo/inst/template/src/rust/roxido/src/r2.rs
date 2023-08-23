@@ -27,6 +27,7 @@ pub struct Array(());
 pub struct Function(());
 pub struct ExternalPtr(());
 pub struct Unspecified(());
+pub struct DataFrame(());
 pub trait Sliceable {}
 
 impl Sliceable for Vector {}
@@ -639,7 +640,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_data_frame(&self) -> Result<RObject<Vector, Unspecified>, &'static str> {
+    pub fn as_data_frame(&self) -> Result<RObject<Vector, DataFrame>, &'static str> {
         if self.is_data_frame() {
             Ok(self.convert())
         } else {
@@ -969,7 +970,7 @@ impl<RMode> RObject<Vector, RMode> {
         if index < self.len() {
             Ok(unsafe { f(self.sexp, index.try_into().unwrap()) })
         } else {
-            Err("Index out of bounds.")
+            Err("Index out of bounds")
         }
     }
 
@@ -982,7 +983,7 @@ impl<RMode> RObject<Vector, RMode> {
         if index < self.len() {
             Ok(unsafe { f(self.sexp, index.try_into().unwrap(), value) })
         } else {
-            Err("Index out of bounds.")
+            Err("Index out of bounds")
         }
     }
 
@@ -992,7 +993,7 @@ impl<RMode> RObject<Vector, RMode> {
 
     pub fn set_names(&self, names: &RObject<Vector, Str>) -> Result<(), &'static str> {
         if unsafe { Rf_length(names.sexp) != Rf_length(self.sexp) } {
-            return Err("Lengths do not match");
+            return Err("Length of names is not correct");
         }
         unsafe {
             Rf_namesgets(self.sexp, names.sexp);
@@ -1099,8 +1100,74 @@ impl RObject<Vector, Unspecified> {
             unsafe { SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp) };
             Ok(())
         } else {
-            Err("Index out of bounds.")
+            Err("Index out of bounds")
         }
+    }
+
+    pub fn to_data_frame(
+        &self,
+        names: &RObject<Vector, Str>,
+        row_names: &RObject<Vector, Str>,
+        pc: &mut Pc,
+    ) -> Result<RObject<Vector, DataFrame>, &'static str> {
+        if names.len() != self.len() {
+            return Err("Length of names is not correct");
+        }
+        let mut nrow = -1;
+        for i in 0..self.len() {
+            let x = self.get(i).unwrap();
+            if unsafe { Rf_isVectorAtomic(x.sexp) == 0 } {
+                return Err("Expected an atomic vector");
+            }
+            let len = unsafe { Rf_xlength(x.sexp) };
+            if i == 0 {
+                nrow = len;
+            } else {
+                if len != nrow {
+                    return Err("Inconsistent number of rows");
+                }
+            }
+        }
+        if row_names.len() != nrow as usize {
+            return Err("Length of row names is not correct");
+        }
+        if let Err(e) = self.set_names(&names) {
+            return Err(e);
+        }
+        unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, row_names.sexp) };
+        self.set_class(&["data.frame"].to_r(pc));
+        Ok(self.convert())
+    }
+}
+
+impl RObject<Vector, DataFrame> {
+    pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
+        self.get_engine(index, VECTOR_ELT).map(|x| R::wrap(x))
+    }
+
+    pub fn set<RType, RMode>(
+        &self,
+        index: usize,
+        value: &RObject<RType, RMode>,
+    ) -> Result<(), &'static str> {
+        if index < self.len() {
+            unsafe { SET_VECTOR_ELT(self.sexp, index.try_into().unwrap(), value.sexp) };
+            Ok(())
+        } else {
+            Err("Index out of bounds")
+        }
+    }
+
+    pub fn get_row_names(&self) -> RObject<Vector, Str> {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_RowNamesSymbol) })
+    }
+
+    pub fn set_col_names(&self, row_names: &RObject<Vector, Str>) -> Result<(), &'static str> {
+        if unsafe { Rf_length(row_names.sexp) != Rf_length(self.sexp) } {
+            return Err("Length of row names is not correct");
+        }
+        unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, row_names.sexp) };
+        Ok(())
     }
 }
 

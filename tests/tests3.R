@@ -906,34 +906,36 @@ test_that("call", {
   expect_identical(f(\(x) 2 * x, 10), 20)
 })
 
+test_that("data frame", {
+  f <- rust_fn(a, "
+    let b = a.as_data_frame().stop();
+    b.get_names()
+  ")
+  expect_error(f(1))
+  a <- data.frame(a = 1:3, b = c(10, 11, 12))
+  expect_identical(f(a), c("a", "b"))
+  f <- rust_fn(a, index, "
+    let b = a.as_data_frame().stop();
+    b.get(index.as_usize().stop()).stop()
+  ")
+  expect_error(f(a, 3))
+  expect_identical(f(a, 0), 1:3)
+  expect_identical(f(a, 1), c(10, 11, 12))
+  f <- rust_fn('
+    let a = R::new_vector_list(2, pc);
+    let _ = a.set(0, &[   1,    2,    3].to_r(pc));
+    let _ = a.set(1, &[10.0, 20.0, 30.0].to_r(pc));
+    let names = ["i32", "f64"].to_r(pc);
+    let row_names = ["row1", "row2", "row3"].to_r(pc);
+    a.to_data_frame(&names, &row_names, pc).stop()
+  ')
+  a <- data.frame(i32 = 1:3, f64 = c(10, 20, 30), row.names = paste0("row", 1:3))
+  expect_identical(f(), a)
+})
 
-
-
-
-
-# test_that("data frame", {
-#   f <- rust_fn(a, "
-#     let b = a.as_data_frame().stop();
-#     b.get_names()
-#   ")
-#   a <- data.frame(a = 1:3, b = c(10, 11, 12))
-#   expect_identical(f(a), c("a", "b"))
-#   f <- rust_fn(a, "
-#     let b = a.as_data_frame().stop();
-#     b.get(0)
-#   ")
-#   expect_identical(f(a), 1:3)
-#   f <- rust_fn(a, "
-#     let b = a.as_data_frame().stop();
-#     b.get(1)
-#   ")
-#   expect_identical(f(a), c(10, 11, 12))
-# })
-# 
 # test_that("data.frame", {
 #   f <- rust_fn(x, "rvec!(x.is_data_frame())")
 #   expect_true(f(data.frame(x = 1:2, y = 4:5)))
 #   expect_false(f(matrix(1:4, nrow = 2)))
 # })
 # 
-
