@@ -1340,7 +1340,7 @@ impl<T> RObject<ExternalPtr, T> {
 }
 
 pub trait ToR1<T> {
-    fn to_r(&self, pc: &mut Pc) -> T;
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, T>;
 }
 
 pub trait ToR2<T> {
@@ -1355,25 +1355,25 @@ pub trait ToR4<T> {
     fn to_r(self, pc: &mut Pc) -> T;
 }
 
-impl ToR1<RObject<Vector, f64>> for f64 {
+impl ToR1<f64> for f64 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         R::wrap(pc.protect(unsafe { Rf_ScalarReal(*self) }))
     }
 }
 
-impl ToR1<RObject<Vector, i32>> for i32 {
+impl ToR1<i32> for i32 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         R::wrap(pc.protect(unsafe { Rf_ScalarInteger(*self) }))
     }
 }
 
-impl ToR1<RObject<Vector, u8>> for u8 {
+impl ToR1<u8> for u8 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         R::wrap(pc.protect(unsafe { Rf_ScalarRaw(*self) }))
     }
 }
 
-impl ToR1<RObject<Vector, bool>> for bool {
+impl ToR1<bool> for bool {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         R::wrap(pc.protect(unsafe {
             Rf_ScalarLogical(if *self {
@@ -1385,7 +1385,7 @@ impl ToR1<RObject<Vector, bool>> for bool {
     }
 }
 
-impl ToR1<RObject<Vector, Str>> for &str {
+impl ToR1<Str> for &str {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let sexp = unsafe {
             Rf_ScalarString(Rf_mkCharLenCE(
@@ -1398,22 +1398,13 @@ impl ToR1<RObject<Vector, Str>> for &str {
     }
 }
 
-impl<const N: usize> ToR1<RObject<Vector, f64>> for [f64; N] {
+impl<const N: usize> ToR1<f64> for [f64; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<RObject<Vector, f64>> for &[f64] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        let result = R::new_vector_f64(self.len(), pc);
-        let slice = result.slice();
-        slice.copy_from_slice(self);
-        result
-    }
-}
-
-impl ToR1<RObject<Vector, f64>> for &mut [f64] {
+impl ToR1<f64> for &[f64] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         let result = R::new_vector_f64(self.len(), pc);
         let slice = result.slice();
@@ -1422,13 +1413,22 @@ impl ToR1<RObject<Vector, f64>> for &mut [f64] {
     }
 }
 
-impl<const N: usize> ToR1<RObject<Vector, i32>> for [i32; N] {
+impl ToR1<f64> for &mut [f64] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+        let result = R::new_vector_f64(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
+impl<const N: usize> ToR1<i32> for [i32; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<RObject<Vector, i32>> for &[i32] {
+impl ToR1<i32> for &[i32] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -1437,7 +1437,7 @@ impl ToR1<RObject<Vector, i32>> for &[i32] {
     }
 }
 
-impl ToR1<RObject<Vector, i32>> for &mut [i32] {
+impl ToR1<i32> for &mut [i32] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -1446,13 +1446,13 @@ impl ToR1<RObject<Vector, i32>> for &mut [i32] {
     }
 }
 
-impl<const N: usize> ToR1<RObject<Vector, u8>> for [u8; N] {
+impl<const N: usize> ToR1<u8> for [u8; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<RObject<Vector, u8>> for &[u8] {
+impl ToR1<u8> for &[u8] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_u8(self.len(), pc);
         let slice = result.slice();
@@ -1461,7 +1461,7 @@ impl ToR1<RObject<Vector, u8>> for &[u8] {
     }
 }
 
-impl ToR1<RObject<Vector, u8>> for &mut [u8] {
+impl ToR1<u8> for &mut [u8] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_u8(self.len(), pc);
         let slice = result.slice();
@@ -1470,13 +1470,13 @@ impl ToR1<RObject<Vector, u8>> for &mut [u8] {
     }
 }
 
-impl<const N: usize> ToR1<RObject<Vector, i32>> for [usize; N] {
+impl<const N: usize> ToR1<i32> for [usize; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<RObject<Vector, i32>> for &[usize] {
+impl ToR1<i32> for &[usize] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -1487,7 +1487,7 @@ impl ToR1<RObject<Vector, i32>> for &[usize] {
     }
 }
 
-impl ToR1<RObject<Vector, i32>> for &mut [usize] {
+impl ToR1<i32> for &mut [usize] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_i32(self.len(), pc);
         let slice = result.slice();
@@ -1498,13 +1498,13 @@ impl ToR1<RObject<Vector, i32>> for &mut [usize] {
     }
 }
 
-impl<const N: usize> ToR1<RObject<Vector, bool>> for [bool; N] {
+impl<const N: usize> ToR1<bool> for [bool; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<RObject<Vector, bool>> for &[bool] {
+impl ToR1<bool> for &[bool] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         let result = R::new_vector_bool(self.len(), pc);
         let slice = result.slice();
@@ -1515,7 +1515,7 @@ impl ToR1<RObject<Vector, bool>> for &[bool] {
     }
 }
 
-impl ToR1<RObject<Vector, bool>> for &mut [bool] {
+impl ToR1<bool> for &mut [bool] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
         let result = R::new_vector_bool(self.len(), pc);
         let slice = result.slice();
@@ -1526,13 +1526,13 @@ impl ToR1<RObject<Vector, bool>> for &mut [bool] {
     }
 }
 
-impl<const N: usize> ToR1<RObject<Vector, Str>> for [&str; N] {
+impl<const N: usize> ToR1<Str> for [&str; N] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<RObject<Vector, Str>> for &[&str] {
+impl ToR1<Str> for &[&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let result = R::new_vector_str(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
@@ -1542,7 +1542,7 @@ impl ToR1<RObject<Vector, Str>> for &[&str] {
     }
 }
 
-impl ToR1<RObject<Vector, Str>> for &mut [&str] {
+impl ToR1<Str> for &mut [&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
         let result = R::new_vector_str(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
