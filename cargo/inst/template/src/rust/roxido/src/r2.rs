@@ -72,14 +72,6 @@ impl Convertible for Function {}
 impl Convertible for ExternalPtr {}
 
 impl R {
-    pub fn from_old(r: crate::r::RObject) -> RObject {
-        Self::wrap(r.0)
-    }
-
-    pub fn to_old(r: RObject) -> crate::r::RObject {
-        crate::r::RObject(r.sexp)
-    }
-
     fn wrap<RTypeTo, RModeTo>(sexp: SEXP) -> RObject<RTypeTo, RModeTo> {
         RObject {
             sexp,
