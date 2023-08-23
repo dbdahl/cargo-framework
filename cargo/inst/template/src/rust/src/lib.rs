@@ -7,8 +7,16 @@ use roxido::*;
 
 #[roxido]
 fn convolve2(a: RObject, b: RObject) -> RObject {
-    let a = a.to_vector_f64(pc).stop_str("'a' not a vector.").slice();
-    let b = b.to_vector_f64(pc).stop_str("'b' not a vector.").slice();
+    let a = a
+        .as_vector()
+        .stop_str("'a' not a vector.")
+        .coerce_to_f64(pc)
+        .slice();
+    let b = b
+        .as_vector()
+        .stop_str("'b' not a vector.")
+        .coerce_to_f64(pc)
+        .slice();
     let r = R::new_vector_f64(a.len() + b.len() - 1, pc);
     let ab = r.slice();
     for abi in ab.iter_mut() {
@@ -26,8 +34,9 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
 fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     let f = f.as_function().stop_str("'f' must be a function.");
     let guesses = guesses
-        .to_vector_f64(pc)
-        .stop_str("'guesses' must be a vector.");
+        .as_vector()
+        .stop_str("'guesses' must be a vector.")
+        .coerce_to_f64(pc);
     if guesses.len() != 2 {
         stop!("'guesses' must be a vector of length two.");
     }
