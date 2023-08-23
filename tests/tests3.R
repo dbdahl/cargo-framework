@@ -938,10 +938,3 @@ test_that("data.frame", {
   a <- data.frame(i32 = 1:3, f64 = c(10, 20, 30), row.names = paste0("row", 1:3))
   expect_identical(f(), a)
 })
-
-# test_that("data.frame", {
-#   f <- rust_fn(x, "rvec!(x.is_data_frame())")
-#   expect_true(f(data.frame(x = 1:2, y = 4:5)))
-#   expect_false(f(matrix(1:4, nrow = 2)))
-# })
-# 

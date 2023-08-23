@@ -28,11 +28,17 @@ pub struct Function(());
 pub struct ExternalPtr(());
 pub struct Unspecified(());
 pub struct DataFrame(());
-pub trait Sliceable {}
 
-impl Sliceable for Vector {}
-impl Sliceable for Matrix {}
-impl Sliceable for Array {}
+pub trait HasLength {}
+impl HasLength for Vector {}
+impl HasLength for Matrix {}
+impl HasLength for Array {}
+
+pub trait Atomic {}
+impl Atomic for f64 {}
+impl Atomic for i32 {}
+impl Atomic for u8 {}
+impl Atomic for bool {}
 
 pub trait Convertible {}
 
@@ -793,7 +799,7 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 }
 
-impl<S: Sliceable, T> RObject<S, T> {
+impl<S: HasLength, T> RObject<S, T> {
     pub fn is_empty(&self) -> bool {
         unsafe { Rf_xlength(self.sexp) == 0 }
     }
@@ -801,7 +807,9 @@ impl<S: Sliceable, T> RObject<S, T> {
         let len = unsafe { Rf_xlength(self.sexp) };
         len.try_into().unwrap() // Won't ever fail if R is sane.
     }
+}
 
+impl<S: HasLength, T: Atomic> RObject<S, T> {
     fn slice_engine<U>(&self, data: *mut U) -> &'static mut [U] {
         let len = self.len();
         unsafe { std::slice::from_raw_parts_mut(data, len) }
@@ -824,25 +832,25 @@ impl<S: Sliceable, T> RObject<S, T> {
     }
 }
 
-impl<S: Sliceable> RObject<S, f64> {
+impl<S: HasLength> RObject<S, f64> {
     pub fn slice(&self) -> &'static mut [f64] {
         self.slice_engine(unsafe { REAL(self.sexp) })
     }
 }
 
-impl<S: Sliceable> RObject<S, i32> {
+impl<S: HasLength> RObject<S, i32> {
     pub fn slice(&self) -> &'static mut [i32] {
         self.slice_engine(unsafe { INTEGER(self.sexp) })
     }
 }
 
-impl<S: Sliceable> RObject<S, u8> {
+impl<S: HasLength> RObject<S, u8> {
     pub fn slice(&self) -> &'static mut [u8] {
         self.slice_engine(unsafe { RAW(self.sexp) })
     }
 }
 
-impl<S: Sliceable> RObject<S, bool> {
+impl<S: HasLength> RObject<S, bool> {
     pub fn slice(&self) -> &'static mut [i32] {
         self.slice_engine(unsafe { LOGICAL(self.sexp) })
     }
