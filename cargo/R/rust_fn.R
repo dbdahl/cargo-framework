@@ -37,7 +37,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   code <- args[[len]]
   args_with_type <- sapply(as.character(args[-len]), function(arg) paste0(arg, ": RObject"))
   all_args <- paste0(args_with_type, collapse = ", ")
-  api <- Sys.getenv("R_CARGO_PKG_API", "2")
+  api <- Sys.getenv("R_CARGO_PKG_API", "3")
   header <- if ( api == "2" ) {
     "pub use r::{AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter, TryAllocateProtected, R};"
   } else if ( api == "3" ) {

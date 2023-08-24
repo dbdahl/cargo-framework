@@ -2,7 +2,6 @@ mod registration {
     include!(concat!(env!("OUT_DIR"), "/registration.rs"));
 }
 
-use r2::{RObject, ToR1, ToR2, ToR3, ToR4, R};
 use roxido::*;
 
 #[roxido]
