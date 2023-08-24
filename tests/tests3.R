@@ -290,7 +290,6 @@ test_that("f64 slice", {
   expect_identical(f(x), x + 1)
   f <- rust_fn(a, "
     let v = a.as_vector().stop().to_mode_f64(pc);
-    assert!(v.is_vector());
     assert!(v.is_mode_f64());
     v.slice().to_r(pc)
   ")
@@ -350,7 +349,6 @@ test_that("i32 slice", {
   expect_identical(f(x), x + 1L)
   f <- rust_fn(a, "
     let v = a.as_vector().stop().to_mode_bool(pc);
-    assert!(v.is_vector());
     assert!(v.is_mode_bool());
     v.slice().to_r(pc)
   ")
@@ -401,7 +399,6 @@ test_that("bool slice", {
   expect_identical(f(), c(TRUE, FALSE, TRUE))
   f <- rust_fn(a, "
     let v = a.as_vector().stop().to_mode_bool(pc);
-    assert!(v.is_vector());
     assert!(v.is_mode_bool());
     v.slice().to_r(pc)
   ")
@@ -466,7 +463,6 @@ test_that("u8 slice", {
   expect_identical(f(x), as.raw(as.integer(x) + 1))
   f <- rust_fn(a, "
     let v = a.as_vector().stop().to_mode_u8(pc);
-    assert!(v.is_vector());
     assert!(v.is_mode_u8());
     v.slice().to_r(pc)
   ")
