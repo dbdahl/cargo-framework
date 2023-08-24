@@ -132,8 +132,8 @@ impl R {
     }
 
     fn new_array<T>(code: u32, dim: &[usize], pc: &mut Pc) -> RObject<Array, T> {
-        let dim = dim.to_r(pc);
-        Self::wrap(pc.protect(unsafe { Rf_allocArray(code, dim.sexp) }))
+        let d = dim.iter().map(|x| i32::try_from(*x).unwrap()).to_r(pc);
+        Self::wrap(pc.protect(unsafe { Rf_allocArray(code, d.sexp) }))
     }
 
     pub fn new_array_double(dim: &[usize], pc: &mut Pc) -> RObject<Array, f64> {
@@ -1208,6 +1208,8 @@ impl<T> RObject<ExternalPtr, T> {
     }
 }
 
+// Conversions
+
 pub trait ToR1<T> {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, T>;
 }
@@ -1224,46 +1226,11 @@ pub trait ToR4<T> {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, T>;
 }
 
+// f64
+
 impl ToR1<f64> for f64 {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
         R::wrap(pc.protect(unsafe { Rf_ScalarReal(*self) }))
-    }
-}
-
-impl ToR1<i32> for i32 {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        R::wrap(pc.protect(unsafe { Rf_ScalarInteger(*self) }))
-    }
-}
-
-impl ToR1<u8> for u8 {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
-        R::wrap(pc.protect(unsafe { Rf_ScalarRaw(*self) }))
-    }
-}
-
-impl ToR1<bool> for bool {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        R::wrap(pc.protect(unsafe {
-            Rf_ScalarLogical(if *self {
-                Rboolean_TRUE as i32
-            } else {
-                Rboolean_FALSE as i32
-            })
-        }))
-    }
-}
-
-impl ToR1<Character> for &str {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
-        let sexp = unsafe {
-            Rf_ScalarString(Rf_mkCharLenCE(
-                self.as_ptr() as *const c_char,
-                self.len().try_into().unwrap(),
-                cetype_t_CE_UTF8,
-            ))
-        };
-        R::wrap(pc.protect(sexp))
     }
 }
 
@@ -1287,136 +1254,6 @@ impl ToR1<f64> for &mut [f64] {
         let result = R::new_vector_double(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
-        result
-    }
-}
-
-impl<const N: usize> ToR1<i32> for [i32; N] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        self.as_ref().to_r(pc)
-    }
-}
-
-impl ToR1<i32> for &[i32] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_integer(self.len(), pc);
-        let slice = result.slice();
-        slice.copy_from_slice(self);
-        result
-    }
-}
-
-impl ToR1<i32> for &mut [i32] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_integer(self.len(), pc);
-        let slice = result.slice();
-        slice.copy_from_slice(self);
-        result
-    }
-}
-
-impl<const N: usize> ToR1<u8> for [u8; N] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
-        self.as_ref().to_r(pc)
-    }
-}
-
-impl ToR1<u8> for &[u8] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_raw(self.len(), pc);
-        let slice = result.slice();
-        slice.copy_from_slice(self);
-        result
-    }
-}
-
-impl ToR1<u8> for &mut [u8] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_raw(self.len(), pc);
-        let slice = result.slice();
-        slice.copy_from_slice(self);
-        result
-    }
-}
-
-impl<const N: usize> ToR1<i32> for [usize; N] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        self.as_ref().to_r(pc)
-    }
-}
-
-impl ToR1<i32> for &[usize] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_integer(self.len(), pc);
-        let slice = result.slice();
-        for (i, j) in slice.iter_mut().zip(self.iter()) {
-            *i = (*j).try_into().unwrap();
-        }
-        result
-    }
-}
-
-impl ToR1<i32> for &mut [usize] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_integer(self.len(), pc);
-        let slice = result.slice();
-        for (i, j) in slice.iter_mut().zip(self.iter()) {
-            *i = (*j).try_into().unwrap();
-        }
-        result
-    }
-}
-
-impl<const N: usize> ToR1<bool> for [bool; N] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        self.as_ref().to_r(pc)
-    }
-}
-
-impl ToR1<bool> for &[bool] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_logical(self.len(), pc);
-        let slice = result.slice();
-        for (i, j) in slice.iter_mut().zip(self.iter()) {
-            *i = (*j).try_into().unwrap();
-        }
-        result
-    }
-}
-
-impl ToR1<bool> for &mut [bool] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_logical(self.len(), pc);
-        let slice = result.slice();
-        for (i, j) in slice.iter_mut().zip(self.iter()) {
-            *i = (*j).try_into().unwrap();
-        }
-        result
-    }
-}
-
-impl<const N: usize> ToR1<Character> for [&str; N] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
-        self.as_ref().to_r(pc)
-    }
-}
-
-impl ToR1<Character> for &[&str] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
-        let result = R::new_vector_character(self.len(), pc);
-        for (index, s) in self.iter().enumerate() {
-            let _ = result.set(index, s);
-        }
-        result
-    }
-}
-
-impl ToR1<Character> for &mut [&str] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
-        let result = R::new_vector_character(self.len(), pc);
-        for (index, s) in self.iter().enumerate() {
-            let _ = result.set(index, s);
-        }
         result
     }
 }
@@ -1454,6 +1291,38 @@ impl<T: IntoIterator<Item = f64> + ExactSizeIterator> ToR4<f64> for T {
     }
 }
 
+// i32
+
+impl ToR1<i32> for i32 {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarInteger(*self) }))
+    }
+}
+
+impl<const N: usize> ToR1<i32> for [i32; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl ToR1<i32> for &[i32] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        let result = R::new_vector_integer(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
+impl ToR1<i32> for &mut [i32] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        let result = R::new_vector_integer(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
 impl<'a, T: Iterator<Item = &'a i32> + ExactSizeIterator> ToR2<i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_integer(self.len(), pc);
@@ -1487,6 +1356,74 @@ impl<T: Iterator<Item = i32> + ExactSizeIterator> ToR4<i32> for T {
     }
 }
 
+// usize
+
+impl ToR1<i32> for usize {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarInteger((*self).try_into().unwrap()) }))
+    }
+}
+
+impl<const N: usize> ToR1<i32> for [usize; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl ToR1<i32> for &[usize] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        let result = R::new_vector_integer(self.len(), pc);
+        let slice = result.slice();
+        for (i, j) in slice.iter_mut().zip(self.iter()) {
+            *i = (*j).try_into().unwrap();
+        }
+        result
+    }
+}
+
+impl ToR1<i32> for &mut [usize] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+        let result = R::new_vector_integer(self.len(), pc);
+        let slice = result.slice();
+        for (i, j) in slice.iter_mut().zip(self.iter()) {
+            *i = (*j).try_into().unwrap();
+        }
+        result
+    }
+}
+
+// u8
+
+impl ToR1<u8> for u8 {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        R::wrap(pc.protect(unsafe { Rf_ScalarRaw(*self) }))
+    }
+}
+
+impl<const N: usize> ToR1<u8> for [u8; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl ToR1<u8> for &[u8] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        let result = R::new_vector_raw(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
+impl ToR1<u8> for &mut [u8] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+        let result = R::new_vector_raw(self.len(), pc);
+        let slice = result.slice();
+        slice.copy_from_slice(self);
+        result
+    }
+}
+
 impl<'a, T: Iterator<Item = &'a u8> + ExactSizeIterator> ToR2<u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_raw(self.len(), pc);
@@ -1515,6 +1452,48 @@ impl<T: Iterator<Item = u8> + ExactSizeIterator> ToR4<u8> for T {
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = from;
+        }
+        result
+    }
+}
+
+// bool
+
+impl ToR1<bool> for bool {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        R::wrap(pc.protect(unsafe {
+            Rf_ScalarLogical(if *self {
+                Rboolean_TRUE as i32
+            } else {
+                Rboolean_FALSE as i32
+            })
+        }))
+    }
+}
+
+impl<const N: usize> ToR1<bool> for [bool; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl ToR1<bool> for &[bool] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        let result = R::new_vector_logical(self.len(), pc);
+        let slice = result.slice();
+        for (i, j) in slice.iter_mut().zip(self.iter()) {
+            *i = (*j).try_into().unwrap();
+        }
+        result
+    }
+}
+
+impl ToR1<bool> for &mut [bool] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+        let result = R::new_vector_logical(self.len(), pc);
+        let slice = result.slice();
+        for (i, j) in slice.iter_mut().zip(self.iter()) {
+            *i = (*j).try_into().unwrap();
         }
         result
     }
@@ -1564,6 +1543,49 @@ impl<T: Iterator<Item = bool> + ExactSizeIterator> ToR4<bool> for T {
         result
     }
 }
+
+// &str
+
+impl ToR1<Character> for &str {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
+        let sexp = unsafe {
+            Rf_ScalarString(Rf_mkCharLenCE(
+                self.as_ptr() as *const c_char,
+                self.len().try_into().unwrap(),
+                cetype_t_CE_UTF8,
+            ))
+        };
+        R::wrap(pc.protect(sexp))
+    }
+}
+
+impl<const N: usize> ToR1<Character> for [&str; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
+        self.as_ref().to_r(pc)
+    }
+}
+
+impl ToR1<Character> for &[&str] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
+        let result = R::new_vector_character(self.len(), pc);
+        for (index, s) in self.iter().enumerate() {
+            let _ = result.set(index, s);
+        }
+        result
+    }
+}
+
+impl ToR1<Character> for &mut [&str] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
+        let result = R::new_vector_character(self.len(), pc);
+        for (index, s) in self.iter().enumerate() {
+            let _ = result.set(index, s);
+        }
+        result
+    }
+}
+
+// From
 
 impl From<SEXP> for RObject {
     fn from(x: SEXP) -> Self {
