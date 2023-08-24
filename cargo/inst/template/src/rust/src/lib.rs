@@ -10,12 +10,12 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
     let a = a
         .as_vector()
         .stop_str("'a' not a vector.")
-        .coerce_to_f64(pc)
+        .to_mode_f64(pc)
         .slice();
     let b = b
         .as_vector()
         .stop_str("'b' not a vector.")
-        .coerce_to_f64(pc)
+        .to_mode_f64(pc)
         .slice();
     let r = R::new_vector_f64(a.len() + b.len() - 1, pc);
     let ab = r.slice();
@@ -36,13 +36,15 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     let guesses = guesses
         .as_vector()
         .stop_str("'guesses' must be a vector.")
-        .coerce_to_f64(pc);
+        .to_mode_f64(pc);
     if guesses.len() != 2 {
         stop!("'guesses' must be a vector of length two.");
     }
     let guesses = guesses
-        .as_vector_f64()
-        .stop_str("'guesses' must have storage mode 'double'.")
+        .as_vector()
+        .stop_str("'guesses' must be a vector.")
+        .as_mode_f64()
+        .stop_str("'guess' must have storage mode 'double'.")
         .slice();
     if guesses.len() != 2 {
         stop!("'guesses' should be of length two.");

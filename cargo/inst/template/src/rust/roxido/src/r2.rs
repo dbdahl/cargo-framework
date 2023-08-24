@@ -340,64 +340,6 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn is_null(&self) -> bool {
-        unsafe { Rf_isNull(self.sexp) != 0 }
-    }
-
-    pub fn is_number(&self) -> bool {
-        unsafe { Rf_isNumber(self.sexp) != 0 }
-    }
-
-    pub fn is_scalar(&self) -> bool {
-        unsafe { Rf_xlength(self.sexp) == 1 }
-    }
-
-    pub fn is_na(&self) -> bool {
-        if self.is_scalar() {
-            if self.is_f64() {
-                unsafe { R_IsNA(Rf_asReal(self.sexp)) != 0 }
-            } else if self.is_i32() {
-                unsafe { Rf_asInteger(self.sexp) == R::na_i32() }
-            } else if self.is_bool() {
-                unsafe { Rf_asLogical(self.sexp) == R::na_bool() }
-            } else if self.is_str() {
-                unsafe { Rf_asChar(self.sexp) == R_NaString }
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    }
-
-    pub fn is_nan(&self) -> bool {
-        if self.is_scalar() && self.is_f64() {
-            unsafe { R_IsNaN(Rf_asReal(self.sexp)) != 0 }
-        } else {
-            false
-        }
-    }
-
-    pub fn is_f64(&self) -> bool {
-        unsafe { Rf_isReal(self.sexp) != 0 }
-    }
-
-    pub fn is_i32(&self) -> bool {
-        unsafe { Rf_isInteger(self.sexp) != 0 }
-    }
-
-    pub fn is_u8(&self) -> bool {
-        unsafe { TYPEOF(self.sexp) == RAWSXP as i32 }
-    }
-
-    pub fn is_bool(&self) -> bool {
-        unsafe { Rf_isLogical(self.sexp) != 0 }
-    }
-
-    pub fn is_str(&self) -> bool {
-        unsafe { Rf_isString(self.sexp) != 0 }
-    }
-
     pub fn is_vector(&self) -> bool {
         unsafe { Rf_isVectorAtomic(self.sexp) != 0 }
     }
@@ -426,32 +368,103 @@ impl<RType, RMode> RObject<RType, RMode> {
         unsafe { TYPEOF(self.sexp) == EXTPTRSXP as i32 }
     }
 
-    pub fn as_f64(&self) -> Result<f64, &'static str> {
+    pub fn is_null(&self) -> bool {
+        unsafe { Rf_isNull(self.sexp) != 0 }
+    }
+
+    pub fn is_number(&self) -> bool {
+        unsafe { Rf_isNumber(self.sexp) != 0 }
+    }
+
+    pub fn is_scalar(&self) -> bool {
+        self.is_vector() && unsafe { Rf_xlength(self.sexp) == 1 }
+    }
+
+    pub fn is_na(&self) -> bool {
         if self.is_scalar() {
+            if self.is_mode_f64() {
+                unsafe { R_IsNA(Rf_asReal(self.sexp)) != 0 }
+            } else if self.is_mode_i32() {
+                unsafe { Rf_asInteger(self.sexp) == R::na_i32() }
+            } else if self.is_mode_bool() {
+                unsafe { Rf_asLogical(self.sexp) == R::na_bool() }
+            } else if self.is_mode_str() {
+                unsafe { Rf_asChar(self.sexp) == R_NaString }
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn is_nan(&self) -> bool {
+        if self.is_scalar() && self.is_mode_f64() {
+            unsafe { R_IsNaN(Rf_asReal(self.sexp)) != 0 }
+        } else {
+            false
+        }
+    }
+
+    pub fn is_mode_f64(&self) -> bool {
+        unsafe { Rf_isReal(self.sexp) != 0 }
+    }
+
+    pub fn is_mode_i32(&self) -> bool {
+        unsafe { Rf_isInteger(self.sexp) != 0 }
+    }
+
+    pub fn is_mode_u8(&self) -> bool {
+        unsafe { TYPEOF(self.sexp) == RAWSXP as i32 }
+    }
+
+    pub fn is_mode_bool(&self) -> bool {
+        unsafe { Rf_isLogical(self.sexp) != 0 }
+    }
+
+    pub fn is_mode_str(&self) -> bool {
+        unsafe { Rf_isString(self.sexp) != 0 }
+    }
+
+    pub fn as_f64(&self) -> Result<f64, &'static str> {
+        if self.is_scalar()
+            && (self.is_mode_f64()
+                || self.is_mode_i32()
+                || self.is_mode_u8()
+                || self.is_mode_bool())
+        {
             Ok(unsafe { Rf_asReal(self.sexp) })
         } else {
-            Err("Cannot be interperated as an f64")
+            Err("Cannot be interpreted as an f64")
         }
     }
 
     pub fn as_i32(&self) -> Result<i32, &'static str> {
+        let msg = "Cannot be interpreted as an i32";
         if self.is_scalar() {
-            if self.is_i32() {
-                Ok(unsafe { Rf_asInteger(self.sexp) })
-            } else if self.is_f64() {
+            if self.is_mode_i32() {
+                let x = unsafe { Rf_asInteger(self.sexp) };
+                if x == i32::MIN {
+                    Err("Value equals NA in R")
+                } else {
+                    Ok(x)
+                }
+            } else if self.is_mode_f64() {
                 let y = unsafe { Rf_asReal(self.sexp) };
                 if y > f64::from(i32::MAX) {
                     Err("Value greater than maximum i32")
                 } else if y == f64::from(i32::MIN) {
-                    Err("Value equals R's NA for i32")
+                    Err("Value equals NA in R")
                 } else if y < f64::from(i32::MIN) {
                     Err("Value less than minumum i32")
                 } else if y.is_nan() {
-                    Err("Value equal R's NaN for f64")
+                    Err("Value equal NaN in R")
                 } else {
                     Ok(y.round() as i32)
                 }
-            } else if self.is_bool() {
+            } else if self.is_mode_u8() {
+                Ok(unsafe { Rf_asInteger(self.sexp) })
+            } else if self.is_mode_bool() {
                 let y = unsafe { Rf_asLogical(self.sexp) };
                 if y == i32::MIN {
                     Err("Value equals R's NA for bool")
@@ -459,85 +472,122 @@ impl<RType, RMode> RObject<RType, RMode> {
                     Ok(y)
                 }
             } else {
-                Err("Cannot be interperated as an i32")
+                Err(msg)
             }
         } else {
-            Err("Cannot be interperated as an i32")
+            Err(msg)
         }
     }
 
     pub fn as_usize(&self) -> Result<usize, &'static str> {
+        let msg = "Cannot be interpreted as an usize";
         if self.is_scalar() {
-            if self.is_i32() {
-                let y = unsafe { Rf_asInteger(self.sexp) };
-                match usize::try_from(y) {
-                    Ok(z) => Ok(z),
-                    _ => Err("Cannot be interperated as a usize"),
-                }
-            } else if self.is_f64() {
+            if self.is_mode_i32() {
+                let x = unsafe { Rf_asInteger(self.sexp) };
+                usize::try_from(x).map_err(|_| msg)
+            } else if self.is_mode_f64() {
                 let y = unsafe { Rf_asReal(self.sexp) };
                 let z = y as usize;
-                if z as f64 != y {
-                    Err("Cannot be interperated as a usize")
-                } else {
+                if z as f64 == y {
                     Ok(z)
+                } else {
+                    Err(msg)
                 }
-            } else if self.is_bool() {
-                let y = unsafe { Rf_asLogical(self.sexp) };
-                if y == i32::MIN {
+            } else if self.is_mode_u8() {
+                let x = unsafe { Rf_asInteger(self.sexp) };
+                usize::try_from(x).map_err(|_| msg)
+            } else if self.is_mode_bool() {
+                let x = unsafe { Rf_asLogical(self.sexp) };
+                if x == i32::MIN {
                     Err("Value equals R's NA for bool")
                 } else {
-                    match usize::try_from(y) {
-                        Ok(z) => Ok(z),
-                        _ => Err("Cannot be interperated as a usize"),
-                    }
+                    usize::try_from(x).map_err(|_| msg)
                 }
             } else {
-                Err("Cannot be interperated as a usize")
+                Err("Cannot be interpreted as an i32")
             }
         } else {
-            Err("Cannot be interperated as a usize")
+            Err("Cannot be interpreted as an i32")
+        }
+    }
+
+    pub fn as_u8(&self) -> Result<u8, &'static str> {
+        let msg = "Cannot be interpreted as an u8";
+        if self.is_scalar() {
+            if self.is_mode_i32() {
+                let x = unsafe { Rf_asInteger(self.sexp) };
+                u8::try_from(x).map_err(|_| msg)
+            } else if self.is_mode_f64() {
+                let y = unsafe { Rf_asReal(self.sexp) };
+                let z = y as u8;
+                if z as f64 == y {
+                    Ok(z)
+                } else {
+                    Err(msg)
+                }
+            } else if self.is_mode_u8() {
+                let x = unsafe { Rf_asInteger(self.sexp) };
+                u8::try_from(x).map_err(|_| msg)
+            } else if self.is_mode_bool() {
+                let x = unsafe { Rf_asLogical(self.sexp) };
+                if x == i32::MIN {
+                    Err("Value equals R's NA for bool")
+                } else {
+                    u8::try_from(x).map_err(|_| msg)
+                }
+            } else {
+                Err(msg)
+            }
+        } else {
+            Err(msg)
         }
     }
 
     pub fn as_bool(&self) -> Result<bool, &'static str> {
+        let msg = "Cannot be interpreted as a bool";
         if self.is_scalar() {
-            if self.is_bool() {
+            if self.is_mode_i32() {
+                let x = unsafe { Rf_asInteger(self.sexp) };
+                if x == i32::MIN {
+                    Err("Value equals NA in R")
+                } else {
+                    Ok(x != 0)
+                }
+            } else if self.is_mode_f64() {
+                let y = unsafe { Rf_asReal(self.sexp) };
+                if R::is_na_f64(y) || R::is_nan(y) {
+                    Err(msg)
+                } else {
+                    Ok(y != 0.0)
+                }
+            } else if self.is_mode_u8() {
+                Ok(unsafe { Rf_asInteger(self.sexp) } != 0)
+            } else if self.is_mode_bool() {
                 let y = unsafe { Rf_asLogical(self.sexp) };
                 if y == i32::MIN {
                     Err("Value equals R's NA for bool")
                 } else {
                     Ok(y != 0)
                 }
-            } else if self.is_i32() {
-                let y = unsafe { Rf_asInteger(self.sexp) };
-                if y == i32::MIN {
-                    Err("Value equals R's NA for i32")
-                } else {
-                    Ok(y != 0)
-                }
-            } else if self.is_f64() {
-                let y = unsafe { Rf_asReal(self.sexp) };
-                if y.is_nan() {
-                    Err("Value equal R's NaN for f64")
-                } else if R::is_na_f64(y) {
-                    Err("Value equal R's NA for f64")
-                } else {
-                    Ok(y != 0.0)
-                }
             } else {
-                Err("Cannot be interperated as a bool")
+                Err(msg)
             }
         } else {
-            Err("Cannot be interperated as an bool")
+            Err(msg)
         }
     }
 
     pub fn as_str(&self) -> Result<Result<&str, Utf8Error>, &'static str> {
         if self.is_scalar() {
-            self.convert::<Vector, Str>().get(0)
+            let mut pc = Pc::new();
+            Ok(self
+                .as_vector()
+                .unwrap()
+                .to_mode_str(&mut pc)
+                .get(0)
+                .unwrap())
         } else {
-            Err("Cannot be interperated as a str")
+            Err("Cannot be interpreted as a str")
         }
     }
 
@@ -549,46 +599,6 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector_f64(&self) -> Result<RObject<Vector, f64>, &'static str> {
-        if self.is_vector() && self.is_f64() {
-            Ok(self.convert())
-        } else {
-            Err("Not an f64 vector")
-        }
-    }
-
-    pub fn as_vector_i32(&self) -> Result<RObject<Vector, i32>, &'static str> {
-        if self.is_vector() && self.is_i32() {
-            Ok(self.convert())
-        } else {
-            Err("Not an i32 vector")
-        }
-    }
-
-    pub fn as_vector_u8(&self) -> Result<RObject<Vector, u8>, &'static str> {
-        if self.is_vector() && self.is_u8() {
-            Ok(self.convert())
-        } else {
-            Err("Not a u8 vector")
-        }
-    }
-
-    pub fn as_vector_bool(&self) -> Result<RObject<Vector, bool>, &'static str> {
-        if self.is_vector() && self.is_bool() {
-            Ok(self.convert())
-        } else {
-            Err("Not a bool vector")
-        }
-    }
-
-    pub fn as_vector_str(&self) -> Result<RObject<Vector, Str>, &'static str> {
-        if self.is_vector() && self.is_str() {
-            Ok(self.convert())
-        } else {
-            Err("Not a str vector")
-        }
-    }
-
     pub fn as_matrix(&self) -> Result<RObject<Matrix, Unknown>, &'static str> {
         if self.is_matrix() {
             Ok(self.convert())
@@ -597,75 +607,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_matrix_f64(&self) -> Result<RObject<Matrix, f64>, &'static str> {
-        if self.is_matrix() && self.is_f64() {
-            Ok(self.convert())
-        } else {
-            Err("Not an f64 matrix")
-        }
-    }
-
-    pub fn as_matrix_i32(&self) -> Result<RObject<Matrix, i32>, &'static str> {
-        if self.is_matrix() && self.is_i32() {
-            Ok(self.convert())
-        } else {
-            Err("Not an i32 matrix")
-        }
-    }
-
-    pub fn as_matrix_u8(&self) -> Result<RObject<Matrix, u8>, &'static str> {
-        if self.is_matrix() && self.is_u8() {
-            Ok(self.convert())
-        } else {
-            Err("Not a u8 matrix")
-        }
-    }
-
-    pub fn as_matrix_bool(&self) -> Result<RObject<Matrix, bool>, &'static str> {
-        if self.is_matrix() && self.is_bool() {
-            Ok(self.convert())
-        } else {
-            Err("Not a bool matrix")
-        }
-    }
-
     pub fn as_array(&self) -> Result<RObject<Array, Unknown>, &'static str> {
         if self.is_vector() {
             Ok(self.convert())
         } else {
             Err("Not an atomic vector")
-        }
-    }
-
-    pub fn as_array_f64(&self) -> Result<RObject<Array, f64>, &'static str> {
-        if self.is_array() && self.is_f64() {
-            Ok(self.convert())
-        } else {
-            Err("Not an f64 array")
-        }
-    }
-
-    pub fn as_array_i32(&self) -> Result<RObject<Array, i32>, &'static str> {
-        if self.is_array() && self.is_i32() {
-            Ok(self.convert())
-        } else {
-            Err("Not an i32 array")
-        }
-    }
-
-    pub fn as_array_u8(&self) -> Result<RObject<Array, u8>, &'static str> {
-        if self.is_array() && self.is_u8() {
-            Ok(self.convert())
-        } else {
-            Err("Not a u8 array")
-        }
-    }
-
-    pub fn as_array_bool(&self) -> Result<RObject<Array, bool>, &'static str> {
-        if self.is_array() && self.is_bool() {
-            Ok(self.convert())
-        } else {
-            Err("Not a bool array")
         }
     }
 
@@ -718,23 +664,63 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         unsafe { std::slice::from_raw_parts_mut(data, len) }
     }
 
-    pub fn coerce_to_f64(&self, pc: &mut Pc) -> RObject<Vector, f64> {
+    pub fn as_mode_f64(&self) -> Result<RObject<S, f64>, &'static str> {
+        if self.is_mode_f64() {
+            Ok(self.convert())
+        } else {
+            Err("Not an f64 vector")
+        }
+    }
+
+    pub fn as_mode_i32(&self) -> Result<RObject<S, i32>, &'static str> {
+        if self.is_mode_i32() {
+            Ok(self.convert())
+        } else {
+            Err("Not an f64 vector")
+        }
+    }
+
+    pub fn as_mode_u8(&self) -> Result<RObject<S, u8>, &'static str> {
+        if self.is_mode_u8() {
+            Ok(self.convert())
+        } else {
+            Err("Not an f64 vector")
+        }
+    }
+
+    pub fn as_mode_bool(&self) -> Result<RObject<S, bool>, &'static str> {
+        if self.is_mode_bool() {
+            Ok(self.convert())
+        } else {
+            Err("Not an f64 vector")
+        }
+    }
+
+    pub fn as_mode_str(&self) -> Result<RObject<S, Str>, &'static str> {
+        if self.is_mode_str() {
+            Ok(self.convert())
+        } else {
+            Err("Not an f64 vector")
+        }
+    }
+
+    pub fn to_mode_f64(&self, pc: &mut Pc) -> RObject<S, f64> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
-    pub fn coerce_to_i32(&self, pc: &mut Pc) -> RObject<Vector, i32> {
+    pub fn to_mode_i32(&self, pc: &mut Pc) -> RObject<S, i32> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
-    pub fn coerce_to_u8(&self, pc: &mut Pc) -> RObject<Vector, u8> {
+    pub fn to_mode_u8(&self, pc: &mut Pc) -> RObject<S, u8> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }))
     }
 
-    pub fn coerce_to_bool(&self, pc: &mut Pc) -> RObject<Vector, bool> {
+    pub fn to_mode_bool(&self, pc: &mut Pc) -> RObject<S, bool> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
     }
 
-    pub fn coerce_to_str(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+    pub fn to_mode_str(&self, pc: &mut Pc) -> RObject<S, Str> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, STRSXP) }))
     }
 }
@@ -1099,7 +1085,7 @@ impl<RMode> RObject<Matrix, RMode> {
             return Err("Length should be two");
         }
         let rownames = dimnames.get(0).unwrap();
-        if !rownames.is_vector() || !rownames.is_str() {
+        if !rownames.is_vector() || !rownames.is_mode_str() {
             return Err("Row names must be a character vector");
         }
         let rownames: RObject<Vector, Str> = rownames.convert();
@@ -1107,7 +1093,7 @@ impl<RMode> RObject<Matrix, RMode> {
             return Err("Row names do not match the number of rows");
         }
         let colnames = dimnames.get(1).unwrap();
-        if !colnames.is_vector() || !colnames.is_str() {
+        if !colnames.is_vector() || !colnames.is_mode_str() {
             return Err("Column names must be a character vector");
         }
         let colnames: RObject<Vector, Str> = colnames.convert();
