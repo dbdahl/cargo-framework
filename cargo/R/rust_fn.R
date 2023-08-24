@@ -29,6 +29,10 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   # Parse arguments
   mc <- match.call(expand.dots = FALSE)
   args <- mc[["..."]]
+  if (!is.null(names(args))) {
+    nms <- names(args)
+    stop(paste0("Unexpected named argument: ", paste0(nms[nms != ""], collapse = ", ")))
+  }
   len <- length(args)
   code <- args[[len]]
   args_with_type <- sapply(as.character(args[-len]), function(arg) paste0(arg, ": RObject"))
