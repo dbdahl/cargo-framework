@@ -303,84 +303,59 @@ impl<RType, RMode> RObject<RType, RMode> {
         R::wrap(self.sexp)
     }
 
-    /// Duplicate an object.
-    ///
-    /// Multiple symbols may be bound to the same object, so if the usual R semantics are to
-    /// apply, any code which alters one of them needs to make a copy first.
-    /// E.g, call this method on arguments pass via `.Call` before modifying them.
-    ///
-    pub fn duplicate(&self, pc: &mut Pc) -> RObject<RType, RMode> {
-        R::wrap(pc.protect(unsafe { Rf_duplicate(self.sexp) }))
-    }
-
-    /// Get an attribute.
-    pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
-        R::wrap(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
-    }
-
-    /// Set an attribute.
-    pub fn set_attribute<RTypeValue, RModeValue>(
-        &self,
-        which: &str,
-        value: &RObject<RTypeValue, RModeValue>,
-        pc: &mut Pc,
-    ) {
-        unsafe {
-            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.sexp);
+    pub fn as_vector(&self) -> Result<RObject<Vector, Unknown>, &'static str> {
+        if unsafe { Rf_isVectorAtomic(self.sexp) != 0 } {
+            Ok(self.convert())
+        } else {
+            Err("Not an atomic vector")
         }
     }
 
-    pub fn get_class(&self) -> RObject<Vector, Str> {
-        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_ClassSymbol) })
-    }
-
-    pub fn set_class(&self, names: &RObject<Vector, Str>) {
-        unsafe {
-            Rf_classgets(self.sexp, names.sexp);
+    pub fn as_matrix(&self) -> Result<RObject<Matrix, Unknown>, &'static str> {
+        if unsafe { Rf_isMatrix(self.sexp) != 0 } {
+            Ok(self.convert())
+        } else {
+            Err("Not an atomic vector")
         }
     }
 
-    pub fn is_null(&self) -> bool {
-        unsafe { Rf_isNull(self.sexp) != 0 }
-    }
-
-    pub fn is_na(&self) -> bool {
-        match self.as_vector() {
-            Ok(s) => {
-                if s.is_scalar() {
-                    if s.is_mode_f64() {
-                        unsafe { R_IsNA(Rf_asReal(s.sexp)) != 0 }
-                    } else if s.is_mode_i32() {
-                        unsafe { Rf_asInteger(s.sexp) == R::na_i32() }
-                    } else if s.is_mode_bool() {
-                        unsafe { Rf_asLogical(s.sexp) == R::na_bool() }
-                    } else if s.is_mode_str() {
-                        unsafe { Rf_asChar(s.sexp) == R_NaString }
-                    } else {
-                        false
-                    }
-                } else {
-                    false
-                }
-            }
-            Err(_) => false,
+    pub fn as_array(&self) -> Result<RObject<Array, Unknown>, &'static str> {
+        if unsafe { Rf_isArray(self.sexp) != 0 } {
+            Ok(self.convert())
+        } else {
+            Err("Not an atomic vector")
         }
     }
 
-    pub fn is_nan(&self) -> bool {
-        match self.as_vector() {
-            Ok(s) => {
-                if s.is_scalar() {
-                    if s.is_mode_f64() {
-                        unsafe { R_IsNaN(Rf_asReal(s.sexp)) != 0 }
-                    } else {
-                        false
-                    }
-                } else {
-                    false
-                }
-            }
-            Err(_) => false,
+    pub fn as_list(&self) -> Result<RObject<Vector, List>, &'static str> {
+        if unsafe { Rf_isVectorList(self.sexp) != 0 } {
+            Ok(self.convert())
+        } else {
+            Err("Not a vector list")
+        }
+    }
+
+    pub fn as_data_frame(&self) -> Result<RObject<Vector, DataFrame>, &'static str> {
+        if unsafe { Rf_isFrame(self.sexp) != 0 } {
+            Ok(self.convert())
+        } else {
+            Err("Not a function")
+        }
+    }
+
+    pub fn as_function(&self) -> Result<RObject<Function, Unknown>, &'static str> {
+        if unsafe { Rf_isFunction(self.sexp) != 0 } {
+            Ok(self.convert())
+        } else {
+            Err("Not a function")
+        }
+    }
+
+    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unknown>, &'static str> {
+        if unsafe { TYPEOF(self.sexp) == EXTPTRSXP as i32 } {
+            Ok(self.convert())
+        } else {
+            Err("Not an external pointer")
         }
     }
 
@@ -571,60 +546,85 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_vector(&self) -> Result<RObject<Vector, Unknown>, &'static str> {
-        if unsafe { Rf_isVectorAtomic(self.sexp) != 0 } {
-            Ok(self.convert())
-        } else {
-            Err("Not an atomic vector")
+    pub fn is_null(&self) -> bool {
+        unsafe { Rf_isNull(self.sexp) != 0 }
+    }
+
+    pub fn is_na(&self) -> bool {
+        match self.as_vector() {
+            Ok(s) => {
+                if s.is_scalar() {
+                    if s.is_mode_f64() {
+                        unsafe { R_IsNA(Rf_asReal(s.sexp)) != 0 }
+                    } else if s.is_mode_i32() {
+                        unsafe { Rf_asInteger(s.sexp) == R::na_i32() }
+                    } else if s.is_mode_bool() {
+                        unsafe { Rf_asLogical(s.sexp) == R::na_bool() }
+                    } else if s.is_mode_str() {
+                        unsafe { Rf_asChar(s.sexp) == R_NaString }
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
+            Err(_) => false,
         }
     }
 
-    pub fn as_matrix(&self) -> Result<RObject<Matrix, Unknown>, &'static str> {
-        if unsafe { Rf_isMatrix(self.sexp) != 0 } {
-            Ok(self.convert())
-        } else {
-            Err("Not an atomic vector")
+    pub fn is_nan(&self) -> bool {
+        match self.as_vector() {
+            Ok(s) => {
+                if s.is_scalar() {
+                    if s.is_mode_f64() {
+                        unsafe { R_IsNaN(Rf_asReal(s.sexp)) != 0 }
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
+            Err(_) => false,
         }
     }
 
-    pub fn as_array(&self) -> Result<RObject<Array, Unknown>, &'static str> {
-        if unsafe { Rf_isArray(self.sexp) != 0 } {
-            Ok(self.convert())
-        } else {
-            Err("Not an atomic vector")
+    pub fn get_class(&self) -> RObject<Vector, Str> {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_ClassSymbol) })
+    }
+
+    pub fn set_class(&self, names: &RObject<Vector, Str>) {
+        unsafe {
+            Rf_classgets(self.sexp, names.sexp);
         }
     }
 
-    pub fn as_list(&self) -> Result<RObject<Vector, List>, &'static str> {
-        if unsafe { Rf_isVectorList(self.sexp) != 0 } {
-            Ok(self.convert())
-        } else {
-            Err("Not a vector list")
+    /// Get an attribute.
+    pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
+    }
+
+    /// Set an attribute.
+    pub fn set_attribute<RTypeValue, RModeValue>(
+        &self,
+        which: &str,
+        value: &RObject<RTypeValue, RModeValue>,
+        pc: &mut Pc,
+    ) {
+        unsafe {
+            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.sexp);
         }
     }
 
-    pub fn as_data_frame(&self) -> Result<RObject<Vector, DataFrame>, &'static str> {
-        if unsafe { Rf_isFrame(self.sexp) != 0 } {
-            Ok(self.convert())
-        } else {
-            Err("Not a function")
-        }
-    }
-
-    pub fn as_function(&self) -> Result<RObject<Function, Unknown>, &'static str> {
-        if unsafe { Rf_isFunction(self.sexp) != 0 } {
-            Ok(self.convert())
-        } else {
-            Err("Not a function")
-        }
-    }
-
-    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unknown>, &'static str> {
-        if unsafe { TYPEOF(self.sexp) == EXTPTRSXP as i32 } {
-            Ok(self.convert())
-        } else {
-            Err("Not an external pointer")
-        }
+    /// Duplicate an object.
+    ///
+    /// Multiple symbols may be bound to the same object, so if the usual R semantics are to
+    /// apply, any code which alters one of them needs to make a copy first.
+    /// E.g, call this method on arguments pass via `.Call` before modifying them.
+    ///
+    pub fn duplicate(&self, pc: &mut Pc) -> RObject<RType, RMode> {
+        R::wrap(pc.protect(unsafe { Rf_duplicate(self.sexp) }))
     }
 }
 
@@ -1181,7 +1181,7 @@ impl<T> RObject<ExternalPtr, T> {
         R::wrap(unsafe { R_ExternalPtrTag(self.sexp) })
     }
 
-    pub fn set_type<ToT>(&self) -> RObject<ExternalPtr, ToT> {
+    pub fn set_type<S>(&self) -> RObject<ExternalPtr, S> {
         self.convert()
     }
 
