@@ -79,10 +79,6 @@ impl R {
         }
     }
 
-    pub fn new_object(sexp: SEXP) -> RObject {
-        Self::wrap(sexp)
-    }
-
     fn new_vector<T>(code: u32, length: usize, pc: &mut Pc) -> RObject<Vector, T> {
         Self::wrap(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
     }
@@ -105,10 +101,6 @@ impl R {
 
     pub fn new_vector_str(length: usize, pc: &mut Pc) -> RObject<Vector, Str> {
         Self::new_vector(STRSXP, length, pc)
-    }
-
-    pub fn new_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
-        Self::new_vector(VECSXP, length, pc)
     }
 
     fn new_matrix<T>(code: u32, nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, T> {
@@ -162,6 +154,10 @@ impl R {
         Self::new_array::<Str>(STRSXP, dim, pc)
     }
 
+    pub fn new_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
+        Self::new_vector(VECSXP, length, pc)
+    }
+
     /// Define a new error.
     ///
     /// This does *not* throw an error.  To throw an R error, simply use `stop!`.
@@ -204,6 +200,22 @@ impl R {
         Self::wrap(unsafe { R_NilValue })
     }
 
+    pub fn na_f64() -> f64 {
+        unsafe { R_NaReal }
+    }
+
+    pub fn na_i32() -> i32 {
+        unsafe { R_NaInt }
+    }
+
+    pub fn na_bool() -> i32 {
+        unsafe { R_NaInt }
+    }
+
+    pub fn nan() -> f64 {
+        unsafe { R_NaN }
+    }
+
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
     }
@@ -212,52 +224,20 @@ impl R {
         unsafe { R_NegInf }
     }
 
-    pub fn nan() -> f64 {
-        unsafe { R_NaN }
-    }
-
-    pub fn is_nan(x: f64) -> bool {
-        unsafe { R_IsNaN(x) != 0 }
-    }
-
-    pub fn new_nan(pc: &mut Pc) -> RObject<Vector, f64> {
-        Self::nan().to_r(pc)
-    }
-
-    pub fn na_f64() -> f64 {
-        unsafe { R_NaReal }
-    }
-
-    pub fn new_na_f64(pc: &mut Pc) -> RObject<Vector, f64> {
-        Self::na_f64().to_r(pc)
-    }
-
     pub fn is_na_f64(x: f64) -> bool {
         unsafe { R_IsNA(x) != 0 }
-    }
-
-    pub fn na_i32() -> i32 {
-        unsafe { R_NaInt }
-    }
-
-    pub fn new_na_i32(pc: &mut Pc) -> RObject<Vector, i32> {
-        Self::na_i32().to_r(pc)
     }
 
     pub fn is_na_i32(x: i32) -> bool {
         x == unsafe { R_NaInt }
     }
 
-    pub fn na_bool() -> i32 {
-        unsafe { R_NaInt }
-    }
-
-    pub fn new_na_bool(pc: &mut Pc) -> RObject<Vector, bool> {
-        Self::wrap(pc.protect(unsafe { Rf_ScalarLogical(Self::na_bool()) }))
-    }
-
     pub fn is_na_bool(x: i32) -> bool {
         x == unsafe { R_NaInt }
+    }
+
+    pub fn is_nan(x: f64) -> bool {
+        unsafe { R_IsNaN(x) != 0 }
     }
 
     pub fn is_finite(x: f64) -> bool {
@@ -1173,18 +1153,6 @@ impl RObject<Matrix, Str> {
 }
 
 impl<T> RObject<ExternalPtr, T> {
-    /// Get tag for an R external pointer
-    ///
-    /// This method get the tag associated with an R external pointer, which was set by [`Self::external_pointer_encode`].
-    ///
-    pub fn tag(&self) -> RObject {
-        R::wrap(unsafe { R_ExternalPtrTag(self.sexp) })
-    }
-
-    pub fn set_type<S>(&self) -> RObject<ExternalPtr, S> {
-        self.convert()
-    }
-
     /// Move an R external pointer to a Rust object
     ///
     /// This method moves an R external pointer created by [`Self::external_pointer_encode`] to a Rust object and Rust will then manage its memory.
@@ -1216,6 +1184,18 @@ impl<T> RObject<ExternalPtr, T> {
             let ptr = R_ExternalPtrAddr(self.sexp) as *mut T;
             ptr.as_mut().unwrap()
         }
+    }
+
+    pub fn set_type<S>(&self) -> RObject<ExternalPtr, S> {
+        self.convert()
+    }
+
+    /// Get tag for an R external pointer
+    ///
+    /// This method get the tag associated with an R external pointer, which was set by [`Self::external_pointer_encode`].
+    ///
+    pub fn tag(&self) -> RObject {
+        R::wrap(unsafe { R_ExternalPtrTag(self.sexp) })
     }
 }
 
@@ -1578,7 +1558,7 @@ impl<T: Iterator<Item = bool> + ExactSizeIterator> ToR4<bool> for T {
 
 impl From<SEXP> for RObject {
     fn from(x: SEXP) -> Self {
-        R::new_object(x)
+        R::wrap(x)
     }
 }
 
