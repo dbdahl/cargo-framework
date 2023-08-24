@@ -10,14 +10,14 @@ fn convolve2(a: RObject, b: RObject) -> RObject {
     let a = a
         .as_vector()
         .stop_str("'a' not a vector.")
-        .to_mode_f64(pc)
+        .to_mode_double(pc)
         .slice();
     let b = b
         .as_vector()
         .stop_str("'b' not a vector.")
-        .to_mode_f64(pc)
+        .to_mode_double(pc)
         .slice();
-    let r = R::new_vector_f64(a.len() + b.len() - 1, pc);
+    let r = R::new_vector_double(a.len() + b.len() - 1, pc);
     let ab = r.slice();
     for abi in ab.iter_mut() {
         *abi = 0.0;
@@ -36,14 +36,14 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     let guesses = guesses
         .as_vector()
         .stop_str("'guesses' must be a vector.")
-        .to_mode_f64(pc);
+        .to_mode_double(pc);
     if guesses.len() != 2 {
         stop!("'guesses' must be a vector of length two.");
     }
     let guesses = guesses
         .as_vector()
         .stop_str("'guesses' must be a vector.")
-        .as_mode_f64()
+        .as_mode_double()
         .stop_str("'guess' must have storage mode 'double'.")
         .slice();
     if guesses.len() != 2 {
@@ -54,7 +54,7 @@ fn zero(f: RObject, guesses: RObject, tol: RObject) -> RObject {
     if !tol.is_finite() || tol <= 0.0 {
         stop!("'tol' must be a strictly positive value.");
     }
-    let x_rval = R::new_vector_f64(1, pc);
+    let x_rval = R::new_vector_double(1, pc);
     let x_slice = x_rval.slice();
     let mut g = |x: f64| {
         x_slice[0] = x;

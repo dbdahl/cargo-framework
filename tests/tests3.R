@@ -98,17 +98,17 @@ test_that("na", {
   expect_false(f(2))
   expect_false(f(TRUE))
   expect_false(f(\() 3))
-  f <- rust_fn("R::na_f64().to_r(pc)")
+  f <- rust_fn("R::na_double().to_r(pc)")
   expect_identical(f(), NA_real_)
   expect_false(identical(f(), NA_integer_))
   expect_false(identical(f(), NA))
   expect_false(identical(f(), NA_character_))
-  f <- rust_fn("R::na_i32().to_r(pc)")
+  f <- rust_fn("R::na_integer().to_r(pc)")
   expect_false(identical(f(), NA_real_))
   expect_identical(f(), NA_integer_)
   expect_false(identical(f(), NA))
   expect_false(identical(f(), NA_character_))
-  f <- rust_fn("R::na_bool().to_r(pc).to_mode_bool(pc)")
+  f <- rust_fn("R::na_logical().to_r(pc).to_mode_logical(pc)")
   expect_false(identical(f(), NA_real_))
   expect_false(identical(f(), NA_integer_))
   expect_identical(f(), NA)
@@ -243,13 +243,13 @@ test_that("random_bytes", {
 
 test_that("f64 slice", {
   f1 <- rust_fn(a, "
-    a.as_vector().stop().to_mode_f64(pc).slice().to_r(pc)
+    a.as_vector().stop().to_mode_double(pc).slice().to_r(pc)
   ")
   f2 <- rust_fn(a, "
-    a.as_vector().stop().to_mode_f64(pc).slice().iter().to_r(pc)
+    a.as_vector().stop().to_mode_double(pc).slice().iter().to_r(pc)
   ")
   f3 <- rust_fn(a, "
-    a.as_vector().stop().to_mode_f64(pc).slice().iter().map(|x| x).to_r(pc)
+    a.as_vector().stop().to_mode_double(pc).slice().iter().map(|x| x).to_r(pc)
   ")
   for (f in list(f1, f2, f3)) {
     x <- numeric(0)
@@ -280,7 +280,7 @@ test_that("f64 slice", {
   ")
   expect_identical(f(), c(1, 2, 3))
   f <- rust_fn(a, "
-    a.as_vector().stop().as_mode_f64().stop().slice().iter().map(|x| x + 1.0).to_r(pc)
+    a.as_vector().stop().as_mode_double().stop().slice().iter().map(|x| x + 1.0).to_r(pc)
   ")
   x <- numeric(0)
   expect_identical(f(x), x + 1)
@@ -289,8 +289,8 @@ test_that("f64 slice", {
   x <- c(1, 2, 3)
   expect_identical(f(x), x + 1)
   f <- rust_fn(a, "
-    let v = a.as_vector().stop().to_mode_f64(pc);
-    assert!(v.is_mode_f64());
+    let v = a.as_vector().stop().to_mode_double(pc);
+    assert!(v.is_mode_double());
     v.slice().to_r(pc)
   ")
   x <- c(0, 1, 2, 3)
@@ -302,13 +302,13 @@ test_that("f64 slice", {
 
 test_that("i32 slice", {
   f1 <- rust_fn(a, "
-    a.as_vector().stop().to_mode_i32(pc).slice().to_r(pc)
+    a.as_vector().stop().to_mode_integer(pc).slice().to_r(pc)
   ")
   f2 <- rust_fn(a, "
-    a.as_vector().stop().to_mode_i32(pc).slice().iter().to_r(pc)
+    a.as_vector().stop().to_mode_integer(pc).slice().iter().to_r(pc)
   ")
   f3 <- rust_fn(a, "
-    a.as_vector().stop().to_mode_i32(pc).slice().iter().map(|x| x).to_r(pc)
+    a.as_vector().stop().to_mode_integer(pc).slice().iter().map(|x| x).to_r(pc)
   ")
   for (f in list(f1, f2, f3)) {
     x <- integer(0)
@@ -339,7 +339,7 @@ test_that("i32 slice", {
   ")
   expect_identical(f(), c(1L, 2L, 3L))
   f <- rust_fn(a, "
-    a.as_vector().stop().to_mode_i32(pc).slice().iter().map(|x| x + 1).to_r(pc)
+    a.as_vector().stop().to_mode_integer(pc).slice().iter().map(|x| x + 1).to_r(pc)
   ")
   x <- integer(0)
   expect_identical(f(x), x + 1L)
@@ -348,8 +348,8 @@ test_that("i32 slice", {
   x <- c(1L, 2L, 3L)
   expect_identical(f(x), x + 1L)
   f <- rust_fn(a, "
-    let v = a.as_vector().stop().to_mode_bool(pc);
-    assert!(v.is_mode_bool());
+    let v = a.as_vector().stop().to_mode_logical(pc);
+    assert!(v.is_mode_logical());
     v.slice().to_r(pc)
   ")
   x <- c(0, 1, 2, 3)
@@ -361,7 +361,7 @@ test_that("i32 slice", {
 
 test_that("bool slice", {
   f3 <- rust_fn(a, "
-    a.as_vector().stop().as_mode_bool().stop().slice().iter().map(|&x| x != 0).to_r(pc)
+    a.as_vector().stop().as_mode_logical().stop().slice().iter().map(|&x| x != 0).to_r(pc)
   ")
   for (f in list(f3)) {
     x <- logical(0)
@@ -398,8 +398,8 @@ test_that("bool slice", {
   ")
   expect_identical(f(), c(TRUE, FALSE, TRUE))
   f <- rust_fn(a, "
-    let v = a.as_vector().stop().to_mode_bool(pc);
-    assert!(v.is_mode_bool());
+    let v = a.as_vector().stop().to_mode_logical(pc);
+    assert!(v.is_mode_logical());
     v.slice().to_r(pc)
   ")
   x <- c(0, 1, 2, 3)
@@ -414,13 +414,13 @@ test_that("bool slice", {
 
 test_that("u8 slice", {
   f1 <- rust_fn(a, "
-    a.as_vector().stop().as_mode_u8().stop().slice().to_r(pc)
+    a.as_vector().stop().as_mode_raw().stop().slice().to_r(pc)
   ")
   f2 <- rust_fn(a, "
-    a.as_vector().stop().as_mode_u8().stop().slice().iter().to_r(pc)
+    a.as_vector().stop().as_mode_raw().stop().slice().iter().to_r(pc)
   ")
   f3 <- rust_fn(a, "
-    a.as_vector().stop().as_mode_u8().stop().slice().iter().map(|x| x).to_r(pc)
+    a.as_vector().stop().as_mode_raw().stop().slice().iter().map(|x| x).to_r(pc)
   ")
   for (f in list(f1, f2, f3)) {
     x <- raw(0)
@@ -453,7 +453,7 @@ test_that("u8 slice", {
   ")
   expect_identical(f(), as.raw(c(1L, 2L, 3L)))
   f <- rust_fn(a, "
-    a.as_vector().stop().as_mode_u8().stop().slice().iter().map(|x| x + 1).to_r(pc)
+    a.as_vector().stop().as_mode_raw().stop().slice().iter().map(|x| x + 1).to_r(pc)
   ")
   x <- raw(0)
   expect_identical(f(x), as.raw(as.integer(x) + 1))
@@ -462,8 +462,8 @@ test_that("u8 slice", {
   x <- as.raw(c(1L, 2L, 3L))
   expect_identical(f(x), as.raw(as.integer(x) + 1))
   f <- rust_fn(a, "
-    let v = a.as_vector().stop().to_mode_u8(pc);
-    assert!(v.is_mode_u8());
+    let v = a.as_vector().stop().to_mode_raw(pc);
+    assert!(v.is_mode_raw());
     v.slice().to_r(pc)
   ")
   x <- as.raw(c(0, 1, 2, 3))
@@ -506,7 +506,7 @@ test_that("attributes", {
 
 test_that("new vectors with names", {
   f <-  rust_fn('
-    let a = R::new_vector_f64(3, pc);
+    let a = R::new_vector_double(3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as f64;
@@ -516,24 +516,24 @@ test_that("new vectors with names", {
   ')
   expect_identical(f(), c(a = 0, b = 1, c = 2))
   f <-  rust_fn('
-    let a = R::new_vector_f64(3, pc);
+    let a = R::new_vector_double(3, pc);
     a.set_names(&["a", "b", "c", "d"].to_r(pc)).stop();
     a
   ')
   expect_error(f())
   f <-  rust_fn('
-    let a = R::new_vector_f64(3, pc);
+    let a = R::new_vector_double(3, pc);
     a.set_names(&["a", "b"].to_r(pc)).stop();
     a
   ')
   expect_error(f())
   # expect_error(rust_fn("
-  #   let a = R::new_vector_f64(3, pc);
+  #   let a = R::new_vector_double(3, pc);
   #   a.set_names(&[1, 2, 3].to_r(pc)).stop();
   #   a
   # "))
   f <-  rust_fn('
-    let a = R::new_vector_i32(3, pc);
+    let a = R::new_vector_integer(3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as i32;
@@ -543,7 +543,7 @@ test_that("new vectors with names", {
   ')
   expect_true(identical(f(), c(a = 0L, b = 1L, c = 2L)))
   f <-  rust_fn('
-    let a = R::new_vector_u8(3, pc);
+    let a = R::new_vector_raw(3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as u8;
@@ -555,7 +555,7 @@ test_that("new vectors with names", {
   names(b) <- c("a", "b", "c")
   expect_true(identical(f(), b))
   f <-  rust_fn('
-    let a = R::new_vector_bool(3, pc);
+    let a = R::new_vector_logical(3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = if i != 0 { 1 } else { 0 };
@@ -565,7 +565,7 @@ test_that("new vectors with names", {
   ')
   expect_true(identical(f(), c(a = FALSE, b = TRUE, c = TRUE)))
   f <-  rust_fn('
-    let a = R::new_vector_i32(3, pc);
+    let a = R::new_vector_integer(3, pc);
     a.set_names(&["a", "b"].to_r(pc)).stop();
   ')
   expect_error(f())
@@ -573,37 +573,37 @@ test_that("new vectors with names", {
 
 test_that("index into vector", {
   f <- rust_fn("
-    let a = R::new_vector_f64(3, pc);
+    let a = R::new_vector_double(3, pc);
     a.set(2, 4.0).stop();
     a.get(2).stop().to_r(pc)
   ")
   expect_identical(f(), 4)
   f <- rust_fn("
-    let a = R::new_vector_f64(3, pc);
+    let a = R::new_vector_double(3, pc);
     a.set(3, 4.0).stop();
     a.get(3).stop().to_r(pc)
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = R::new_vector_f64(3, pc);
+    let a = R::new_vector_double(3, pc);
     a.set(2, 4.0).stop();
     a.get(3).stop().to_r(pc)
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = R::new_vector_i32(3, pc);
+    let a = R::new_vector_integer(3, pc);
     a.set(2, 4).stop();
     a.get(2).stop().to_r(pc)
   ")
   expect_identical(f(), 4L)
   f <- rust_fn("
-    let a = R::new_vector_u8(3, pc);
+    let a = R::new_vector_raw(3, pc);
     a.set(2, 4).stop();
     a.get(2).stop().to_r(pc)
   ")
   expect_identical(f(), as.raw(4))
   f <- rust_fn("
-    let a = R::new_vector_bool(3, pc);
+    let a = R::new_vector_logical(3, pc);
     a.set(0, false).stop();
     a.set(2, true).stop();
     assert!(a.get(2).stop() == true);
@@ -616,19 +616,19 @@ test_that("index into vector", {
 
 test_that("index into matrix", {
   f <- rust_fn("
-    let a = R::new_matrix_f64(2, 3, pc);
+    let a = R::new_matrix_double(2, 3, pc);
     a.set((1, 2), 4.0).stop();
     a.get((1, 2)).stop().to_r(pc)
   ")
   expect_identical(f(), 4)
   f <- rust_fn("
-    let a = R::new_matrix_f64(2, 3, pc);
+    let a = R::new_matrix_double(2, 3, pc);
     a.set((2, 2), 4.0).stop();
     a.get((2, 2)).stop().to_r(pc)
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = R::new_matrix_f64(2, 3, pc);
+    let a = R::new_matrix_double(2, 3, pc);
     a.set((1, 2), 4.0).stop();
     a.get((2, 2)).stop().to_r(pc)
   ")
@@ -661,7 +661,7 @@ test_that("index into list", {
 
 test_that("new matrix with names", {
   f <-  rust_fn('
-    let a = R::new_matrix_f64(1, 3, pc);
+    let a = R::new_matrix_double(1, 3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as f64;
@@ -674,7 +674,7 @@ test_that("new matrix with names", {
   ')
   expect_no_error(f())
   f <-  rust_fn("
-    let a = R::new_matrix_i32(1, 3, pc);
+    let a = R::new_matrix_integer(1, 3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as i32;
@@ -682,7 +682,7 @@ test_that("new matrix with names", {
   ")
   expect_no_error(f())
   f <-  rust_fn("
-    let a = R::new_matrix_u8(1, 3, pc);
+    let a = R::new_matrix_raw(1, 3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as u8;
@@ -690,7 +690,7 @@ test_that("new matrix with names", {
   ")
   expect_no_error(f())
   f <-  rust_fn("
-    let a = R::new_matrix_bool(1, 3, pc);
+    let a = R::new_matrix_logical(1, 3, pc);
     let slice = a.slice();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = if i != 0 { 1 } else { 0 };
@@ -701,10 +701,10 @@ test_that("new matrix with names", {
 
 test_that("new arrary", {
   f <-  rust_fn("
-    let _: &[f64] = R::new_matrix_f64(1, 3, pc).slice();
-    let _: &[i32] = R::new_matrix_i32(1, 3, pc).slice();
-    let _: &[u8] = R::new_matrix_u8(1, 3, pc).slice();
-    let _: &[i32] = R::new_matrix_bool(1, 3, pc).slice();
+    let _: &[f64] = R::new_matrix_double(1, 3, pc).slice();
+    let _: &[i32] = R::new_matrix_integer(1, 3, pc).slice();
+    let _: &[u8] = R::new_matrix_raw(1, 3, pc).slice();
+    let _: &[i32] = R::new_matrix_logical(1, 3, pc).slice();
   ")
   expect_no_error(f())
 })
@@ -731,7 +731,7 @@ test_that("matrix", {
   expect_false(is.matrix(f(a)))
   f <-  rust_fn(a, "
     let a = a.as_matrix().stop();
-    a.to_mode_i32(pc);
+    a.to_mode_integer(pc);
     a
   ")
   b <- a
@@ -739,21 +739,21 @@ test_that("matrix", {
   expect_true(identical(f(a), b))
   f <-  rust_fn(a, "
     let a = a.as_matrix().stop();
-    a.to_mode_f64(pc)
+    a.to_mode_double(pc)
   ")
   b <- a
   storage.mode(b) <- "double"
   expect_true(identical(f(a), b))
   f <-  rust_fn(a, "
     let a = a.as_matrix().stop();
-    a.to_mode_bool(pc)
+    a.to_mode_logical(pc)
   ")
   b <- a
   storage.mode(b) <- "logical"
   expect_true(identical(f(a), b))
   f <-  rust_fn(a, "
     let a = a.as_matrix().stop();
-    a.to_mode_u8(pc)
+    a.to_mode_raw(pc)
   ")
   b <- a
   storage.mode(b) <- "raw"
@@ -762,14 +762,14 @@ test_that("matrix", {
 
 test_that("array", {
   f <-  rust_fn(a, "
-    let a = a.as_array().stop().as_mode_i32().stop();
+    let a = a.as_array().stop().as_mode_integer().stop();
     let b = a.dim();
     (&b[..]).to_r(pc)
   ")
   a <- array(1:24, dim = c(2L, 3L, 4L))
   expect_identical(f(a), c(2L, 3L, 4L))
   f <-  rust_fn(a, "
-    let a = a.as_array().stop().as_mode_f64().stop();
+    let a = a.as_array().stop().as_mode_double().stop();
     let b = a.dim();
     (&b[..]).to_r(pc)
   ")
@@ -808,7 +808,7 @@ test_that("external_ptr", {
     let a = vec![10.0, 11.0, 13.0];
     R::encode(a, &"vec_f64".to_r(pc))
   ')
-  f1_u8 <- rust_fn('
+  f1_raw <- rust_fn('
     let a = vec![10_u8, 11, 13];
     R::encode(a, &"vec_u8".to_r(pc))
   ')
@@ -834,7 +834,7 @@ test_that("external_ptr", {
   expect_identical(f3(f1_i32()), 11L)
   expect_false(identical(f3(f1_i32()), 11))
   expect_identical(f3(f1_f64()), 11)
-  expect_error(f3(f1_u8()))
+  expect_error(f3(f1_raw()))
   expect_error(f3(3))
 })
 

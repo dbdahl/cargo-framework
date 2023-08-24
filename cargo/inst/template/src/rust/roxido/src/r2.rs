@@ -83,19 +83,19 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
     }
 
-    pub fn new_vector_f64(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
+    pub fn new_vector_double(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
         Self::new_vector::<f64>(REALSXP, length, pc)
     }
 
-    pub fn new_vector_i32(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
+    pub fn new_vector_integer(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
-    pub fn new_vector_u8(length: usize, pc: &mut Pc) -> RObject<Vector, u8> {
+    pub fn new_vector_raw(length: usize, pc: &mut Pc) -> RObject<Vector, u8> {
         Self::new_vector::<u8>(RAWSXP, length, pc)
     }
 
-    pub fn new_vector_bool(length: usize, pc: &mut Pc) -> RObject<Vector, bool> {
+    pub fn new_vector_logical(length: usize, pc: &mut Pc) -> RObject<Vector, bool> {
         Self::new_vector::<bool>(LGLSXP, length, pc)
     }
 
@@ -109,19 +109,19 @@ impl R {
         }))
     }
 
-    pub fn new_matrix_f64(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
+    pub fn new_matrix_double(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
         Self::new_matrix::<f64>(REALSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_i32(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
+    pub fn new_matrix_integer(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
         Self::new_matrix::<i32>(INTSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_u8(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, u8> {
+    pub fn new_matrix_raw(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, u8> {
         Self::new_matrix::<u8>(RAWSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_bool(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
+    pub fn new_matrix_logical(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
         Self::new_matrix::<bool>(LGLSXP, nrow, ncol, pc)
     }
 
@@ -134,19 +134,19 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_allocArray(code, dim.sexp) }))
     }
 
-    pub fn new_array_f64(dim: &[usize], pc: &mut Pc) -> RObject<Array, f64> {
+    pub fn new_array_double(dim: &[usize], pc: &mut Pc) -> RObject<Array, f64> {
         Self::new_array::<f64>(REALSXP, dim, pc)
     }
 
-    pub fn new_array_i32(dim: &[usize], pc: &mut Pc) -> RObject<Array, i32> {
+    pub fn new_array_integer(dim: &[usize], pc: &mut Pc) -> RObject<Array, i32> {
         Self::new_array::<i32>(INTSXP, dim, pc)
     }
 
-    pub fn new_array_u8(dim: &[usize], pc: &mut Pc) -> RObject<Array, u8> {
+    pub fn new_array_raw(dim: &[usize], pc: &mut Pc) -> RObject<Array, u8> {
         Self::new_array::<u8>(RAWSXP, dim, pc)
     }
 
-    pub fn new_array_bool(dim: &[usize], pc: &mut Pc) -> RObject<Array, bool> {
+    pub fn new_array_logical(dim: &[usize], pc: &mut Pc) -> RObject<Array, bool> {
         Self::new_array::<bool>(LGLSXP, dim, pc)
     }
 
@@ -200,15 +200,15 @@ impl R {
         Self::wrap(unsafe { R_NilValue })
     }
 
-    pub fn na_f64() -> f64 {
+    pub fn na_double() -> f64 {
         unsafe { R_NaReal }
     }
 
-    pub fn na_i32() -> i32 {
+    pub fn na_integer() -> i32 {
         unsafe { R_NaInt }
     }
 
-    pub fn na_bool() -> i32 {
+    pub fn na_logical() -> i32 {
         unsafe { R_NaInt }
     }
 
@@ -224,15 +224,15 @@ impl R {
         unsafe { R_NegInf }
     }
 
-    pub fn is_na_f64(x: f64) -> bool {
+    pub fn is_na_double(x: f64) -> bool {
         unsafe { R_IsNA(x) != 0 }
     }
 
-    pub fn is_na_i32(x: i32) -> bool {
+    pub fn is_na_integer(x: i32) -> bool {
         x == unsafe { R_NaInt }
     }
 
-    pub fn is_na_bool(x: i32) -> bool {
+    pub fn is_na_logical(x: i32) -> bool {
         x == unsafe { R_NaInt }
     }
 
@@ -358,14 +358,14 @@ impl<RType, RMode> RObject<RType, RMode> {
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
-                    if s.is_mode_i32() {
+                    if s.is_mode_integer() {
                         let x = unsafe { Rf_asInteger(s.sexp) };
                         if x == i32::MIN {
                             Err("Value equals NA in R")
                         } else {
                             Ok(x)
                         }
-                    } else if s.is_mode_f64() {
+                    } else if s.is_mode_double() {
                         let y = unsafe { Rf_asReal(s.sexp) };
                         if y > f64::from(i32::MAX) {
                             Err("Value greater than maximum i32")
@@ -378,9 +378,9 @@ impl<RType, RMode> RObject<RType, RMode> {
                         } else {
                             Ok(y.round() as i32)
                         }
-                    } else if s.is_mode_u8() {
+                    } else if s.is_mode_raw() {
                         Ok(unsafe { Rf_asInteger(s.sexp) })
-                    } else if s.is_mode_bool() {
+                    } else if s.is_mode_logical() {
                         let y = unsafe { Rf_asLogical(s.sexp) };
                         if y == i32::MIN {
                             Err("Value equals R's NA for bool")
@@ -403,10 +403,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
-                    if s.is_mode_i32() {
+                    if s.is_mode_integer() {
                         let x = unsafe { Rf_asInteger(s.sexp) };
                         usize::try_from(x).map_err(|_| msg)
-                    } else if s.is_mode_f64() {
+                    } else if s.is_mode_double() {
                         let y = unsafe { Rf_asReal(s.sexp) };
                         let z = y as usize;
                         if z as f64 == y {
@@ -414,10 +414,10 @@ impl<RType, RMode> RObject<RType, RMode> {
                         } else {
                             Err(msg)
                         }
-                    } else if s.is_mode_u8() {
+                    } else if s.is_mode_raw() {
                         let x = unsafe { Rf_asInteger(s.sexp) };
                         usize::try_from(x).map_err(|_| msg)
-                    } else if s.is_mode_bool() {
+                    } else if s.is_mode_logical() {
                         let x = unsafe { Rf_asLogical(s.sexp) };
                         if x == i32::MIN {
                             Err("Value equals R's NA for bool")
@@ -440,10 +440,10 @@ impl<RType, RMode> RObject<RType, RMode> {
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
-                    if s.is_mode_i32() {
+                    if s.is_mode_integer() {
                         let x = unsafe { Rf_asInteger(s.sexp) };
                         u8::try_from(x).map_err(|_| msg)
-                    } else if s.is_mode_f64() {
+                    } else if s.is_mode_double() {
                         let y = unsafe { Rf_asReal(s.sexp) };
                         let z = y as u8;
                         if z as f64 == y {
@@ -451,10 +451,10 @@ impl<RType, RMode> RObject<RType, RMode> {
                         } else {
                             Err(msg)
                         }
-                    } else if s.is_mode_u8() {
+                    } else if s.is_mode_raw() {
                         let x = unsafe { Rf_asInteger(s.sexp) };
                         u8::try_from(x).map_err(|_| msg)
-                    } else if s.is_mode_bool() {
+                    } else if s.is_mode_logical() {
                         let x = unsafe { Rf_asLogical(s.sexp) };
                         if x == i32::MIN {
                             Err("Value equals R's NA for bool")
@@ -477,23 +477,23 @@ impl<RType, RMode> RObject<RType, RMode> {
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
-                    if s.is_mode_i32() {
+                    if s.is_mode_integer() {
                         let x = unsafe { Rf_asInteger(s.sexp) };
                         if x == i32::MIN {
                             Err("Value equals NA in R")
                         } else {
                             Ok(x != 0)
                         }
-                    } else if s.is_mode_f64() {
+                    } else if s.is_mode_double() {
                         let y = unsafe { Rf_asReal(s.sexp) };
-                        if R::is_na_f64(y) || R::is_nan(y) {
+                        if R::is_na_double(y) || R::is_nan(y) {
                             Err(msg)
                         } else {
                             Ok(y != 0.0)
                         }
-                    } else if s.is_mode_u8() {
+                    } else if s.is_mode_raw() {
                         Ok(unsafe { Rf_asInteger(s.sexp) } != 0)
-                    } else if s.is_mode_bool() {
+                    } else if s.is_mode_logical() {
                         let y = unsafe { Rf_asLogical(s.sexp) };
                         if y == i32::MIN {
                             Err("Value equals R's NA for bool")
@@ -534,12 +534,12 @@ impl<RType, RMode> RObject<RType, RMode> {
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
-                    if s.is_mode_f64() {
+                    if s.is_mode_double() {
                         unsafe { R_IsNA(Rf_asReal(s.sexp)) != 0 }
-                    } else if s.is_mode_i32() {
-                        unsafe { Rf_asInteger(s.sexp) == R::na_i32() }
-                    } else if s.is_mode_bool() {
-                        unsafe { Rf_asLogical(s.sexp) == R::na_bool() }
+                    } else if s.is_mode_integer() {
+                        unsafe { Rf_asInteger(s.sexp) == R::na_integer() }
+                    } else if s.is_mode_logical() {
+                        unsafe { Rf_asLogical(s.sexp) == R::na_logical() }
                     } else if s.is_mode_str() {
                         unsafe { Rf_asChar(s.sexp) == R_NaString }
                     } else {
@@ -557,7 +557,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
-                    if s.is_mode_f64() {
+                    if s.is_mode_double() {
                         unsafe { R_IsNaN(Rf_asReal(s.sexp)) != 0 }
                     } else {
                         false
@@ -629,19 +629,19 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         unsafe { std::slice::from_raw_parts_mut(data, len) }
     }
 
-    pub fn is_mode_f64(&self) -> bool {
+    pub fn is_mode_double(&self) -> bool {
         unsafe { Rf_isReal(self.sexp) != 0 }
     }
 
-    pub fn is_mode_i32(&self) -> bool {
+    pub fn is_mode_integer(&self) -> bool {
         unsafe { Rf_isInteger(self.sexp) != 0 }
     }
 
-    pub fn is_mode_u8(&self) -> bool {
+    pub fn is_mode_raw(&self) -> bool {
         unsafe { TYPEOF(self.sexp) == RAWSXP as i32 }
     }
 
-    pub fn is_mode_bool(&self) -> bool {
+    pub fn is_mode_logical(&self) -> bool {
         unsafe { Rf_isLogical(self.sexp) != 0 }
     }
 
@@ -649,32 +649,32 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         unsafe { Rf_isString(self.sexp) != 0 }
     }
 
-    pub fn as_mode_f64(&self) -> Result<RObject<S, f64>, &'static str> {
-        if self.is_mode_f64() {
+    pub fn as_mode_double(&self) -> Result<RObject<S, f64>, &'static str> {
+        if self.is_mode_double() {
             Ok(self.convert())
         } else {
             Err("Not an f64 vector")
         }
     }
 
-    pub fn as_mode_i32(&self) -> Result<RObject<S, i32>, &'static str> {
-        if self.is_mode_i32() {
+    pub fn as_mode_integer(&self) -> Result<RObject<S, i32>, &'static str> {
+        if self.is_mode_integer() {
             Ok(self.convert())
         } else {
             Err("Not an f64 vector")
         }
     }
 
-    pub fn as_mode_u8(&self) -> Result<RObject<S, u8>, &'static str> {
-        if self.is_mode_u8() {
+    pub fn as_mode_raw(&self) -> Result<RObject<S, u8>, &'static str> {
+        if self.is_mode_raw() {
             Ok(self.convert())
         } else {
             Err("Not an f64 vector")
         }
     }
 
-    pub fn as_mode_bool(&self) -> Result<RObject<S, bool>, &'static str> {
-        if self.is_mode_bool() {
+    pub fn as_mode_logical(&self) -> Result<RObject<S, bool>, &'static str> {
+        if self.is_mode_logical() {
             Ok(self.convert())
         } else {
             Err("Not an f64 vector")
@@ -689,19 +689,19 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         }
     }
 
-    pub fn to_mode_f64(&self, pc: &mut Pc) -> RObject<S, f64> {
+    pub fn to_mode_double(&self, pc: &mut Pc) -> RObject<S, f64> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, REALSXP) }))
     }
 
-    pub fn to_mode_i32(&self, pc: &mut Pc) -> RObject<S, i32> {
+    pub fn to_mode_integer(&self, pc: &mut Pc) -> RObject<S, i32> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, INTSXP) }))
     }
 
-    pub fn to_mode_u8(&self, pc: &mut Pc) -> RObject<S, u8> {
+    pub fn to_mode_raw(&self, pc: &mut Pc) -> RObject<S, u8> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, RAWSXP) }))
     }
 
-    pub fn to_mode_bool(&self, pc: &mut Pc) -> RObject<S, bool> {
+    pub fn to_mode_logical(&self, pc: &mut Pc) -> RObject<S, bool> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
     }
 
@@ -1266,7 +1266,7 @@ impl<const N: usize> ToR1<f64> for [f64; N] {
 
 impl ToR1<f64> for &[f64] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        let result = R::new_vector_f64(self.len(), pc);
+        let result = R::new_vector_double(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
@@ -1275,7 +1275,7 @@ impl ToR1<f64> for &[f64] {
 
 impl ToR1<f64> for &mut [f64] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, f64> {
-        let result = R::new_vector_f64(self.len(), pc);
+        let result = R::new_vector_double(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
@@ -1290,7 +1290,7 @@ impl<const N: usize> ToR1<i32> for [i32; N] {
 
 impl ToR1<i32> for &[i32] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
@@ -1299,7 +1299,7 @@ impl ToR1<i32> for &[i32] {
 
 impl ToR1<i32> for &mut [i32] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
@@ -1314,7 +1314,7 @@ impl<const N: usize> ToR1<u8> for [u8; N] {
 
 impl ToR1<u8> for &[u8] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_u8(self.len(), pc);
+        let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
@@ -1323,7 +1323,7 @@ impl ToR1<u8> for &[u8] {
 
 impl ToR1<u8> for &mut [u8] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_u8(self.len(), pc);
+        let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
         slice.copy_from_slice(self);
         result
@@ -1338,7 +1338,7 @@ impl<const N: usize> ToR1<i32> for [usize; N] {
 
 impl ToR1<i32> for &[usize] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         for (i, j) in slice.iter_mut().zip(self.iter()) {
             *i = (*j).try_into().unwrap();
@@ -1349,7 +1349,7 @@ impl ToR1<i32> for &[usize] {
 
 impl ToR1<i32> for &mut [usize] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         for (i, j) in slice.iter_mut().zip(self.iter()) {
             *i = (*j).try_into().unwrap();
@@ -1366,7 +1366,7 @@ impl<const N: usize> ToR1<bool> for [bool; N] {
 
 impl ToR1<bool> for &[bool] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_bool(self.len(), pc);
+        let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
         for (i, j) in slice.iter_mut().zip(self.iter()) {
             *i = (*j).try_into().unwrap();
@@ -1377,7 +1377,7 @@ impl ToR1<bool> for &[bool] {
 
 impl ToR1<bool> for &mut [bool] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_bool(self.len(), pc);
+        let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
         for (i, j) in slice.iter_mut().zip(self.iter()) {
             *i = (*j).try_into().unwrap();
@@ -1414,7 +1414,7 @@ impl ToR1<Str> for &mut [&str] {
 
 impl<'a, T: IntoIterator<Item = &'a f64> + ExactSizeIterator> ToR2<f64> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, f64> {
-        let result = R::new_vector_f64(self.len(), pc);
+        let result = R::new_vector_double(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = *from;
@@ -1425,7 +1425,7 @@ impl<'a, T: IntoIterator<Item = &'a f64> + ExactSizeIterator> ToR2<f64> for T {
 
 impl<'a, T: IntoIterator<Item = &'a mut f64> + ExactSizeIterator> ToR3<f64> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, f64> {
-        let result = R::new_vector_f64(self.len(), pc);
+        let result = R::new_vector_double(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = *from;
@@ -1436,7 +1436,7 @@ impl<'a, T: IntoIterator<Item = &'a mut f64> + ExactSizeIterator> ToR3<f64> for 
 
 impl<T: IntoIterator<Item = f64> + ExactSizeIterator> ToR4<f64> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, f64> {
-        let result = R::new_vector_f64(self.len(), pc);
+        let result = R::new_vector_double(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = from;
@@ -1447,7 +1447,7 @@ impl<T: IntoIterator<Item = f64> + ExactSizeIterator> ToR4<f64> for T {
 
 impl<'a, T: Iterator<Item = &'a i32> + ExactSizeIterator> ToR2<i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = *from;
@@ -1458,7 +1458,7 @@ impl<'a, T: Iterator<Item = &'a i32> + ExactSizeIterator> ToR2<i32> for T {
 
 impl<'a, T: Iterator<Item = &'a mut i32> + ExactSizeIterator> ToR3<i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = *from;
@@ -1469,7 +1469,7 @@ impl<'a, T: Iterator<Item = &'a mut i32> + ExactSizeIterator> ToR3<i32> for T {
 
 impl<T: Iterator<Item = i32> + ExactSizeIterator> ToR4<i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
-        let result = R::new_vector_i32(self.len(), pc);
+        let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = from;
@@ -1480,7 +1480,7 @@ impl<T: Iterator<Item = i32> + ExactSizeIterator> ToR4<i32> for T {
 
 impl<'a, T: Iterator<Item = &'a u8> + ExactSizeIterator> ToR2<u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_u8(self.len(), pc);
+        let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = *from;
@@ -1491,7 +1491,7 @@ impl<'a, T: Iterator<Item = &'a u8> + ExactSizeIterator> ToR2<u8> for T {
 
 impl<'a, T: Iterator<Item = &'a mut u8> + ExactSizeIterator> ToR3<u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_u8(self.len(), pc);
+        let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = *from;
@@ -1502,7 +1502,7 @@ impl<'a, T: Iterator<Item = &'a mut u8> + ExactSizeIterator> ToR3<u8> for T {
 
 impl<T: Iterator<Item = u8> + ExactSizeIterator> ToR4<u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
-        let result = R::new_vector_u8(self.len(), pc);
+        let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = from;
@@ -1513,7 +1513,7 @@ impl<T: Iterator<Item = u8> + ExactSizeIterator> ToR4<u8> for T {
 
 impl<'a, T: Iterator<Item = &'a bool> + ExactSizeIterator> ToR2<bool> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_bool(self.len(), pc);
+        let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = if *from {
@@ -1528,7 +1528,7 @@ impl<'a, T: Iterator<Item = &'a bool> + ExactSizeIterator> ToR2<bool> for T {
 
 impl<'a, T: Iterator<Item = &'a mut bool> + ExactSizeIterator> ToR3<bool> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_bool(self.len(), pc);
+        let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = if *from {
@@ -1543,7 +1543,7 @@ impl<'a, T: Iterator<Item = &'a mut bool> + ExactSizeIterator> ToR3<bool> for T 
 
 impl<T: Iterator<Item = bool> + ExactSizeIterator> ToR4<bool> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, bool> {
-        let result = R::new_vector_bool(self.len(), pc);
+        let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
         for (to, from) in slice.iter_mut().zip(self) {
             *to = if from {
