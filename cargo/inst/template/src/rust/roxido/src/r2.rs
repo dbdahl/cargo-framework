@@ -41,7 +41,7 @@ pub struct ExternalPtr(());
 pub struct Unknown(());
 
 #[doc(hidden)]
-pub struct Str;
+pub struct Character;
 
 #[doc(hidden)]
 pub struct List(());
@@ -60,7 +60,7 @@ impl Atomic for f64 {}
 impl Atomic for i32 {}
 impl Atomic for u8 {}
 impl Atomic for bool {}
-impl Atomic for Str {}
+impl Atomic for Character {}
 impl Atomic for Unknown {}
 
 #[doc(hidden)]
@@ -99,7 +99,7 @@ impl R {
         Self::new_vector::<bool>(LGLSXP, length, pc)
     }
 
-    pub fn new_vector_character(length: usize, pc: &mut Pc) -> RObject<Vector, Str> {
+    pub fn new_vector_character(length: usize, pc: &mut Pc) -> RObject<Vector, Character> {
         Self::new_vector(STRSXP, length, pc)
     }
 
@@ -125,8 +125,12 @@ impl R {
         Self::new_matrix::<bool>(LGLSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_character(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
-        Self::new_matrix::<Str>(STRSXP, nrow, ncol, pc)
+    pub fn new_matrix_character(
+        nrow: usize,
+        ncol: usize,
+        pc: &mut Pc,
+    ) -> RObject<Matrix, Character> {
+        Self::new_matrix::<Character>(STRSXP, nrow, ncol, pc)
     }
 
     fn new_array<T>(code: u32, dim: &[usize], pc: &mut Pc) -> RObject<Array, T> {
@@ -150,8 +154,8 @@ impl R {
         Self::new_array::<bool>(LGLSXP, dim, pc)
     }
 
-    pub fn new_array_character(dim: &[usize], pc: &mut Pc) -> RObject<Array, Str> {
-        Self::new_array::<Str>(STRSXP, dim, pc)
+    pub fn new_array_character(dim: &[usize], pc: &mut Pc) -> RObject<Array, Character> {
+        Self::new_array::<Character>(STRSXP, dim, pc)
     }
 
     pub fn new_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
@@ -570,11 +574,11 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn get_class(&self) -> RObject<Vector, Str> {
+    pub fn get_class(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_ClassSymbol) })
     }
 
-    pub fn set_class(&self, names: &RObject<Vector, Str>) {
+    pub fn set_class(&self, names: &RObject<Vector, Character>) {
         unsafe {
             Rf_classgets(self.sexp, names.sexp);
         }
@@ -681,7 +685,7 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         }
     }
 
-    pub fn as_mode_character(&self) -> Result<RObject<S, Str>, &'static str> {
+    pub fn as_mode_character(&self) -> Result<RObject<S, Character>, &'static str> {
         if self.is_mode_character() {
             Ok(self.convert())
         } else {
@@ -705,7 +709,7 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
     }
 
-    pub fn to_mode_character(&self, pc: &mut Pc) -> RObject<S, Str> {
+    pub fn to_mode_character(&self, pc: &mut Pc) -> RObject<S, Character> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, STRSXP) }))
     }
 }
@@ -873,11 +877,11 @@ impl<RMode> RObject<Vector, RMode> {
         }
     }
 
-    pub fn get_names(&self) -> RObject<Vector, Str> {
+    pub fn get_names(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_NamesSymbol) })
     }
 
-    pub fn set_names(&self, names: &RObject<Vector, Str>) -> Result<(), &'static str> {
+    pub fn set_names(&self, names: &RObject<Vector, Character>) -> Result<(), &'static str> {
         if unsafe { Rf_length(names.sexp) != Rf_length(self.sexp) } {
             return Err("Length of names is not correct");
         }
@@ -946,7 +950,7 @@ impl RObject<Vector, bool> {
     }
 }
 
-impl RObject<Vector, Str> {
+impl RObject<Vector, Character> {
     pub fn get<'a>(&self, index: usize) -> Result<Result<&'a str, Utf8Error>, &'static str> {
         self.get_engine(index, STRING_ELT).map(|sexp| {
             let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
@@ -992,8 +996,8 @@ impl RObject<Vector, List> {
 
     pub fn to_data_frame(
         &self,
-        names: &RObject<Vector, Str>,
-        row_names: &RObject<Vector, Str>,
+        names: &RObject<Vector, Character>,
+        row_names: &RObject<Vector, Character>,
         pc: &mut Pc,
     ) -> Result<RObject<Vector, DataFrame>, &'static str> {
         if names.len() != self.len() {
@@ -1039,11 +1043,14 @@ impl RObject<Vector, DataFrame> {
         self.convert::<Vector, List>().set(index, value)
     }
 
-    pub fn get_row_names(&self) -> RObject<Vector, Str> {
+    pub fn get_row_names(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_RowNamesSymbol) })
     }
 
-    pub fn set_col_names(&self, row_names: &RObject<Vector, Str>) -> Result<(), &'static str> {
+    pub fn set_col_names(
+        &self,
+        row_names: &RObject<Vector, Character>,
+    ) -> Result<(), &'static str> {
         if unsafe { Rf_length(row_names.sexp) != Rf_length(self.sexp) } {
             return Err("Length of row names is not correct");
         }
@@ -1058,7 +1065,7 @@ impl<RMode> RObject<Matrix, RMode> {
         nrow * j + i
     }
 
-    pub fn get_dimnames(&self) -> RObject<Vector, Str> {
+    pub fn get_dimnames(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_DimNamesSymbol) })
     }
 
@@ -1070,7 +1077,7 @@ impl<RMode> RObject<Matrix, RMode> {
         if rownames.as_vector().map(|x| x.is_mode_character()) != Ok(true) {
             return Err("Row names must be a character vector");
         }
-        let rownames: RObject<Vector, Str> = rownames.convert();
+        let rownames: RObject<Vector, Character> = rownames.convert();
         if rownames.len() != self.nrow() {
             return Err("Row names do not match the number of rows");
         }
@@ -1078,7 +1085,7 @@ impl<RMode> RObject<Matrix, RMode> {
         if colnames.as_vector().map(|x| x.is_mode_character()) != Ok(true) {
             return Err("Column names must be a character vector");
         }
-        let colnames: RObject<Vector, Str> = colnames.convert();
+        let colnames: RObject<Vector, Character> = colnames.convert();
         if colnames.len() != self.ncol() {
             return Err("Column names do not match the number of columns");
         }
@@ -1138,9 +1145,9 @@ impl RObject<Matrix, bool> {
     }
 }
 
-impl RObject<Matrix, Str> {
+impl RObject<Matrix, Character> {
     pub fn get(&self, index: (usize, usize)) -> Result<Result<&str, Utf8Error>, &'static str> {
-        self.convert::<Vector, Str>().get(self.index(index))
+        self.convert::<Vector, Character>().get(self.index(index))
     }
 
     pub fn set<RType, RMode>(
@@ -1148,7 +1155,8 @@ impl RObject<Matrix, Str> {
         index: (usize, usize),
         value: &str,
     ) -> Result<(), &'static str> {
-        self.convert::<Vector, Str>().set(self.index(index), value)
+        self.convert::<Vector, Character>()
+            .set(self.index(index), value)
     }
 }
 
@@ -1245,8 +1253,8 @@ impl ToR1<bool> for bool {
     }
 }
 
-impl ToR1<Str> for &str {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+impl ToR1<Character> for &str {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
         let sexp = unsafe {
             Rf_ScalarString(Rf_mkCharLenCE(
                 self.as_ptr() as *const c_char,
@@ -1386,14 +1394,14 @@ impl ToR1<bool> for &mut [bool] {
     }
 }
 
-impl<const N: usize> ToR1<Str> for [&str; N] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+impl<const N: usize> ToR1<Character> for [&str; N] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
         self.as_ref().to_r(pc)
     }
 }
 
-impl ToR1<Str> for &[&str] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+impl ToR1<Character> for &[&str] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
         let result = R::new_vector_character(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
             let _ = result.set(index, s);
@@ -1402,8 +1410,8 @@ impl ToR1<Str> for &[&str] {
     }
 }
 
-impl ToR1<Str> for &mut [&str] {
-    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
+impl ToR1<Character> for &mut [&str] {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Character> {
         let result = R::new_vector_character(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
             let _ = result.set(index, s);
