@@ -15,7 +15,6 @@ use crate::rbindings::*;
 use std::ffi::{c_char, c_void, CStr};
 use std::marker::PhantomData;
 use std::ops::Deref;
-use std::str::Utf8Error;
 
 pub struct R {}
 
@@ -514,13 +513,13 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_str(&self) -> Result<Result<&str, Utf8Error>, &'static str> {
-        let msg = "Cannot be interpreted as an str";
+    pub fn as_str(&self) -> Result<&str, &'static str> {
+        let msg = "Cannot be interpreted as an &str";
         match self.as_vector() {
             Ok(s) => {
                 if s.is_scalar() {
                     let mut pc = Pc::new();
-                    Ok(s.to_mode_character(&mut pc).get(0).unwrap())
+                    s.to_mode_character(&mut pc).get(0)
                 } else {
                     Err(msg)
                 }
@@ -950,11 +949,14 @@ impl RObject<Vector, bool> {
 }
 
 impl RObject<Vector, Character> {
-    pub fn get<'a>(&self, index: usize) -> Result<Result<&'a str, Utf8Error>, &'static str> {
-        self.get_engine(index, STRING_ELT).map(|sexp| {
-            let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
-            c_str.to_str()
-        })
+    pub fn get<'a>(&self, index: usize) -> Result<&'a str, &'static str> {
+        match self.get_engine(index, STRING_ELT) {
+            Ok(sexp) => {
+                let c_str = unsafe { CStr::from_ptr(R_CHAR(Rf_asChar(sexp)) as *const c_char) };
+                c_str.to_str().map_err(|_| "Not valid UTF8")
+            }
+            Err(e) => Err(e),
+        }
     }
 
     pub fn set(&self, index: usize, value: &str) -> Result<(), &'static str> {
@@ -1145,7 +1147,7 @@ impl RObject<Matrix, bool> {
 }
 
 impl RObject<Matrix, Character> {
-    pub fn get(&self, index: (usize, usize)) -> Result<Result<&str, Utf8Error>, &'static str> {
+    pub fn get(&self, index: (usize, usize)) -> Result<&str, &'static str> {
         self.convert::<Vector, Character>().get(self.index(index))
     }
 
