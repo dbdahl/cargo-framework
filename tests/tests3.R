@@ -814,7 +814,7 @@ test_that("external_ptr", {
   ')
   f3 <- rust_fn(b, '
     let b = b.as_external_ptr().stop();
-    let tag = b.tag().as_vector().stop().as_mode_str().stop();
+    let tag = b.tag().as_vector().stop().as_mode_character().stop();
     let s = tag.get(0).stop().stop();
     let result: RObject = if s == "vec_i32" {
       let c = b.set_type::<Vec<i32>>();
@@ -855,7 +855,7 @@ test_that("string", {
   ')
   expect_identical(f(), c("adf", "billy", "bob"))
   f <- rust_fn(a, "
-    let b = a.as_vector().stop().as_mode_str().stop();
+    let b = a.as_vector().stop().as_mode_character().stop();
     b.get(1).stop().stop().to_r(pc)
   ")
   expect_identical(f(c("adf", "billy", "bob")), "billy")

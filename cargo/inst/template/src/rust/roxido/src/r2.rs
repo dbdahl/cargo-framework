@@ -99,7 +99,7 @@ impl R {
         Self::new_vector::<bool>(LGLSXP, length, pc)
     }
 
-    pub fn new_vector_str(length: usize, pc: &mut Pc) -> RObject<Vector, Str> {
+    pub fn new_vector_character(length: usize, pc: &mut Pc) -> RObject<Vector, Str> {
         Self::new_vector(STRSXP, length, pc)
     }
 
@@ -125,7 +125,7 @@ impl R {
         Self::new_matrix::<bool>(LGLSXP, nrow, ncol, pc)
     }
 
-    pub fn new_matrix_str(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
+    pub fn new_matrix_character(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, Str> {
         Self::new_matrix::<Str>(STRSXP, nrow, ncol, pc)
     }
 
@@ -150,7 +150,7 @@ impl R {
         Self::new_array::<bool>(LGLSXP, dim, pc)
     }
 
-    pub fn new_array_str(dim: &[usize], pc: &mut Pc) -> RObject<Array, Str> {
+    pub fn new_array_character(dim: &[usize], pc: &mut Pc) -> RObject<Array, Str> {
         Self::new_array::<Str>(STRSXP, dim, pc)
     }
 
@@ -517,7 +517,7 @@ impl<RType, RMode> RObject<RType, RMode> {
             Ok(s) => {
                 if s.is_scalar() {
                     let mut pc = Pc::new();
-                    Ok(s.to_mode_str(&mut pc).get(0).unwrap())
+                    Ok(s.to_mode_character(&mut pc).get(0).unwrap())
                 } else {
                     Err(msg)
                 }
@@ -540,7 +540,7 @@ impl<RType, RMode> RObject<RType, RMode> {
                         unsafe { Rf_asInteger(s.sexp) == R::na_integer() }
                     } else if s.is_mode_logical() {
                         unsafe { Rf_asLogical(s.sexp) == R::na_logical() }
-                    } else if s.is_mode_str() {
+                    } else if s.is_mode_character() {
                         unsafe { Rf_asChar(s.sexp) == R_NaString }
                     } else {
                         false
@@ -645,7 +645,7 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         unsafe { Rf_isLogical(self.sexp) != 0 }
     }
 
-    pub fn is_mode_str(&self) -> bool {
+    pub fn is_mode_character(&self) -> bool {
         unsafe { Rf_isString(self.sexp) != 0 }
     }
 
@@ -681,8 +681,8 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         }
     }
 
-    pub fn as_mode_str(&self) -> Result<RObject<S, Str>, &'static str> {
-        if self.is_mode_str() {
+    pub fn as_mode_character(&self) -> Result<RObject<S, Str>, &'static str> {
+        if self.is_mode_character() {
             Ok(self.convert())
         } else {
             Err("Not an f64 vector")
@@ -705,7 +705,7 @@ impl<S: HasLength, T: Atomic> RObject<S, T> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, LGLSXP) }))
     }
 
-    pub fn to_mode_str(&self, pc: &mut Pc) -> RObject<S, Str> {
+    pub fn to_mode_character(&self, pc: &mut Pc) -> RObject<S, Str> {
         R::wrap(pc.protect(unsafe { Rf_coerceVector(self.sexp, STRSXP) }))
     }
 }
@@ -1067,7 +1067,7 @@ impl<RMode> RObject<Matrix, RMode> {
             return Err("Length should be two");
         }
         let rownames = dimnames.get(0).unwrap();
-        if rownames.as_vector().map(|x| x.is_mode_str()) != Ok(true) {
+        if rownames.as_vector().map(|x| x.is_mode_character()) != Ok(true) {
             return Err("Row names must be a character vector");
         }
         let rownames: RObject<Vector, Str> = rownames.convert();
@@ -1075,7 +1075,7 @@ impl<RMode> RObject<Matrix, RMode> {
             return Err("Row names do not match the number of rows");
         }
         let colnames = dimnames.get(1).unwrap();
-        if colnames.as_vector().map(|x| x.is_mode_str()) != Ok(true) {
+        if colnames.as_vector().map(|x| x.is_mode_character()) != Ok(true) {
             return Err("Column names must be a character vector");
         }
         let colnames: RObject<Vector, Str> = colnames.convert();
@@ -1394,7 +1394,7 @@ impl<const N: usize> ToR1<Str> for [&str; N] {
 
 impl ToR1<Str> for &[&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
-        let result = R::new_vector_str(self.len(), pc);
+        let result = R::new_vector_character(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
             let _ = result.set(index, s);
         }
@@ -1404,7 +1404,7 @@ impl ToR1<Str> for &[&str] {
 
 impl ToR1<Str> for &mut [&str] {
     fn to_r(&self, pc: &mut Pc) -> RObject<Vector, Str> {
-        let result = R::new_vector_str(self.len(), pc);
+        let result = R::new_vector_character(self.len(), pc);
         for (index, s) in self.iter().enumerate() {
             let _ = result.set(index, s);
         }
