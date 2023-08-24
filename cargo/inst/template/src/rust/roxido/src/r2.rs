@@ -49,7 +49,6 @@ pub struct List(());
 #[doc(hidden)]
 pub struct DataFrame(());
 
-#[doc(hidden)]
 pub trait HasLength {}
 impl HasLength for Vector {}
 impl HasLength for Matrix {}
