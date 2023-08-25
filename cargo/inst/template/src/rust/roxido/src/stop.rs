@@ -21,7 +21,7 @@ macro_rules! stop {
 
 pub trait UnwrapOrStop<T> {
     fn stop(self) -> T;
-    fn stop_str<'a>(self, msg: &'a str) -> T;
+    fn stop_str(self, msg: &str) -> T;
     fn stop_closure(self, msg: impl FnMut() -> String) -> T;
 }
 
@@ -32,7 +32,7 @@ impl<T, S: Display> UnwrapOrStop<T> for Result<T, S> {
             Err(e) => stop!("{}", e),
         }
     }
-    fn stop_str<'a>(self, msg: &'a str) -> T {
+    fn stop_str(self, msg: &str) -> T {
         match self {
             Ok(t) => t,
             Err(_) => stop!("{}", msg),

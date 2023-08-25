@@ -873,7 +873,8 @@ impl<RMode> RObject<Vector, RMode> {
         f: unsafe extern "C" fn(SEXP, isize, T),
     ) -> Result<(), &'static str> {
         if index < self.len() {
-            Ok(unsafe { f(self.sexp, index.try_into().unwrap(), value) })
+            unsafe { f(self.sexp, index.try_into().unwrap(), value) }
+            Ok(())
         } else {
             Err("Index out of bounds")
         }
@@ -983,7 +984,7 @@ impl RObject<Vector, Character> {
 
 impl RObject<Vector, List> {
     pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
-        self.get_engine(index, VECTOR_ELT).map(|x| R::wrap(x))
+        self.get_engine(index, VECTOR_ELT).map(R::wrap)
     }
 
     pub fn set<RType, RMode>(
@@ -1017,18 +1018,14 @@ impl RObject<Vector, List> {
             let len = unsafe { Rf_xlength(x.sexp) };
             if i == 0 {
                 nrow = len;
-            } else {
-                if len != nrow {
-                    return Err("Inconsistent number of rows");
-                }
+            } else if len != nrow {
+                return Err("Inconsistent number of rows");
             }
         }
         if row_names.len() != nrow as usize {
             return Err("Length of row names is not correct");
         }
-        if let Err(e) = self.set_names(&names) {
-            return Err(e);
-        }
+        self.set_names(names)?;
         unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, row_names.sexp) };
         self.set_class(&["data.frame"].to_r(pc));
         Ok(self.convert())
@@ -1192,7 +1189,7 @@ impl<T> RObject<ExternalPtr, T> {
     ///
     /// This method obtained a mutable reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
     ///
-    pub fn decode_as_mut_ref(&self) -> &mut T {
+    pub fn decode_as_mut_ref(&mut self) -> &mut T {
         unsafe {
             let ptr = R_ExternalPtrAddr(self.sexp) as *mut T;
             ptr.as_mut().unwrap()
