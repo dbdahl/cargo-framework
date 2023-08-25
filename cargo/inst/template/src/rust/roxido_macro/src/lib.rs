@@ -198,12 +198,8 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
             extern "C" fn #name(#args) #output {
                 let result = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
-                    #[allow(unused_macros)]
-                    macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
-                    #[allow(unused_macros)]
-                    macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
                     let mut f = || { #body };
-                    f().into()
+                    f().to_r(pc).as_unknown()
                 });
                 match result {
                     Ok(obj) => obj,
@@ -240,18 +236,14 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
             extern "C" fn #name(#args) #output {
                 let result: Result<RObject,_> = std::panic::catch_unwind(|| {
                     let pc = &mut Pc::new();
-                    #[allow(unused_macros)]
-                    macro_rules! rvec { ($val:expr) => { RVector::allocate($val, pc) } }
-                    #[allow(unused_macros)]
-                    macro_rules! rstr { ($val:expr) => { RVectorCharacter::allocate($val, pc) } }
                     let mut f = || { #body };
-                    f().into()
+                    f().to_r(pc).as_unknown()
                 });
                 match result {
                     Ok(obj) => obj,
                     Err(_) => {
                         let pc = &mut crate::Pc::new();
-                        crate::R::new_error(format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name)).as_str(), pc)
+                        crate::R::new_error(format!("Panic in Rust function '{}' with 'roxido' attribute.", stringify!(#name)).as_str(), pc).as_unknown()
                     }
                 }
             }
