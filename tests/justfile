@@ -3,8 +3,8 @@ all: rust_fn package
 rust_fn: clean
     Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
 
-rust_fn3: clean
-    Rscript -e 'testthat::test_file("tests3.R", reporter=check_reporter())'
+rust_fn-api2: clean
+    Rscript -e 'testthat::test_file("tests-api2.R", reporter=check_reporter())'
 
 package: clean
     rm -rf testpkg
