@@ -120,7 +120,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
                 let ty = &pat_type.ty;
                 let string = quote!(#ty).to_string();
                 if string != "RObject" {
-                    panic!("All arguments to a function with the 'roxido' attribute must be of type RObject, but found '{}'.", string)
+                    panic!("All arguments to a function with the 'roxido' attribute must be of type 'RObject', but found '{}'.", string)
                 }
             }
             _ => panic!(
@@ -135,7 +135,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
             let tipe_as_string = quote!(#tipe).to_string();
             if tipe_as_string != "RObject" {
                 panic!(
-                    "A function with the 'roxido' attribute must return RObject, but found '{}'.",
+                    "A function with the 'roxido' attribute must return 'RObject', but found '{}'.",
                     tipe_as_string
                 );
             }
