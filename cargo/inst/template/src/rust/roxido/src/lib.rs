@@ -22,7 +22,6 @@ pub mod pc;
 pub mod print;
 pub mod r;
 pub mod rbindings;
-pub mod rold;
 pub mod stop;
 
 /// A procedural macro to facilitate calling a Rust function from R.
@@ -37,8 +36,3 @@ pub use stop::{RStopHelper, UnwrapOrStop};
 pub use pc::Pc;
 
 pub use r::{RObject, ToR1, ToR2, ToR3, ToR4, R};
-
-// pub use rold::{
-//     AllocateProtected, RFunction, RList, RMatrix, RObject, RVector, RVectorCharacter,
-//     TryAllocateProtected, R,
-// };

@@ -372,7 +372,7 @@ test_that("bool slice", {
     expect_error(f(as.integer(x)))
   }
   f <- rust_fn("
-    (&[true, false, true])
+    &[true, false, true]
   ")
   expect_identical(f(), c(TRUE, FALSE, TRUE))
   f <- rust_fn("
@@ -380,7 +380,7 @@ test_that("bool slice", {
   ")
   expect_identical(f(), c(TRUE, FALSE, TRUE))
   f <- rust_fn("
-    (&[true, false, true])
+    &[true, false, true]
   ")
   expect_identical(f(), c(TRUE, FALSE, TRUE))
   f <- rust_fn("
@@ -431,7 +431,7 @@ test_that("u8 slice", {
     expect_error(f(as.integer(x)))
   }
   f <- rust_fn("
-    (&[1_u8, 2, 3])
+    &[1_u8, 2, 3]
   ")
   expect_identical(f(), as.raw(c(1L, 2L, 3L)))
   f <- rust_fn("
