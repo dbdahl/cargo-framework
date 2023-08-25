@@ -1,38 +1,38 @@
 use faer_core::MatRef;
-use roxido::{Pc, RMatrix};
+use roxido::r::Matrix;
+use roxido::*;
 
 pub trait RMatrix2Faer {
-    fn as_faer_f64(self) -> Result<MatRef<'static, f64>, &'static str>;
+    fn as_faer(self) -> Result<MatRef<'static, f64>, &'static str>;
 }
 
-impl RMatrix2Faer for RMatrix {
-    fn as_faer_f64(self) -> Result<MatRef<'static, f64>, &'static str> {
-        Ok(unsafe {
-            use roxido::rbindings::*;
-            if Rf_isMatrix(self.0) == 0 {
-                return Err("Not a matrix");
+impl RMatrix2Faer for RObject<Matrix, f64> {
+    fn as_faer(self) -> Result<MatRef<'static, f64>, &'static str> {
+        Ok({
+            let nrow = self.nrow();
+            unsafe {
+                MatRef::from_raw_parts(
+                    self.slice().as_ptr(),
+                    nrow,
+                    self.ncol(),
+                    1,
+                    nrow.try_into().unwrap(),
+                )
             }
-            if Rf_isReal(self.0) == 0 {
-                return Err("Not f64");
-            }
-            let nrow = Rf_nrows(self.0).try_into().unwrap();
-            let ncol = Rf_ncols(self.0).try_into().unwrap();
-            let slice = self.slice_double()?;
-            MatRef::from_raw_parts(slice.as_ptr(), nrow, ncol, 1, nrow.try_into().unwrap())
         })
     }
 }
 
 pub trait Faer2RMatrix {
-    fn to_rmatrix(self, pc: &mut Pc) -> RMatrix;
+    fn to_r(self, pc: &mut Pc) -> RObject<Matrix, f64>;
 }
 
 impl Faer2RMatrix for MatRef<'_, f64> {
-    fn to_rmatrix(self, pc: &mut Pc) -> RMatrix {
+    fn to_r(self, pc: &mut Pc) -> RObject<Matrix, f64> {
         let nr = self.nrows();
         let nc = self.ncols();
-        let (result, result_slice) = RMatrix::new_double(nr, nc, pc);
-        for (k, r) in result_slice.iter_mut().enumerate() {
+        let result = R::new_matrix_double(nr, nc, pc);
+        for (k, r) in result.slice().iter_mut().enumerate() {
             *r = self.read(k % nr, k / nc);
         }
         result
