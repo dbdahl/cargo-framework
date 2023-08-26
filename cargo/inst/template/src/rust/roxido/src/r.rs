@@ -1013,13 +1013,13 @@ impl RObject<Vector, List> {
         for i in 0..self.len() {
             let x = self.get(i).unwrap();
             if unsafe { Rf_isVectorAtomic(x.sexp) == 0 } {
-                return Err("Expected an atomic vector");
+                return Err("Expected an atomic vector... Have you set the list elements yet?");
             }
             let len = unsafe { Rf_xlength(x.sexp) };
             if i == 0 {
                 nrow = len;
             } else if len != nrow {
-                return Err("Inconsistent number of rows");
+                return Err("Inconsistent number of rows among list elements");
             }
         }
         if row_names.len() != nrow as usize {
