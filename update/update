@@ -33,7 +33,6 @@ for x in DOTgitignore \
          src/rust/roxido/src/print.rs \
          src/rust/roxido/src/r.rs \
          src/rust/roxido/src/rbindings.rs \
-         src/rust/roxido/src/rold.rs \
          src/rust/roxido/src/stop.rs \
          src/rust/roxido_macro/Cargo.toml \
          src/rust/roxido_macro/src/lib.rs \

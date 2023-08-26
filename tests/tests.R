@@ -643,6 +643,7 @@ test_that("index into list", {
   ')
   expect_identical(f(1), "bill")
   expect_identical(f(2), 4)
+  expect_error(f(4))
   f <- rust_fn("
     let a = R::new_list(3, pc);
     a.set(3, &4.0.to_r(pc)).stop();
