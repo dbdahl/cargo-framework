@@ -9,13 +9,40 @@ pub struct RStopHelper(pub String);
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! stop {
     () => {
-        std::panic::panic_any(crate::RStopHelper(String::new()))
+        match std::env::var("RUST_BACKTRACE") {
+            Ok(_) => {
+                panic!("Panic in stop!() due to RUST_BACKTRACE environment variable")
+            },
+            Err(_) => {
+                std::panic::panic_any(crate::RStopHelper(String::new()))
+            }
+        }
     };
     ($fmt_string:expr) => {
-        std::panic::panic_any(crate::RStopHelper(format!($fmt_string)))
+        match std::env::var("RUST_BACKTRACE") {
+            Ok(_) => {
+                let mut msg = String::new();
+                msg.push_str("Panic in stop!(...) due to RUST_BACKTRACE environment variable... ");
+                msg.push_str(&format!($fmt_string));
+                panic!("{}", msg);
+            },
+            Err(_) => {
+                std::panic::panic_any(crate::RStopHelper(format!($fmt_string)))
+            }
+        }
     };
     ($fmt_string:expr, $( $arg:expr ),* ) => {
-        std::panic::panic_any(crate::RStopHelper(format!($fmt_string, $($arg),*)))
+        match std::env::var("RUST_BACKTRACE") {
+            Ok(_) => {
+                let mut msg = String::new();
+                msg.push_str("Panic in stop!(...) due to RUST_BACKTRACE environment variable... ");
+                msg.push_str(&format!($fmt_string, $($arg),*));
+                panic!("{}", msg);
+            },
+            Err(_) => {
+                std::panic::panic_any(crate::RStopHelper(format!($fmt_string, $($arg),*)))
+            }
+        }
     }
 }
 
