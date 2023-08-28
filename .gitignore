@@ -10,3 +10,6 @@ Cargo.lock
 roxido.txt
 registration.rs
 /README.html
+/cargo/inst/template/R/roxido.R
+/cargo/inst/template/inst/
+/cargo/inst/template/src/shim.c
