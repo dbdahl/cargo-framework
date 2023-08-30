@@ -80,7 +80,7 @@ impl R {
         }
     }
 
-    pub fn new(sexp: SEXP) -> RObject {
+    pub fn new_object(sexp: SEXP) -> RObject {
         Self::wrap(sexp)
     }
 
