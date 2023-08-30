@@ -37,6 +37,9 @@ pub struct Function(());
 pub struct ExternalPtr(());
 
 #[doc(hidden)]
+pub struct Symbol(());
+
+#[doc(hidden)]
 pub struct Unknown(());
 
 #[doc(hidden)]
@@ -75,6 +78,10 @@ impl R {
             sexp,
             rtype: PhantomData,
         }
+    }
+
+    pub fn new(sexp: SEXP) -> RObject {
+        Self::wrap(sexp)
     }
 
     fn new_vector<T>(code: u32, length: usize, pc: &mut Pc) -> RObject<Vector, T> {
@@ -174,7 +181,7 @@ impl R {
     }
 
     /// Define a new symbol.
-    pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject {
+    pub fn new_symbol(x: &str, pc: &mut Pc) -> RObject<Symbol, ()> {
         let sexp = pc.protect(unsafe {
             Rf_mkCharLenCE(
                 x.as_ptr() as *const c_char,
@@ -183,6 +190,26 @@ impl R {
             )
         });
         Self::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
+    }
+
+    pub fn symbol_dim() -> RObject<Symbol, ()> {
+        R::wrap(unsafe { R_DimSymbol })
+    }
+
+    pub fn symbol_names() -> RObject<Symbol, ()> {
+        R::wrap(unsafe { R_NamesSymbol })
+    }
+
+    pub fn symbol_rownames() -> RObject<Symbol, ()> {
+        R::wrap(unsafe { R_RowNamesSymbol })
+    }
+
+    pub fn symbol_dimnames() -> RObject<Symbol, ()> {
+        R::wrap(unsafe { R_DimNamesSymbol })
+    }
+
+    pub fn symbol_class() -> RObject<Symbol, ()> {
+        R::wrap(unsafe { R_ClassSymbol })
     }
 
     /// Move Rust object to an R external pointer
@@ -329,7 +356,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_function(&self) -> Result<RObject<Function, Unknown>, &'static str> {
+    pub fn as_function(&self) -> Result<RObject<Function, ()>, &'static str> {
         if unsafe { Rf_isFunction(self.sexp) != 0 } {
             Ok(self.convert())
         } else {
@@ -577,7 +604,7 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     pub fn get_class(&self) -> RObject<Vector, Character> {
-        R::wrap(unsafe { Rf_getAttrib(self.sexp, R_ClassSymbol) })
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, R::symbol_class().sexp) })
     }
 
     pub fn set_class(&self, names: &RObject<Vector, Character>) {
@@ -587,19 +614,18 @@ impl<RType, RMode> RObject<RType, RMode> {
     }
 
     /// Get an attribute.
-    pub fn get_attribute(&self, which: &str, pc: &mut Pc) -> RObject {
-        R::wrap(unsafe { Rf_getAttrib(self.sexp, R::new_symbol(which, pc).sexp) })
+    pub fn get_attribute(&self, which: &RObject<Symbol, ()>) -> RObject {
+        R::wrap(unsafe { Rf_getAttrib(self.sexp, which.sexp) })
     }
 
     /// Set an attribute.
     pub fn set_attribute<RTypeValue, RModeValue>(
         &self,
-        which: &str,
+        which: &RObject<Symbol, ()>,
         value: &RObject<RTypeValue, RModeValue>,
-        pc: &mut Pc,
     ) {
         unsafe {
-            Rf_setAttrib(self.sexp, R::new_symbol(which, pc).sexp, value.sexp);
+            Rf_setAttrib(self.sexp, which.sexp, value.sexp);
         }
     }
 
@@ -753,6 +779,17 @@ impl<T> RObject<Matrix, T> {
         [self.nrow(), self.ncol()]
     }
 
+    pub fn transpose(&self, pc: &mut Pc) -> RObject<Matrix, T> {
+        let transposed = self.duplicate(pc);
+        let dim: RObject<Vector, i32> =
+            self.get_attribute(&R::symbol_dim()).duplicate(pc).convert();
+        let slice = dim.slice();
+        slice.swap(0, 1);
+        transposed.set_attribute(&R::symbol_dim(), &dim);
+        unsafe { Rf_copyMatrix(transposed.sexp, self.sexp, Rboolean_TRUE) };
+        transposed
+    }
+
     // Manipulates the matrix in place to be a vector by dropping the `dim` attribute.
     pub fn to_vector(&self) -> RObject<Vector, T> {
         unsafe { Rf_setAttrib(self.sexp, R_DimSymbol, R_NilValue) };
@@ -773,7 +810,7 @@ impl<T> RObject<Array, T> {
     }
 }
 
-impl RObject<Function, Unknown> {
+impl RObject<Function, ()> {
     fn eval(expression: SEXP, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = pc.protect(expression);
         let mut p_out_error: i32 = 0;
@@ -816,7 +853,7 @@ impl RObject<Function, Unknown> {
         &self,
         arg1: &RObject<T1, M1>,
         arg2: &RObject<T2, M2>,
-        arg3: &RObject<T2, M3>,
+        arg3: &RObject<T3, M3>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang4(self.sexp, arg1.sexp, arg2.sexp, arg3.sexp) };
@@ -827,7 +864,7 @@ impl RObject<Function, Unknown> {
         &self,
         arg1: &RObject<T1, M1>,
         arg2: &RObject<T2, M2>,
-        arg3: &RObject<T2, M3>,
+        arg3: &RObject<T3, M3>,
         arg4: &RObject<T4, M4>,
         pc: &mut Pc,
     ) -> Result<RObject, i32> {
@@ -839,7 +876,7 @@ impl RObject<Function, Unknown> {
         &self,
         arg1: &RObject<T1, M1>,
         arg2: &RObject<T2, M2>,
-        arg3: &RObject<T2, M3>,
+        arg3: &RObject<T3, M3>,
         arg4: &RObject<T4, M4>,
         arg5: &RObject<T5, M5>,
         pc: &mut Pc,
@@ -1003,7 +1040,7 @@ impl RObject<Vector, List> {
     pub fn to_data_frame(
         &self,
         names: &RObject<Vector, Character>,
-        row_names: &RObject<Vector, Character>,
+        rownames: &RObject<Vector, Character>,
         pc: &mut Pc,
     ) -> Result<RObject<Vector, DataFrame>, &'static str> {
         if names.len() != self.len() {
@@ -1022,11 +1059,11 @@ impl RObject<Vector, List> {
                 return Err("Inconsistent number of rows among list elements");
             }
         }
-        if row_names.len() != nrow as usize {
+        if rownames.len() != nrow as usize {
             return Err("Length of row names is not correct");
         }
         self.set_names(names)?;
-        unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, row_names.sexp) };
+        unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, rownames.sexp) };
         self.set_class(&["data.frame"].to_r(pc));
         Ok(self.convert())
     }
@@ -1045,18 +1082,15 @@ impl RObject<Vector, DataFrame> {
         self.convert::<Vector, List>().set(index, value)
     }
 
-    pub fn get_row_names(&self) -> RObject<Vector, Character> {
+    pub fn get_rownames(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_RowNamesSymbol) })
     }
 
-    pub fn set_col_names(
-        &self,
-        row_names: &RObject<Vector, Character>,
-    ) -> Result<(), &'static str> {
-        if unsafe { Rf_length(row_names.sexp) != Rf_length(self.sexp) } {
+    pub fn set_rownames(&self, rownames: &RObject<Vector, Character>) -> Result<(), &'static str> {
+        if unsafe { Rf_length(rownames.sexp) != Rf_length(self.sexp) } {
             return Err("Length of row names is not correct");
         }
-        unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, row_names.sexp) };
+        unsafe { Rf_setAttrib(self.sexp, R_RowNamesSymbol, rownames.sexp) };
         Ok(())
     }
 }
@@ -1198,6 +1232,20 @@ impl<T> RObject<ExternalPtr, T> {
 
     pub fn set_type<S>(&self) -> RObject<ExternalPtr, S> {
         self.convert()
+    }
+
+    pub fn unset_type(&self) -> RObject<ExternalPtr, Unknown> {
+        self.convert()
+    }
+
+    pub fn address(&self) -> *mut c_void {
+        unsafe { R_ExternalPtrAddr(self.sexp) }
+    }
+
+    pub fn register_finalizer(&self, func: extern "C" fn(sexp: SEXP)) {
+        unsafe {
+            R_RegisterCFinalizerEx(self.sexp, Some(func), 0);
+        }
     }
 
     /// Get tag for an R external pointer

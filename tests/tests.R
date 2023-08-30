@@ -474,12 +474,12 @@ test_that("u8 slice", {
 test_that("attributes", {
   a <- 1
   f <- rust_fn(a, '
-    a.set_attribute("bill", &"bob".to_r(pc), pc);
+    a.set_attribute(&R::new_symbol("bill", pc), &"bob".to_r(pc));
     a
   ')
   expect_identical(attr(f(a), "bill"), "bob")
   f <- rust_fn(a, '
-    a.get_attribute("dim", pc)
+    a.get_attribute(&R::new_symbol("dim", pc))
   ')
   a <- c(1, 2)
   attr(a, "dim") <- c(2, 1)
@@ -709,12 +709,14 @@ test_that("new arrary", {
 })
 
 test_that("matrix", {
+  a <- matrix(1:8, nrow = 2)
+  f <- rust_fn(a, 'a.as_matrix().stop().transpose(pc)')
+  expect_identical(f(a), t(a))
   f <-  rust_fn(a, "
     let a = a.as_matrix().stop();
     let b = a.dim();
     [b[0] as i32, b[1] as i32]
   ")
-  a <- matrix(1:8, nrow = 2)
   expect_identical(f(a), c(2L, 4L))
   f <- rust_fn(a, "
     let b = a.as_matrix().stop();
@@ -724,7 +726,7 @@ test_that("matrix", {
   expect_true(is.vector(f(a)))
   f <- rust_fn(a, '
     let a = a.duplicate(pc);
-    a.set_attribute("dim", &R::null(), pc);
+    a.set_attribute(&R::new_symbol("dim", pc), &R::null());
     a
   ')
   expect_false(is.matrix(f(a)))
