@@ -217,7 +217,7 @@ impl R {
     /// This method moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
     /// Thus the programmer is then responsible to release the memory by calling [`RObject::decode_as_val`].
     ///
-    pub fn encode<T, RType, RMode>(x: T, tag: &RObject<RType, RMode>) -> RObject<ExternalPtr, T> {
+    pub fn encode<T, RType, RMode>(x: T, tag: &RObject<RType, RMode>) -> RObject<ExternalPtr, ()> {
         unsafe {
             // Move to Box<_> and then forget about it.
             let ptr = Box::into_raw(Box::new(x)) as *mut c_void;
@@ -364,7 +364,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, Unknown>, &'static str> {
+    pub fn as_external_ptr(&self) -> Result<RObject<ExternalPtr, ()>, &'static str> {
         if unsafe { TYPEOF(self.sexp) == EXTPTRSXP as i32 } {
             Ok(self.convert())
         } else {
