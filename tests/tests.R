@@ -788,9 +788,8 @@ test_that("external_ptr", {
   f <- rust_fn("
     let a = vec![10_i32, 11, 13];
     let b = R::encode(a, &R::null());
-    let d = b.decode_as_val();
-    let e: i32 = d[1];
-    e
+    let d = b.decode_as_val::<Vec<i32>>();
+    d[1]
   ")
   expect_identical(f(), 11L)
   f1_i32 <- rust_fn('
@@ -799,8 +798,7 @@ test_that("external_ptr", {
   ')
   f2_i32 <- rust_fn(b, "
     let b = b.as_external_ptr().stop();
-    let c = b.set_type::<Vec<i32>>();
-    let d = c.decode_as_ref();
+    let d = b.decode_as_ref::<Vec<i32>>();
     let e: i32 = d[1];
     e
   ")
@@ -818,13 +816,11 @@ test_that("external_ptr", {
     let tag = b.tag().as_vector().stop().as_mode_character().stop();
     let s = tag.get(0).stop();
     let result: RObject = if s == "vec_i32" {
-      let c = b.set_type::<Vec<i32>>();
-      let d = c.decode_as_ref();
+      let d = b.decode_as_ref::<Vec<i32>>();
       let e: i32 = d[1];
       e.to_r(pc).as_unknown()
     } else if s == "vec_f64" {
-      let c = b.set_type::<Vec<f64>>();
-      let d = c.decode_as_ref();
+      let d = b.decode_as_ref::<Vec<f64>>();
       let e: f64 = d[1];
       e.to_r(pc).as_unknown()
     } else {

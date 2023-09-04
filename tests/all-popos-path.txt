@@ -5,35 +5,35 @@ Build directory: /home/dahl/.cache/R/cargo/rust_fn
    Compiling proc-macro2 v1.0.66
    Compiling unicode-ident v1.0.11
    Compiling quote v1.0.33
-   Compiling syn v2.0.29
+   Compiling syn v2.0.31
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.51s
+    Finished release [optimized] target(s) in 4.85s
    Compiling roxido3 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.15s
+    Finished release [optimized] target(s) in 0.18s
     Updating crates.io index
    Compiling proc-macro2 v1.0.66
    Compiling unicode-ident v1.0.11
    Compiling quote v1.0.33
-   Compiling syn v2.0.29
+   Compiling syn v2.0.31
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido5 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.32s
+    Finished release [optimized] target(s) in 4.46s
     Updating crates.io index
    Compiling proc-macro2 v1.0.66
    Compiling unicode-ident v1.0.11
    Compiling quote v1.0.33
-   Compiling syn v2.0.29
+   Compiling syn v2.0.31
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido6 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.33s
+    Finished release [optimized] target(s) in 4.11s
 thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: "Not a function"', src/lib.rs:2:21
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 Error in (function ()  : An error was thrown!
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 266 ]
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 268 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
 * installing *source* package ‘testpkg’ ...
@@ -41,18 +41,18 @@ Rscript -e "cargo::new_package('testpkg')"
 ---
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.71.0' is available, which satisfies the need for '1.65'.
+Cargo version '1.72.0' is available, which satisfies the need for '1.64'.
     Updating crates.io index
    Compiling proc-macro2 v1.0.66
    Compiling unicode-ident v1.0.11
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
    Compiling quote v1.0.33
-   Compiling syn v2.0.29
+   Compiling syn v2.0.31
    Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized] target(s) in 3.33s
+    Finished release [optimized] target(s) in 5.57s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized] target(s) in 0.18s
+    Finished release [optimized] target(s) in 0.28s
 ---
 Built Rust static library.
 ** libs
@@ -94,7 +94,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [3s/11s] NOTE
+* checking CRAN incoming feasibility ... [4s/23s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
@@ -109,9 +109,9 @@ New submission
 * checking whether package ‘testpkg’ can be installed ... OK
 * used C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’
 * checking installed package size ... NOTE
-  installed size is  5.8Mb
+  installed size is  6.2Mb
   sub-directories of 1Mb or more:
-    libs   5.7Mb
+    libs   6.1Mb
 * checking package directory ... OK
 * checking for future file timestamps ... OK
 * checking DESCRIPTION meta-information ... NOTE
