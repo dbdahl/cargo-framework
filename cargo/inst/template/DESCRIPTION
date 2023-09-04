@@ -10,7 +10,7 @@ Authors@R: c(person(given = "First", family = "Last", role = c("aut", "cre"), em
 Description: One paragraph description of what the package does.
 License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 4.2.0)
-SystemRequirements: Cargo (Rust's package manager), rustc (>= 1.65)
+SystemRequirements: Cargo (Rust's package manager), rustc (>= 1.64)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
