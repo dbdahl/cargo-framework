@@ -228,7 +228,6 @@ impl R {
             let sexp = pc.protect(R_MakeExternalPtr(ptr as *mut c_void, tag.sexp, R_NilValue));
             if managed_by_r {
                 unsafe extern "C" fn free<S>(sexp: SEXP) {
-                    println!("Freeing...");
                     let addr = R_ExternalPtrAddr(sexp);
                     if addr.as_ref().is_none() {
                         return;
