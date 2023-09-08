@@ -217,11 +217,29 @@ impl R {
     /// This method moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
     /// Thus the programmer is then responsible to release the memory by calling [`RObject::decode_as_val`].
     ///
-    pub fn encode<T, RType, RMode>(x: T, tag: &RObject<RType, RMode>) -> RObject<ExternalPtr, ()> {
+    pub fn encode<T, RType, RMode>(
+        x: T,
+        tag: &RObject<RType, RMode>,
+        managed_by_r: bool,
+        pc: &mut Pc,
+    ) -> RObject<ExternalPtr, ()> {
         unsafe {
-            // Move to Box<_> and then forget about it.
-            let ptr = Box::into_raw(Box::new(x)) as *mut c_void;
-            Self::wrap(R_MakeExternalPtr(ptr, tag.sexp, R_NilValue))
+            let ptr = Box::into_raw(Box::new(x));
+            let sexp = pc.protect(R_MakeExternalPtr(ptr as *mut c_void, tag.sexp, R_NilValue));
+            if managed_by_r {
+                unsafe extern "C" fn free<S>(sexp: SEXP) {
+                    println!("Freeing...");
+                    let addr = R_ExternalPtrAddr(sexp);
+                    if addr.as_ref().is_none() {
+                        return;
+                    }
+                    let _ = Box::from_raw(addr as *mut S);
+                    R_ClearExternalPtr(sexp);
+                }
+                Rf_setAttrib(sexp, R_AtsignSymbol, R_AtsignSymbol);
+                R_RegisterCFinalizerEx(sexp, Some(free::<T>), 0);
+            }
+            Self::wrap(sexp)
         }
     }
 
@@ -1197,14 +1215,25 @@ impl RObject<Matrix, Character> {
 }
 
 impl RObject<ExternalPtr, ()> {
+    pub fn is_managed_by_r(&self) -> bool {
+        unsafe { Rf_getAttrib(self.sexp, R_AtsignSymbol) == R_AtsignSymbol }
+    }
+
     /// Move an R external pointer to a Rust object
     ///
     /// This method moves an R external pointer created by [`Self::external_pointer_encode`] to a Rust object and Rust will then manage its memory.
     ///
-    pub fn decode_as_val<T>(&self) -> T {
+    pub fn decode_as_val<T>(&self) -> Result<T, &'static str> {
+        if self.is_managed_by_r() {
+            return Err("External pointer is managed by R");
+        }
         unsafe {
-            let ptr = R_ExternalPtrAddr(self.sexp) as *mut T;
-            *Box::from_raw(ptr)
+            let addr = R_ExternalPtrAddr(self.sexp);
+            if addr.as_ref().is_none() {
+                return Err("External pointer was already decoded by value");
+            }
+            R_ClearExternalPtr(self.sexp);
+            Ok(*Box::from_raw(addr as *mut T))
         }
     }
 
@@ -1234,9 +1263,13 @@ impl RObject<ExternalPtr, ()> {
         unsafe { R_ExternalPtrAddr(self.sexp) }
     }
 
-    pub fn register_finalizer(&self, func: extern "C" fn(sexp: SEXP)) {
+    pub fn register_finalizer(&self, func: extern "C" fn(sexp: SEXP)) -> Result<(), &'static str> {
+        if self.is_managed_by_r() {
+            return Err("External pointer is managed by R");
+        }
         unsafe {
             R_RegisterCFinalizerEx(self.sexp, Some(func), 0);
+            Ok(())
         }
     }
 
