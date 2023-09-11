@@ -23,12 +23,12 @@ impl RMatrix2Faer for RObject<Matrix, f64> {
     }
 }
 
-pub trait Faer2RMatrix {
-    fn to_r(self, pc: &mut Pc) -> RObject<Matrix, f64>;
+pub trait ToR1<S, T> {
+    fn to_r(&self, pc: &mut Pc) -> RObject<S, T>;
 }
 
-impl Faer2RMatrix for MatRef<'_, f64> {
-    fn to_r(self, pc: &mut Pc) -> RObject<Matrix, f64> {
+impl ToR1<Matrix, f64> for MatRef<'_, f64> {
+    fn to_r(&self, pc: &mut Pc) -> RObject<Matrix, f64> {
         let nr = self.nrows();
         let nc = self.ncols();
         let result = R::new_matrix_double(nr, nc, pc);
