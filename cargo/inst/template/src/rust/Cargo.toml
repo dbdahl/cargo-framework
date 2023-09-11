@@ -9,7 +9,6 @@ publish = false
 crate-type = ["staticlib"]
 
 # To convert stop!() to panic!(), set RUST_BACKTRACE=1 environment variable.
-# But, the get helpful line numbers, also uncomment below and recompile.
 [profile.release]
 debug = "line-tables-only"
 
