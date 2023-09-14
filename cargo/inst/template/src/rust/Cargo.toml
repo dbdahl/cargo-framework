@@ -10,7 +10,7 @@ crate-type = ["staticlib"]
 
 # To convert stop!() to panic!(), set RUST_BACKTRACE=1 environment variable.
 [profile.release]
-debug = "line-tables-only"
+debug = 1
 
 [dependencies]
 roxido = { path="roxido" }
