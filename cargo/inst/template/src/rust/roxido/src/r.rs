@@ -21,13 +21,10 @@ pub struct R {}
 #[doc(hidden)]
 pub struct AnyType(());
 
-#[doc(hidden)]
 pub struct Vector(());
 
-#[doc(hidden)]
 pub struct Matrix(());
 
-#[doc(hidden)]
 pub struct Array(());
 
 #[doc(hidden)]
@@ -214,7 +211,7 @@ impl R {
 
     /// Move Rust object to an R external pointer
     ///
-    /// This method moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
+    /// This *method* moves a Rust object to an R external pointer and then, as far as Rust is concerned, leaks the memory.
     /// Thus the programmer is then responsible to release the memory by calling [`RObject::decode_as_val`].
     ///
     pub fn encode<T, RType, RMode>(
@@ -1396,7 +1393,7 @@ impl ToR1<Vector, i32> for &mut [i32] {
     }
 }
 
-impl<'a, T: Iterator<Item = &'a i32> + ExactSizeIterator> ToR2<Vector, i32> for T {
+impl<'a, T: IntoIterator<Item = &'a i32> + ExactSizeIterator> ToR2<Vector, i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
@@ -1407,7 +1404,7 @@ impl<'a, T: Iterator<Item = &'a i32> + ExactSizeIterator> ToR2<Vector, i32> for 
     }
 }
 
-impl<'a, T: Iterator<Item = &'a mut i32> + ExactSizeIterator> ToR3<Vector, i32> for T {
+impl<'a, T: IntoIterator<Item = &'a mut i32> + ExactSizeIterator> ToR3<Vector, i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
@@ -1418,7 +1415,7 @@ impl<'a, T: Iterator<Item = &'a mut i32> + ExactSizeIterator> ToR3<Vector, i32> 
     }
 }
 
-impl<T: Iterator<Item = i32> + ExactSizeIterator> ToR4<Vector, i32> for T {
+impl<T: IntoIterator<Item = i32> + ExactSizeIterator> ToR4<Vector, i32> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, i32> {
         let result = R::new_vector_integer(self.len(), pc);
         let slice = result.slice();
@@ -1497,7 +1494,7 @@ impl ToR1<Vector, u8> for &mut [u8] {
     }
 }
 
-impl<'a, T: Iterator<Item = &'a u8> + ExactSizeIterator> ToR2<Vector, u8> for T {
+impl<'a, T: IntoIterator<Item = &'a u8> + ExactSizeIterator> ToR2<Vector, u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
@@ -1508,7 +1505,7 @@ impl<'a, T: Iterator<Item = &'a u8> + ExactSizeIterator> ToR2<Vector, u8> for T 
     }
 }
 
-impl<'a, T: Iterator<Item = &'a mut u8> + ExactSizeIterator> ToR3<Vector, u8> for T {
+impl<'a, T: IntoIterator<Item = &'a mut u8> + ExactSizeIterator> ToR3<Vector, u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
@@ -1519,7 +1516,7 @@ impl<'a, T: Iterator<Item = &'a mut u8> + ExactSizeIterator> ToR3<Vector, u8> fo
     }
 }
 
-impl<T: Iterator<Item = u8> + ExactSizeIterator> ToR4<Vector, u8> for T {
+impl<T: IntoIterator<Item = u8> + ExactSizeIterator> ToR4<Vector, u8> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, u8> {
         let result = R::new_vector_raw(self.len(), pc);
         let slice = result.slice();
@@ -1572,7 +1569,7 @@ impl ToR1<Vector, bool> for &mut [bool] {
     }
 }
 
-impl<'a, T: Iterator<Item = &'a bool> + ExactSizeIterator> ToR2<Vector, bool> for T {
+impl<'a, T: IntoIterator<Item = &'a bool> + ExactSizeIterator> ToR2<Vector, bool> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, bool> {
         let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
@@ -1587,7 +1584,7 @@ impl<'a, T: Iterator<Item = &'a bool> + ExactSizeIterator> ToR2<Vector, bool> fo
     }
 }
 
-impl<'a, T: Iterator<Item = &'a mut bool> + ExactSizeIterator> ToR3<Vector, bool> for T {
+impl<'a, T: IntoIterator<Item = &'a mut bool> + ExactSizeIterator> ToR3<Vector, bool> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, bool> {
         let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
@@ -1602,7 +1599,7 @@ impl<'a, T: Iterator<Item = &'a mut bool> + ExactSizeIterator> ToR3<Vector, bool
     }
 }
 
-impl<T: Iterator<Item = bool> + ExactSizeIterator> ToR4<Vector, bool> for T {
+impl<T: IntoIterator<Item = bool> + ExactSizeIterator> ToR4<Vector, bool> for T {
     fn to_r(self, pc: &mut Pc) -> RObject<Vector, bool> {
         let result = R::new_vector_logical(self.len(), pc);
         let slice = result.slice();
