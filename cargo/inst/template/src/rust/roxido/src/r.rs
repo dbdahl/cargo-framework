@@ -77,6 +77,7 @@ impl R {
         }
     }
 
+    /// Create a new object from a SEXP
     pub fn new_object(sexp: SEXP) -> RObject {
         Self::wrap(sexp)
     }
@@ -85,22 +86,27 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
     }
 
+    /// Create a new vector of type f64
     pub fn new_vector_double(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
         Self::new_vector::<f64>(REALSXP, length, pc)
     }
 
+    /// Create a new vector of type i32
     pub fn new_vector_integer(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
+    /// Create a new vector of type u8
     pub fn new_vector_raw(length: usize, pc: &mut Pc) -> RObject<Vector, u8> {
         Self::new_vector::<u8>(RAWSXP, length, pc)
     }
 
+    /// Create a new vector of type bool
     pub fn new_vector_logical(length: usize, pc: &mut Pc) -> RObject<Vector, bool> {
         Self::new_vector::<bool>(LGLSXP, length, pc)
     }
 
+    /// Create a new vector of type Character
     pub fn new_vector_character(length: usize, pc: &mut Pc) -> RObject<Vector, Character> {
         Self::new_vector(STRSXP, length, pc)
     }
@@ -111,22 +117,27 @@ impl R {
         }))
     }
 
+    /// Create a new matrix of type f64
     pub fn new_matrix_double(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, f64> {
         Self::new_matrix::<f64>(REALSXP, nrow, ncol, pc)
     }
 
+    /// Create a new matrix of type i32
     pub fn new_matrix_integer(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, i32> {
         Self::new_matrix::<i32>(INTSXP, nrow, ncol, pc)
     }
 
+    /// Create a new matrix of type u8
     pub fn new_matrix_raw(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, u8> {
         Self::new_matrix::<u8>(RAWSXP, nrow, ncol, pc)
     }
 
+    /// Create a new matrix of type bool
     pub fn new_matrix_logical(nrow: usize, ncol: usize, pc: &mut Pc) -> RObject<Matrix, bool> {
         Self::new_matrix::<bool>(LGLSXP, nrow, ncol, pc)
     }
 
+    /// Create a new matrix of type Character
     pub fn new_matrix_character(
         nrow: usize,
         ncol: usize,
@@ -140,26 +151,32 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_allocArray(code, d.sexp) }))
     }
 
+    /// Create a new array of type f64
     pub fn new_array_double(dim: &[usize], pc: &mut Pc) -> RObject<Array, f64> {
         Self::new_array::<f64>(REALSXP, dim, pc)
     }
 
+    /// Create a new array of type i32
     pub fn new_array_integer(dim: &[usize], pc: &mut Pc) -> RObject<Array, i32> {
         Self::new_array::<i32>(INTSXP, dim, pc)
     }
 
+    /// Create a new array of type u8
     pub fn new_array_raw(dim: &[usize], pc: &mut Pc) -> RObject<Array, u8> {
         Self::new_array::<u8>(RAWSXP, dim, pc)
     }
 
+    /// Create a new array of type bool
     pub fn new_array_logical(dim: &[usize], pc: &mut Pc) -> RObject<Array, bool> {
         Self::new_array::<bool>(LGLSXP, dim, pc)
     }
 
+    /// Create a new array of type Character
     pub fn new_array_character(dim: &[usize], pc: &mut Pc) -> RObject<Array, Character> {
         Self::new_array::<Character>(STRSXP, dim, pc)
     }
 
+    /// Create a new list
     pub fn new_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
         Self::new_vector(VECSXP, length, pc)
     }
@@ -189,22 +206,27 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
+    /// Get the dimensions of a symbol
     pub fn symbol_dim() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_DimSymbol })
     }
 
+    /// Get the names from a symbol
     pub fn symbol_names() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_NamesSymbol })
     }
 
+    /// Get the row names of a symbol
     pub fn symbol_rownames() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_RowNamesSymbol })
     }
 
+    /// Get the dimension names from a symbol
     pub fn symbol_dimnames() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_DimNamesSymbol })
     }
 
+    /// Get the class of a symbol
     pub fn symbol_class() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_ClassSymbol })
     }
@@ -239,22 +261,27 @@ impl R {
         }
     }
 
+    /// Returns an R NA value as an RObject
     pub fn null() -> RObject {
         Self::wrap(unsafe { R_NilValue })
     }
 
+    /// Returns an R NA double as an f64
     pub fn na_double() -> f64 {
         unsafe { R_NaReal }
     }
 
+    /// Returns an R NA integer as an i32
     pub fn na_integer() -> i32 {
         unsafe { R_NaInt }
     }
 
+    /// Returns an R NA logical as an i32
     pub fn na_logical() -> i32 {
         unsafe { R_NaInt }
     }
 
+    /// Retruns an R NaN value as an f64
     pub fn nan() -> f64 {
         unsafe { R_NaN }
     }
@@ -1217,7 +1244,7 @@ impl RObject<ExternalPtr, ()> {
 
     /// Move an R external pointer to a Rust object
     ///
-    /// This method moves an R external pointer created by [`Self::external_pointer_encode`] to a Rust object and Rust will then manage its memory.
+    /// This method moves an R external pointer created by [`Self::as_external_ptr`] to a Rust object and Rust will then manage its memory.
     ///
     pub fn decode_as_val<T>(&self) -> Result<T, &'static str> {
         if self.is_managed_by_r() {
@@ -1235,7 +1262,7 @@ impl RObject<ExternalPtr, ()> {
 
     /// Obtain a reference to a Rust object from an R external pointer
     ///
-    /// This method obtained a reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
+    /// This method obtained a reference to a Rust object from an R external pointer created by [`Self::as_external_ptr`].
     ///
     pub fn decode_as_ref<T>(&self) -> &'static T {
         unsafe {
@@ -1246,7 +1273,7 @@ impl RObject<ExternalPtr, ()> {
 
     /// Obtain a mutable reference to a Rust object from an R external pointer
     ///
-    /// This method obtained a mutable reference to a Rust object from an R external pointer created by [`Self::external_pointer_encode`].
+    /// This method obtained a mutable reference to a Rust object from an R external pointer created by [`Self::as_external_ptr`].
     ///
     pub fn decode_as_mut<T>(&mut self) -> &'static mut T {
         unsafe {
@@ -1271,7 +1298,7 @@ impl RObject<ExternalPtr, ()> {
 
     /// Get tag for an R external pointer
     ///
-    /// This method get the tag associated with an R external pointer, which was set by [`Self::external_pointer_encode`].
+    /// This method get the tag associated with an R external pointer, which was set by [`Self::as_external_ptr`].
     ///
     pub fn tag(&self) -> RObject {
         R::wrap(unsafe { R_ExternalPtrTag(self.sexp) })

@@ -16,7 +16,7 @@
 //! overhead and allows a programmer to easily add additional wrappers.
 //!
 //! This crate provides the Rust API for the cargo framework.  Of particular note
-//! is [R], [RObject], [RVector], [RMatrix], [RVectorCharacter], [RList], and [RFunction].
+//! is [R] and [RObject].
 
 pub mod pc;
 pub mod print;
