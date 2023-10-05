@@ -360,7 +360,7 @@ impl<RType, RMode> RObject<RType, RMode> {
         R::wrap(self.sexp)
     }
 
-    /// Convert RObject of any RType and RMode to unknown RType and RMode 
+    /// Convert RObject of any RType and RMode to unknown RType and RMode
     pub fn as_unknown(&self) -> RObject {
         self.convert()
     }
@@ -927,16 +927,19 @@ impl RObject<Function, ()> {
         }
     }
 
+    /// Evaluate a function with 0 parameters
     pub fn call0(&self, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang1(self.sexp) };
         Self::eval(expression, pc)
     }
 
+    /// Evaluate a function with 1 parameter
     pub fn call1<T1, M1>(&self, arg1: &RObject<T1, M1>, pc: &mut Pc) -> Result<RObject, i32> {
         let expression = unsafe { Rf_lang2(self.sexp, arg1.sexp) };
         Self::eval(expression, pc)
     }
 
+    /// Evaluate a function with 2 parameters
     pub fn call2<T1, M1, T2, M2>(
         &self,
         arg1: &RObject<T1, M1>,
@@ -947,6 +950,7 @@ impl RObject<Function, ()> {
         Self::eval(expression, pc)
     }
 
+    /// Evaluate a function with 3 parameters
     pub fn call3<T1, M1, T2, M2, T3, M3>(
         &self,
         arg1: &RObject<T1, M1>,
@@ -958,6 +962,7 @@ impl RObject<Function, ()> {
         Self::eval(expression, pc)
     }
 
+    /// Evaluate a function with 4 parameters
     pub fn call4<T1, M1, T2, M2, T3, M3, T4, M4>(
         &self,
         arg1: &RObject<T1, M1>,
@@ -970,6 +975,7 @@ impl RObject<Function, ()> {
         Self::eval(expression, pc)
     }
 
+    /// Evaluate a function with 5 parameters
     pub fn call5<T1, M1, T2, M2, T3, M3, T4, M4, T5, M5>(
         &self,
         arg1: &RObject<T1, M1>,
@@ -1015,10 +1021,12 @@ impl<RMode> RObject<Vector, RMode> {
         }
     }
 
+    /// Get names of values in a Vector
     pub fn get_names(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_NamesSymbol) })
     }
 
+    /// Set names of values in a Vector
     pub fn set_names(&self, names: &RObject<Vector, Character>) -> Result<(), &'static str> {
         if unsafe { Rf_length(names.sexp) != Rf_length(self.sexp) } {
             return Err("Length of names is not correct");
@@ -1031,44 +1039,53 @@ impl<RMode> RObject<Vector, RMode> {
 }
 
 impl RObject<Vector, f64> {
+    /// Get the value at a certain index in an f64 Vector
     pub fn get(&self, index: usize) -> Result<f64, &'static str> {
         self.get_engine(index, REAL_ELT)
     }
 
+    /// Set the value at a certain index in an f64 Vector
     pub fn set(&self, index: usize, value: f64) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_REAL_ELT)
     }
 }
 
 impl RObject<Vector, i32> {
+    /// Get the value at a certain index in an i32 Vector
     pub fn get(&self, index: usize) -> Result<i32, &'static str> {
         self.get_engine(index, INTEGER_ELT)
     }
 
+    /// Set the value at a certain index in an i32 Vector
     pub fn set(&self, index: usize, value: i32) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_INTEGER_ELT)
     }
 }
 
 impl RObject<Vector, u8> {
+    /// Get the value at a certain index in a u8 Vector
     pub fn get(&self, index: usize) -> Result<u8, &'static str> {
         self.get_engine(index, RAW_ELT)
     }
 
+    /// Set the value at a certain index in a u8 Vector
     pub fn set(&self, index: usize, value: u8) -> Result<(), &'static str> {
         self.set_engine(index, value, SET_RAW_ELT)
     }
 }
 
 impl RObject<Vector, bool> {
+    /// Get the value at a certain index in a bool Vector
     pub fn get(&self, index: usize) -> Result<bool, &'static str> {
         self.get_engine(index, LOGICAL_ELT).map(|x| x != 0)
     }
 
+    /// Get the value at a certain index in a bool Vector as an i32
     pub fn get_i32(&self, index: usize) -> Result<i32, &'static str> {
         self.get_engine(index, LOGICAL_ELT)
     }
 
+    /// Set the value at a certain index in a bool Vector
     pub fn set(&self, index: usize, value: bool) -> Result<(), &'static str> {
         let value = if value {
             Rboolean_TRUE as i32
@@ -1078,6 +1095,7 @@ impl RObject<Vector, bool> {
         self.set_engine(index, value, SET_LOGICAL_ELT)
     }
 
+    /// Set the value at certain index in a bool Vector with an i32
     pub fn set_i32(&self, index: usize, value: i32) -> Result<(), &'static str> {
         let value = if value != 0 {
             Rboolean_TRUE as i32
@@ -1089,6 +1107,7 @@ impl RObject<Vector, bool> {
 }
 
 impl RObject<Vector, Character> {
+    /// Get the value at a certain index in a Character Vector
     pub fn get<'a>(&self, index: usize) -> Result<&'a str, &'static str> {
         match self.get_engine(index, STRING_ELT) {
             Ok(sexp) => {
@@ -1099,6 +1118,7 @@ impl RObject<Vector, Character> {
         }
     }
 
+    /// Set the value at a certain index in a Character Vector
     pub fn set(&self, index: usize, value: &str) -> Result<(), &'static str> {
         unsafe {
             let value = Rf_mkCharLenCE(
@@ -1110,6 +1130,7 @@ impl RObject<Vector, Character> {
         }
     }
 
+    /// Set the value at a certain index in a Character Vector to NA
     pub fn set_na(&self, index: usize) {
         unsafe {
             SET_STRING_ELT(self.sexp, index.try_into().unwrap(), R_NaString);
@@ -1118,10 +1139,12 @@ impl RObject<Vector, Character> {
 }
 
 impl RObject<Vector, List> {
+    /// Get the value at a certain index in a List
     pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
         self.get_engine(index, VECTOR_ELT).map(R::wrap)
     }
 
+    /// Set the value at a certain index in a List
     pub fn set<RType, RMode>(
         &self,
         index: usize,
@@ -1135,6 +1158,7 @@ impl RObject<Vector, List> {
         }
     }
 
+    /// Convert a List to a DataFrame
     pub fn to_data_frame(
         &self,
         names: &RObject<Vector, Character>,
@@ -1168,10 +1192,12 @@ impl RObject<Vector, List> {
 }
 
 impl RObject<Vector, DataFrame> {
+    /// Get the value at a certain index in a DataFrame
     pub fn get(&self, index: usize) -> Result<RObject, &'static str> {
         self.convert::<Vector, List>().get(index)
     }
 
+    /// Set the value at a certain index in a DataFrame
     pub fn set<RType, RMode>(
         &self,
         index: usize,
@@ -1180,10 +1206,12 @@ impl RObject<Vector, DataFrame> {
         self.convert::<Vector, List>().set(index, value)
     }
 
+    /// Get the row names of a DataFrame
     pub fn get_rownames(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_RowNamesSymbol) })
     }
 
+    /// Set the row names of a DataFrame
     pub fn set_rownames(&self, rownames: &RObject<Vector, Character>) -> Result<(), &'static str> {
         if unsafe { Rf_length(rownames.sexp) != Rf_length(self.sexp) } {
             return Err("Length of row names is not correct");
@@ -1194,15 +1222,18 @@ impl RObject<Vector, DataFrame> {
 }
 
 impl<RMode> RObject<Matrix, RMode> {
+    /// Get the index of a value based on the row and column number
     pub fn index(&self, (i, j): (usize, usize)) -> usize {
         let nrow = self.nrow();
         nrow * j + i
     }
 
+    /// Get the dimension names of a matrix
     pub fn get_dimnames(&self) -> RObject<Vector, Character> {
         R::wrap(unsafe { Rf_getAttrib(self.sexp, R_DimNamesSymbol) })
     }
 
+    /// Set the dimension namesof a matrix
     pub fn set_dimnames(&self, dimnames: &RObject<Vector, List>) -> Result<(), &'static str> {
         if dimnames.len() != 2 {
             return Err("Length should be two");
@@ -1231,48 +1262,58 @@ impl<RMode> RObject<Matrix, RMode> {
 }
 
 impl RObject<Matrix, f64> {
+    /// Get the value at a certain index in an f64 Matrix
     pub fn get(&self, index: (usize, usize)) -> Result<f64, &'static str> {
         self.convert::<Vector, f64>().get(self.index(index))
     }
 
+    /// Set the value at a certain index in an f64 Matrix
     pub fn set(&self, index: (usize, usize), value: f64) -> Result<(), &'static str> {
         self.convert::<Vector, f64>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, i32> {
+    /// Get the value at a certain index in an i32 Matrix
     pub fn get(&self, index: (usize, usize)) -> Result<i32, &'static str> {
         self.convert::<Vector, i32>().get(self.index(index))
     }
 
+    /// Set the value at a certain index in an i32 Matrix
     pub fn set(&self, index: (usize, usize), value: i32) -> Result<(), &'static str> {
         self.convert::<Vector, i32>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, u8> {
+    /// Get the value at a certain index in a u8 Matrix
     pub fn get(&self, index: (usize, usize)) -> Result<u8, &'static str> {
         self.convert::<Vector, u8>().get(self.index(index))
     }
 
+    /// Set the value at a certain index in a u8 Matrix
     pub fn set(&self, index: (usize, usize), value: u8) -> Result<(), &'static str> {
         self.convert::<Vector, u8>().set(self.index(index), value)
     }
 }
 
 impl RObject<Matrix, bool> {
+    /// Get the value at a certain index in a bool Matrix
     pub fn get(&self, index: (usize, usize)) -> Result<bool, &'static str> {
         self.convert::<Vector, bool>().get(self.index(index))
     }
 
+    /// Get the value at a certain index in a bool Matrix as an i32
     pub fn get_i32(&self, index: (usize, usize)) -> Result<i32, &'static str> {
         self.convert::<Vector, bool>().get_i32(self.index(index))
     }
 
+    /// Set the value at a certain index in a bool Matrix
     pub fn set(&self, index: (usize, usize), value: bool) -> Result<(), &'static str> {
         self.convert::<Vector, bool>().set(self.index(index), value)
     }
 
+    /// Set the value at a certain index in a bool Matrix an an i32
     pub fn set_i32(&self, index: (usize, usize), value: i32) -> Result<(), &'static str> {
         self.convert::<Vector, bool>()
             .set_i32(self.index(index), value)
@@ -1280,10 +1321,12 @@ impl RObject<Matrix, bool> {
 }
 
 impl RObject<Matrix, Character> {
+    /// Get the value at a certain index in a Character Matrix
     pub fn get(&self, index: (usize, usize)) -> Result<&str, &'static str> {
         self.convert::<Vector, Character>().get(self.index(index))
     }
 
+    /// Set the value at a certain index in a Character Matrix
     pub fn set<RType, RMode>(
         &self,
         index: (usize, usize),
@@ -1295,6 +1338,7 @@ impl RObject<Matrix, Character> {
 }
 
 impl RObject<ExternalPtr, ()> {
+    /// Check if an external pointer is managed by R
     pub fn is_managed_by_r(&self) -> bool {
         unsafe { Rf_getAttrib(self.sexp, R_AtsignSymbol) == R_AtsignSymbol }
     }
@@ -1339,10 +1383,14 @@ impl RObject<ExternalPtr, ()> {
         }
     }
 
+    /// Get the memory address of the external pointer
     pub fn address(&self) -> *mut c_void {
         unsafe { R_ExternalPtrAddr(self.sexp) }
     }
 
+    /// Register the external pointer to be finalized
+    ///
+    /// This allows the object to perform cleanup actions when no longer referenced in R
     pub fn register_finalizer(&self, func: extern "C" fn(sexp: SEXP)) -> Result<(), &'static str> {
         if self.is_managed_by_r() {
             return Err("External pointer is managed by R");
@@ -1364,18 +1412,30 @@ impl RObject<ExternalPtr, ()> {
 
 // Conversions
 
+/// Trait for converting objects to RObjects
+///
+/// The traits R2, R3, and R4 are needed for generic data types that have required trait implementations
 pub trait ToR1<S, T> {
     fn to_r(&self, pc: &mut Pc) -> RObject<S, T>;
 }
 
+/// Trait for converting objects to RObjects
+///
+/// Used for generic data types that implement IntoIterator on immutable references
 pub trait ToR2<S, T> {
     fn to_r(self, pc: &mut Pc) -> RObject<S, T>;
 }
 
+/// Trait for converting objects to RObjects
+///
+/// Used for generic data types that implement IntoIterator on mutable references
 pub trait ToR3<S, T> {
     fn to_r(self, pc: &mut Pc) -> RObject<S, T>;
 }
 
+/// Trait for converting objects to RObjects
+///
+/// Used for generic data types that implement IntoIterator on owned data
 pub trait ToR4<S, T> {
     fn to_r(self, pc: &mut Pc) -> RObject<S, T>;
 }
