@@ -77,7 +77,7 @@ impl R {
         }
     }
 
-    /// Create a new object from a SEXP
+    /// Create a new object from a SEXP.
     pub fn new_object(sexp: SEXP) -> RObject {
         Self::wrap(sexp)
     }
@@ -86,27 +86,27 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_allocVector(code, length.try_into().unwrap()) }))
     }
 
-    /// Create a new vector of type f64
+    /// Create a new vector of storage mode "double".
     pub fn new_vector_double(length: usize, pc: &mut Pc) -> RObject<Vector, f64> {
         Self::new_vector::<f64>(REALSXP, length, pc)
     }
 
-    /// Create a new vector of type i32
+    /// Create a new vector of type storage mode "integer".
     pub fn new_vector_integer(length: usize, pc: &mut Pc) -> RObject<Vector, i32> {
         Self::new_vector::<i32>(INTSXP, length, pc)
     }
 
-    /// Create a new vector of type u8
+    /// Create a new vector of storage mode "raw".
     pub fn new_vector_raw(length: usize, pc: &mut Pc) -> RObject<Vector, u8> {
         Self::new_vector::<u8>(RAWSXP, length, pc)
     }
 
-    /// Create a new vector of type bool
+    /// Create a new vector of storage mode "logical".
     pub fn new_vector_logical(length: usize, pc: &mut Pc) -> RObject<Vector, bool> {
         Self::new_vector::<bool>(LGLSXP, length, pc)
     }
 
-    /// Create a new vector of type Character
+    /// Create a new vector of storage mode "character".
     pub fn new_vector_character(length: usize, pc: &mut Pc) -> RObject<Vector, Character> {
         Self::new_vector(STRSXP, length, pc)
     }
@@ -206,27 +206,27 @@ impl R {
         Self::wrap(pc.protect(unsafe { Rf_installChar(sexp) }))
     }
 
-    /// Get the dimensions of a symbol
+    /// Get R's "dim" symbol.
     pub fn symbol_dim() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_DimSymbol })
     }
 
-    /// Get the names from a symbol
+    /// Get R's "names" symbol.
     pub fn symbol_names() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_NamesSymbol })
     }
 
-    /// Get the row names of a symbol
+    /// Get R's "rownames" symbol.
     pub fn symbol_rownames() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_RowNamesSymbol })
     }
 
-    /// Get the dimension names from a symbol
+    /// Get R's "dimnames" symbol.
     pub fn symbol_dimnames() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_DimNamesSymbol })
     }
 
-    /// Get the class of a symbol
+    /// Get R's "class" symbol.
     pub fn symbol_class() -> RObject<Symbol, ()> {
         R::wrap(unsafe { R_ClassSymbol })
     }
@@ -261,37 +261,37 @@ impl R {
         }
     }
 
-    /// Returns an R NA value as an RObject
+    /// Returns a R's NULL value.
     pub fn null() -> RObject {
         Self::wrap(unsafe { R_NilValue })
     }
 
-    /// Returns an R NA double as an f64
+    /// Returns a R's NA value for storage mode "double".
     pub fn na_double() -> f64 {
         unsafe { R_NaReal }
     }
 
-    /// Returns an R NA integer as an i32
+    /// Returns a R's NA value for storage mode "integer".
     pub fn na_integer() -> i32 {
         unsafe { R_NaInt }
     }
 
-    /// Returns an R NA logical as an i32
+    /// Returns a R's NA value for storage mode "integer".
     pub fn na_logical() -> i32 {
         unsafe { R_NaInt }
     }
 
-    /// Returns an R NaN value as an f64
+    /// Returns a R's NaN value.
     pub fn nan() -> f64 {
         unsafe { R_NaN }
     }
 
-    /// Returns an R Inf as an f64
+    /// Returns a R's Inf value.
     pub fn infinity_positive() -> f64 {
         unsafe { R_PosInf }
     }
 
-    /// Returns an R -Inf as an f64
+    /// Returns a R's -Inf value.
     pub fn infinity_negative() -> f64 {
         unsafe { R_NegInf }
     }
@@ -360,13 +360,13 @@ impl<RType, RMode> RObject<RType, RMode> {
         R::wrap(self.sexp)
     }
 
-    /// Convert RObject of any RType and RMode to unknown RType and RMode
+    /// Recharacterize an RObject<RType, RMode> as an RObject (i.e., an RObject<AnyType, Unknown>).
     pub fn as_unknown(&self) -> RObject {
         self.convert()
     }
 
-    /// Attempt to convert RObject to RType Vector
-    /// Will fail if data is not atomic
+    /// Check if appropriate to characterize as an RObject<Vector, Unknown>.
+    /// Checks using R's `Rf_isVectorAtomic` function.
     pub fn as_vector(&self) -> Result<RObject<Vector, Unknown>, &'static str> {
         if unsafe { Rf_isVectorAtomic(self.sexp) != 0 } {
             Ok(self.convert())
@@ -375,8 +375,8 @@ impl<RType, RMode> RObject<RType, RMode> {
         }
     }
 
-    /// Attempt to convert RObject to RType Matrix
-    /// Will fail if data is not atomic
+    /// Check if appropriate to characterize as an RObject<Matrix, Unknown>.
+    /// Checks using R's `Rf_isMatrix` function.
     pub fn as_matrix(&self) -> Result<RObject<Matrix, Unknown>, &'static str> {
         if unsafe { Rf_isMatrix(self.sexp) != 0 } {
             Ok(self.convert())
