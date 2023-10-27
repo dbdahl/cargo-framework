@@ -1,8 +1,8 @@
+install target = ".":
+  R CMD INSTALL {{target}}
+
 build:
   R CMD build .
-
-install target=default_target:
-  R CMD INSTALL {{target}}
 
 document:
   Rscript -e "roxygen2::roxygenise()"
@@ -10,7 +10,18 @@ document:
 cran:
   Rscript -e "cargo::build_for_cran()"
 
+deploy host = "": cran (install `just srcpkg`)
+  #!/usr/bin/env sh
+  if test "{{host}}" != ""
+  then
+    srcpkg=`Rscript -e "a <- read.dcf('DESCRIPTION'); cat(a[,'Package'],'_',a[,'Version'],'.tar.gz',sep='')"`
+    scp "$srcpkg" {{host}}:.
+    ssh {{host}} R CMD INSTALL "$srcpkg"
+  fi
+
 api:
   Rscript -e "cargo::api_documentation()"
 
-default_target := "."
+srcpkg:
+  Rscript -e "a <- read.dcf('DESCRIPTION'); cat(a[,'Package'],'_',a[,'Version'],'.tar.gz',sep='')"
+
