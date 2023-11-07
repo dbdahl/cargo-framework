@@ -115,7 +115,7 @@ euclidean_norm(rnorm(10))
 ```
 
 Notice that if you redefine the `euclidean_norm` function, the second
-complication is much faster.
+compilation is much faster.
 
 Again, for full details, please read the paper
 [*Writing R Extensions in Rust*](https://raw.githubusercontent.com/dbdahl/cargo-framework/main/cargo/inst/doc/Writing_R_Extensions_in_Rust.pdf).
