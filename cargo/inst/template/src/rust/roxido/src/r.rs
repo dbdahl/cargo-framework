@@ -176,7 +176,7 @@ impl R {
         Self::new_array::<Character>(STRSXP, dim, pc)
     }
 
-    /// Create a new list
+    /// Create a new list.
     pub fn new_list(length: usize, pc: &mut Pc) -> RObject<Vector, List> {
         Self::new_vector(VECSXP, length, pc)
     }
