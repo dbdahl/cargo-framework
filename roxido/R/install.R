@@ -17,11 +17,11 @@ install <- function(force = FALSE) {
 (an official Rust website) and install it into the directory:
     %s
 The directory will then be used to keep the Rust installation up-to-date
-and to cache compilation artifacts.  The cargo package purges cache items
+and to cache compilation artifacts.  The roxido package purges cache items
 every %s days, but you can change the frequency by modifying the last line
 of the "%s" file in the directory. You can revoke permission at
 any time by deleting the directory.\n\n', cache_dir, days_until_next_purge, basename(last_purge_filename()))
-  suggestion <- "Please try again in an interactive session or use 'cargo::install(force=TRUE)'.\n"
+  suggestion <- "Please try again in an interactive session or use 'roxido::install(force=TRUE)'.\n"
   if (!get_permission(message, suggestion, force)) {
     return(invisible(FALSE))
   }
@@ -38,7 +38,7 @@ any time by deleting the directory.\n\n', cache_dir, days_until_next_purge, base
   rustup_init <- file.path(cache_dir, sprintf("rustup-init.%s", ifelse(windows, "exe", "sh")))
   URL <- ifelse(windows, "https://win.rustup.rs/x86_64", "https://sh.rustup.rs")
   if (tryCatch(utils::download.file(URL, rustup_init, mode = "wb", quiet = FALSE), warning = function(e) 1, error = function(e) 1) != 0) {
-    msg(sprintf("\nCould not download '%s' to '%s'.\nPlease try again by running 'cargo::install()' in an interactive session.\n\n", URL, rustup_init))
+    msg(sprintf("\nCould not download '%s' to '%s'.\nPlease try again by running 'roxido::install()' in an interactive session.\n\n", URL, rustup_init))
     return(invisible(FALSE))
   }
   msg("Running installation. Please be patient.\n")
@@ -50,13 +50,13 @@ any time by deleting the directory.\n\n', cache_dir, days_until_next_purge, base
     writeLines(lines, rustup_init_bat)
     status <- system3(rustup_init_bat, stdout = rustup_init_stdout, stderr = rustup_init_stderr, env = vars)
     if (status != 0) {
-      msg(sprintf("There was a problem running the rustup installer at '%s'.\nSee '%s' and '%s'.\nPlease try again by running 'cargo::install()' in an interactive session.\n", rustup_init, rustup_init_stdout, rustup_init_stderr))
+      msg(sprintf("There was a problem running the rustup installer at '%s'.\nSee '%s' and '%s'.\nPlease try again by running 'roxido::install()' in an interactive session.\n", rustup_init, rustup_init_stdout, rustup_init_stderr))
       return(invisible(FALSE))
     }
     unlink(rustup_init_bat)
   } else {
     if (system3("sh", c(shQuote(rustup_init), "--no-modify-path", "-y"), stdout = rustup_init_stdout, stderr = rustup_init_stderr, env = vars) != 0) {
-      msg(sprintf("There was a problem running the rustup installer at '%s'.\nSee '%s' and '%s'.\nPlease try again by running 'cargo::install()' in an interactive session.\n", rustup_init, rustup_init_stdout, rustup_init_stderr))
+      msg(sprintf("There was a problem running the rustup installer at '%s'.\nSee '%s' and '%s'.\nPlease try again by running 'roxido::install()' in an interactive session.\n", rustup_init, rustup_init_stdout, rustup_init_stderr))
       return(invisible(FALSE))
     }
   }

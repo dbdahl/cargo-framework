@@ -117,7 +117,7 @@ get_lib_path <- function(verbose, cached, force) {
   if (!dir.exists(path)) {
     message <- sprintf('\nThis function needs to cache files in the directory:
     %s
-The cargo package purges cache items every %s days, but you can change
+The roxido package purges cache items every %s days, but you can change
 the frequency by modifying the last line of the "%s" file in
 the directory.  You can revoke permission at any time by deleting the
 directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
@@ -141,7 +141,7 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
     path <- file.path(tmpdir = tempdir(check = TRUE), paste0("roxido-", Sys.getpid()))
   }
   stamp_file <- file.path(path, "stamp")
-  if (!isTRUE(cached) || !file.exists(stamp_file) || packageVersion("cargo") > readRDS(stamp_file)) {
+  if (!isTRUE(cached) || !file.exists(stamp_file) || packageVersion("roxido") > readRDS(stamp_file)) {
     copy_from_template()
   }
   verbose <- if (isTRUE(verbose)) {
@@ -164,12 +164,12 @@ copy_from_template <- function() {
   path <- file.path(parent, "rust_fn")
   unlink(path, recursive = TRUE, force = TRUE)
   dir.create(path, showWarnings = FALSE)
-  saveRDS(packageVersion("cargo"), file = file.path(path, "stamp"))
+  saveRDS(packageVersion("roxido"), file = file.path(path, "stamp"))
   dir.create(file.path(path, "R"), showWarnings = FALSE)
   rustlib_directory <- file.path(path, "rust")
   dir.create(rustlib_directory, showWarnings = FALSE)
-  file.copy(system.file(file.path("template", "src", "rust", "roxido"), package = "cargo"), rustlib_directory, recursive = TRUE)
-  file.copy(system.file(file.path("template", "src", "rust", "roxido_macro"), package = "cargo"), rustlib_directory, recursive = TRUE)
+  file.copy(system.file(file.path("template", "src", "rust", "roxido"), package = "roxido"), rustlib_directory, recursive = TRUE)
+  file.copy(system.file(file.path("template", "src", "rust", "roxido_macro"), package = "roxido"), rustlib_directory, recursive = TRUE)
   unlink(file.path(path, "rust", "target"), recursive = TRUE, force = TRUE)
 }
 

@@ -13,7 +13,7 @@ new_package <- function(path) {
   if (!grepl("^[a-zA-Z][a-zA-Z0-9]+$", pkgname)) stop(sprintf("The name '%s' is not a valid.", pkgname))
   if (file.exists(path) || dir.exists(path)) stop(sprintf("The path '%s' already exists.", path))
   dir.create(path)
-  file.copy(list.files(system.file(file.path("template"), package = "cargo"),
+  file.copy(list.files(system.file(file.path("template"), package = "roxido"),
             all.files = TRUE, no.. = TRUE, full.names = TRUE), path, recursive = TRUE)
   file.rename(file.path(path, "DOTRbuildignore"), file.path(path, ".Rbuildignore"))
   file.rename(file.path(path, "DOTgitignore"), file.path(path, ".gitignore"))

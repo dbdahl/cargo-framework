@@ -19,7 +19,7 @@ authors <- function() {
   authors_crates <- function() {
     x <- run("authors", stdout = TRUE)
     if (!is.null(attr(x, "status")) && attr(x, "status") != 0) {
-      stop("Could not run 'cargo authors'. Install it with 'cargo::run(\"install\",\"cargo-authors\")'")
+      stop("Could not run 'cargo authors'. Install it with 'roxido::run(\"install\",\"cargo-authors\")'")
     }
     x[-(1:2)]
   }

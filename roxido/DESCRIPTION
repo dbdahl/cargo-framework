@@ -1,4 +1,4 @@
-Package: cargo
+Package: roxido
 Title: Develop R Packages using Rust
 Version: 0.4.9
 Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu",comment=c(ORCID="0000-0002-8173-1547")))
