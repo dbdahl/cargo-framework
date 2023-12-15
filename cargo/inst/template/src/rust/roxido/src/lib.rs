@@ -16,7 +16,42 @@
 //! overhead and allows a programmer to easily add additional wrappers.
 //!
 //! This crate provides the Rust API for the cargo framework.  Of particular note
-//! is [R], [RObject], [RVector], [RMatrix], [RVectorCharacter], [RList], and [RFunction].
+//! is [R] and [RObject].
+//!
+//! # Example
+//!
+//! This example function takes two R vectors and computes the convolution
+//! of them. Any function with the roxido attribute must return an [RObject],
+//! and may only take parameters of [RObject] type.
+//!
+//! ```
+//! use roxido::*;
+//!
+//! #[roxido]
+//! fn convolve2(a: RObject, b: RObject) -> RObject {
+//!     let a = a
+//!         .as_vector()
+//!         .stop_str("'a' not a vector.")
+//!         .to_mode_double(pc)
+//!         .slice();
+//!     let b = b
+//!         .as_vector()
+//!         .stop_str("'b' not a vector.")
+//!         .to_mode_double(pc)
+//!         .slice();
+//!     let r = R::new_vector_double(a.len() + b.len() - 1, pc);
+//!     let ab = r.slice();
+//!     for abi in ab.iter_mut() {
+//!         *abi = 0.0;
+//!     }
+//!     for (i, ai) in a.iter().enumerate() {
+//!         for (j, bj) in b.iter().enumerate() {
+//!             ab[i + j] += ai + bj;
+//!         }
+//!     }
+//!     r
+//! }
+//! ```
 
 pub mod pc;
 pub mod print;
