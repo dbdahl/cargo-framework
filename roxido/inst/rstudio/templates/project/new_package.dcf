@@ -1,5 +1,5 @@
 Binding: new_package
 Title: Rust-based R Package (using roxido package)
-Subtitle: Create a new R package based on Rust with help from the roxido package
+Subtitle: Create a new R package using Rust with help from the roxido package
 OpenFiles: tools/src/rust/src/lib.rs, R/myrnorm.R
 Icon: roxido.png
