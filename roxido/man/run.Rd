@@ -32,10 +32,10 @@ is used to upgrade the Cargo installation if needed.}
 \code{"path"}, \code{"convention"}, and \code{"cache"}. This indicates the
 methods to use (and their order) when searching for a suitable Cargo
 installation. \code{"path"} indicates to try to use \code{\link[base:Sys.which]{base::Sys.which()}}.
-\code{"convention"} indicates to try to use the directories \code{.cargo}
+\code{"convention"} indicates to try to use the directories \code{.roxido}
 in the user's home directory. \code{"cache"} indicates to try to use the
-directory from the cargo package's own installation as given by the
-\code{tools::R_user_dir('cargo', 'cache')}.}
+directory from the roxido package's own installation as given by the
+\code{tools::R_user_dir('roxido', 'cache')}.}
 
 \item{leave_no_trace}{If \code{TRUE}, the \code{CARGO_HOME} environment
 variable is set to a temporary directory that is subsequently deleted.}
@@ -74,7 +74,7 @@ arguments passed as command line arguments.
 }
 \examples{
 if (run("--version") != 0) {
-  message("Cargo is not installed. Please run cargo::install() in an interactive session.")
+  message("Cargo is not installed. Please run roxido::install() in an interactive session.")
 }
 
 }
