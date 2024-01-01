@@ -7,17 +7,17 @@ fn main() {
         "Running build.rs with working directory {:?}",
         std::env::current_dir()
     );
-    println!("cargo:rerun-if-env-changed=R_CARGO_RUN_COUNTER");
+    println!("cargo:rerun-if-env-changed=ROXIDO_RUN_COUNTER");
     let src_path = Path::new("roxido.txt");
-    let snippet = match env::var("R_CARGO_RUN_COUNTER") {
+    let snippet = match env::var("ROXIDO_RUN_COUNTER") {
         Ok(x) if x == "1" => None,
         Ok(x) if x == "2" => make_registration_code(src_path),
         Ok(_) => {
-            println!("Environment variable 'R_CARGO_RUN_COUNTER' has an unexpected value.");
+            println!("Environment variable 'ROXIDO_RUN_COUNTER' has an unexpected value.");
             None
         }
         Err(_) => {
-            println!("Environment variable 'R_CARGO_RUN_COUNTER' is not set.");
+            println!("Environment variable 'ROXIDO_RUN_COUNTER' is not set.");
             None
         }
     };

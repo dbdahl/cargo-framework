@@ -6,8 +6,8 @@ Description: A framework is provided to develop R packages using 'Rust' <https:/
  minimal overhead, and more wrappers are easily added. Help is provided to use 'Cargo' <https://doc.rust-lang.org/cargo/> in a manner
  consistent with CRAN policies. 'Rust' code can also be embedded directly in an R script. The package is not official, affiliated with,
  nor endorsed by the Rust project.
-URL: https://github.com/dbdahl/cargo-framework (repository)
-BugReports: https://github.com/dbdahl/cargo-framework/issues
+URL: https://github.com/dbdahl/roxido (repository)
+BugReports: https://github.com/dbdahl/roxido/issues
 License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 4.2.0)
 Suggests: roxygen2 (>= 7.2.3)

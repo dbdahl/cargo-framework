@@ -35,7 +35,7 @@
 #'   \code{FALSE}, no details are shown.  If it is a connection, then details
 #'   are shown and also written to the connection.
 #' @param run_twice Should the cargo command be run twice? The environment
-#'   variable \code{R_CARGO_RUN_COUNTER} is set to either \code{1} or \code{2}
+#'   variable \code{ROXIDO_RUN_COUNTER} is set to either \code{1} or \code{2}
 #'   during each run.
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
@@ -90,7 +90,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
     environment_variables
   }
   run_engine <- function(bypass_env_var, cargo_cmd, vars, can_update) {
-    general_bypass_env_var <- "R_CARGO_RUN"
+    general_bypass_env_var <- "ROXIDO_RUN"
     if (toupper(Sys.getenv(general_bypass_env_var, "TRUE")) == "FALSE") {
       msg(sprintf("Method bypassed by %s environment variable.\n", general_bypass_env_var))
       return(NULL)
@@ -164,9 +164,9 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
     }
     status <- check_candidate()
     if (status == 0) {
-      result_first <- system3(cargo_cmd, args, env = c(vars, R_CARGO_RUN_COUNTER = 1), stdout = stdout, stderr = stderr)
+      result_first <- system3(cargo_cmd, args, env = c(vars, ROXIDO_RUN_COUNTER = 1), stdout = stdout, stderr = stderr)
       result <- if (run_twice) {
-        system3(cargo_cmd, args, env = c(vars, R_CARGO_RUN_COUNTER = 2), stdout = stdout, stderr = stderr)
+        system3(cargo_cmd, args, env = c(vars, ROXIDO_RUN_COUNTER = 2), stdout = stdout, stderr = stderr)
       } else {
         result_first
       }
@@ -184,7 +184,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       cargo_cmd <- Sys.which("cargo")
       if (is.na(cargo_cmd) || (cargo_cmd == "")) next
       vars <- environment_variables
-      status <- run_engine("R_CARGO_RUN_PATH", cargo_cmd, vars, FALSE)
+      status <- run_engine("ROXIDO_RUN_PATH", cargo_cmd, vars, FALSE)
       if ((!is.null(status)) && (!is.numeric(status) || (status == 0))) {
         return(status)
       }
@@ -198,7 +198,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       vars <- c(environment_variables,
         PATH = paste0(Sys.getenv("PATH"), .Platform$path.sep, cargo_bin_dir)
       )
-      status <- run_engine("R_CARGO_RUN_CONVENTION", cargo_cmd, vars, FALSE)
+      status <- run_engine("ROXIDO_RUN_CONVENTION", cargo_cmd, vars, FALSE)
       if ((!is.null(status)) && (!is.numeric(status) || (status == 0))) {
         return(status)
       }
@@ -215,7 +215,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
         RUSTUP_HOME = rustup_home
       )
       vars <- if (leave_no_trace) c(vars, CARGO_HOME_ORIGINAL = cargo_home) else c(vars, CARGO_HOME = cargo_home)
-      status <- run_engine("R_CARGO_RUN_CACHE", cargo_cmd, vars, TRUE)
+      status <- run_engine("ROXIDO_RUN_CACHE", cargo_cmd, vars, TRUE)
       if ((!is.null(status)) && (!is.numeric(status) || (status == 0))) {
         return(status)
       }

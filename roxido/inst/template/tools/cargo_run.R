@@ -15,10 +15,10 @@
 #'   \code{"path"}, \code{"convention"}, and \code{"cache"}. This indicates the
 #'   methods to use (and their order) when searching for a suitable Cargo
 #'   installation. \code{"path"} indicates to try to use [base::Sys.which()].
-#'   \code{"convention"} indicates to try to use the directories \code{.cargo}
+#'   \code{"convention"} indicates to try to use the directories \code{.roxido}
 #'   in the user's home directory. \code{"cache"} indicates to try to use the
-#'   directory from the cargo package's own installation as given by the
-#'   \code{tools::R_user_dir('cargo', 'cache')}.
+#'   directory from the roxido package's own installation as given by the
+#'   \code{tools::R_user_dir('roxido', 'cache')}.
 #' @param leave_no_trace If \code{TRUE}, the \code{CARGO_HOME} environment
 #'   variable is set to a temporary directory that is subsequently deleted.
 #' @param environment_variables A named character vector providing environment
@@ -35,7 +35,7 @@
 #'   \code{FALSE}, no details are shown.  If it is a connection, then details
 #'   are shown and also written to the connection.
 #' @param run_twice Should the cargo command be run twice? The environment
-#'   variable \code{R_CARGO_RUN_COUNTER} is set to either \code{1} or \code{2}
+#'   variable \code{ROXIDO_RUN_COUNTER} is set to either \code{1} or \code{2}
 #'   during each run.
 #' @param stdout See argument of the same name in [base::system2()].
 #' @param stderr See argument of the same name in [base::system2()].
@@ -47,7 +47,7 @@
 #'
 #' @examples
 #' if (run("--version") != 0) {
-#'   message("Cargo is not installed. Please run cargo::install() in an interactive session.")
+#'   message("Cargo is not installed. Please run roxido::install() in an interactive session.")
 #' }
 #'
 run <- function(..., minimum_version = ".", search_methods = c("cache", "convention", "path"), leave_no_trace = FALSE, environment_variables = list(),
@@ -90,7 +90,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
     environment_variables
   }
   run_engine <- function(bypass_env_var, cargo_cmd, vars, can_update) {
-    general_bypass_env_var <- "R_CARGO_RUN"
+    general_bypass_env_var <- "ROXIDO_RUN"
     if (toupper(Sys.getenv(general_bypass_env_var, "TRUE")) == "FALSE") {
       msg(sprintf("Method bypassed by %s environment variable.\n", general_bypass_env_var))
       return(NULL)
@@ -108,7 +108,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       }
       output <- system3(cargo_cmd, "--version", stdout = TRUE, env = vars)
       if (!is.null(attr(output, "status"))) {
-        msg("Cargo is installed, but broken.\nPlease try again after running 'cargo::install()' in an interactive session.\n")
+        msg("Cargo is installed, but broken.\nPlease try again after running 'roxido::install()' in an interactive session.\n")
         return(202)
       }
       version <- tryCatch(
@@ -116,7 +116,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
           version <- strsplit(output, " ", fixed = TRUE)[[1]][2]
           if (is.na(version)) {
             msg(sprintf(
-              "Problem parsing Cargo version string: '%s'.\nPlease try again after running 'cargo::install()' in an interactive session.\n",
+              "Problem parsing Cargo version string: '%s'.\nPlease try again after running 'roxido::install()' in an interactive session.\n",
               paste(output, collapse = ",")
             ))
             return(203)
@@ -141,7 +141,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
             }
             exit_status <- system3(rustup_cmd, "update", env = vars2)
             if (exit_status != 0) {
-              msg("Upgrade failed.\nPlease try again by running 'cargo::install()' in an interactive session.\n")
+              msg("Upgrade failed.\nPlease try again by running 'roxido::install()' in an interactive session.\n")
               return(exit_status)
             }
             return(Recall())
@@ -155,7 +155,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       )
       if (inherits(version, "warning") || inherits(version, "error")) {
         msg(sprintf(
-          "Problem parsing Cargo version string '%s', comparing it against '%s', or other error.\nPlease try again after running 'cargo::install()' in an interactive session.\n",
+          "Problem parsing Cargo version string '%s', comparing it against '%s', or other error.\nPlease try again after running 'roxido::install()' in an interactive session.\n",
           paste(output, collapse = ","), msrv
         ))
         return(206)
@@ -164,9 +164,9 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
     }
     status <- check_candidate()
     if (status == 0) {
-      result_first <- system3(cargo_cmd, args, env = c(vars, R_CARGO_RUN_COUNTER = 1), stdout = stdout, stderr = stderr)
+      result_first <- system3(cargo_cmd, args, env = c(vars, ROXIDO_RUN_COUNTER = 1), stdout = stdout, stderr = stderr)
       result <- if (run_twice) {
-        system3(cargo_cmd, args, env = c(vars, R_CARGO_RUN_COUNTER = 2), stdout = stdout, stderr = stderr)
+        system3(cargo_cmd, args, env = c(vars, ROXIDO_RUN_COUNTER = 2), stdout = stdout, stderr = stderr)
       } else {
         result_first
       }
@@ -184,7 +184,7 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       cargo_cmd <- Sys.which("cargo")
       if (is.na(cargo_cmd) || (cargo_cmd == "")) next
       vars <- environment_variables
-      status <- run_engine("R_CARGO_RUN_PATH", cargo_cmd, vars, FALSE)
+      status <- run_engine("ROXIDO_RUN_PATH", cargo_cmd, vars, FALSE)
       if ((!is.null(status)) && (!is.numeric(status) || (status == 0))) {
         return(status)
       }
@@ -198,12 +198,12 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
       vars <- c(environment_variables,
         PATH = paste0(Sys.getenv("PATH"), .Platform$path.sep, cargo_bin_dir)
       )
-      status <- run_engine("R_CARGO_RUN_CONVENTION", cargo_cmd, vars, FALSE)
+      status <- run_engine("ROXIDO_RUN_CONVENTION", cargo_cmd, vars, FALSE)
       if ((!is.null(status)) && (!is.numeric(status) || (status == 0))) {
         return(status)
       }
     } else if (method == "cache") {
-      msg("Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').\n")
+      msg("Trying to find a suitable Cargo using tools::R_user_dir('roxido', 'cache').\n")
       prefix_dir <- cache_dir()
       cargo_home <- file.path(prefix_dir, "cargo")
       cargo_bin_dir <- file.path(cargo_home, "bin")
@@ -215,13 +215,13 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
         RUSTUP_HOME = rustup_home
       )
       vars <- if (leave_no_trace) c(vars, CARGO_HOME_ORIGINAL = cargo_home) else c(vars, CARGO_HOME = cargo_home)
-      status <- run_engine("R_CARGO_RUN_CACHE", cargo_cmd, vars, TRUE)
+      status <- run_engine("ROXIDO_RUN_CACHE", cargo_cmd, vars, TRUE)
       if ((!is.null(status)) && (!is.numeric(status) || (status == 0))) {
         return(status)
       }
     }
   }
-  msg("No suitable version of Cargo was found.\nOne solution is to run 'cargo::install()'.\n---\n")
+  msg("No suitable version of Cargo was found.\nOne solution is to run 'roxido::install()'.\n---\n")
   1
 }
 
@@ -258,7 +258,7 @@ mk_rustflags <- function(...) {
   }
 }
 
-cache_dir <- function() tools::R_user_dir("cargo", "cache")
+cache_dir <- function() tools::R_user_dir("roxido", "cache")
 
 target <- function(sysname = Sys.info()[["sysname"]], arch = R.version$arch) {
   if (sysname == "Linux") {

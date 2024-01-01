@@ -167,7 +167,7 @@ fn roxido_fn(options: Vec<NestedMeta>, item_fn: syn::ItemFn) -> TokenStream {
         }
         .expect("Could not write to the file.");
     } else {
-        match std::env::var("R_CARGO_RUN_COUNTER") {
+        match std::env::var("ROXIDO_RUN_COUNTER") {
             Ok(x) if x == "1" => {
                 let filename = "roxido.txt";
                 if let Ok(mut file) = OpenOptions::new().append(true).create(true).open(filename) {

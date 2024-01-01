@@ -57,7 +57,7 @@ unchanged.}
 are shown and also written to the connection.}
 
 \item{run_twice}{Should the cargo command be run twice? The environment
-variable \code{R_CARGO_RUN_COUNTER} is set to either \code{1} or \code{2}
+variable \code{ROXIDO_RUN_COUNTER} is set to either \code{1} or \code{2}
 during each run.}
 
 \item{stdout}{See argument of the same name in \code{\link[base:system2]{base::system2()}}.}
