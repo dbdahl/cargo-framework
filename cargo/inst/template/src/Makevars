@@ -1,2 +1,0 @@
-PKG_LIBS = -L. -lrust
-$(SHLIB): librust.a
