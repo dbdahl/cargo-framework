@@ -8,17 +8,36 @@
 #' @export
 #' @importFrom utils install.packages
 #'
-new_package <- function(path) {
+new_package <- function(path, rev = "main") {
   pkgname <- basename(path)
   if (!grepl("^[a-zA-Z][a-zA-Z0-9]+$", pkgname)) stop(sprintf("The name '%s' is not a valid.", pkgname))
   if (file.exists(path) || dir.exists(path)) stop(sprintf("The path '%s' already exists.", path))
-  dir.create(path)
-  file.copy(list.files(system.file(file.path("template"), package = "cargo"),
-            all.files = TRUE, no.. = TRUE, full.names = TRUE), path, recursive = TRUE)
-  file.rename(file.path(path, "DOTRbuildignore"), file.path(path, ".Rbuildignore"))
-  file.rename(file.path(path, "DOTgitignore"), file.path(path, ".gitignore"))
-  sed("X@X", pkgname, file.path(path, "DESCRIPTION"))
-  sed("X@X", pkgname, file.path(path, "NAMESPACE"))
+  owner <- "dbdahl"
+  repo <- "roxidoExample"
+  tarball_filename <- tempfile(sprintf("%s_%s_%s_", owner, repo, rev), fileext = ".tar.gz")
+  on.exit(add = TRUE, {
+    unlink(tarball_filename, recursive = TRUE, force = TRUE, expand = FALSE)
+  })
+  if (0 != download.file(sprintf("https://api.github.com/repos/%s/%s/tarball/%s", owner, repo, rev), tarball_filename, mode = "wb")) {
+    stop("Problem downloading repository from Github.")
+  }
+  expand_dirname <- tempfile()
+  on.exit(add = TRUE, {
+    unlink(expand_dirname, recursive = TRUE, force = TRUE, expand = FALSE)
+  })
+  untar(tarball_filename, exdir = expand_dirname)
+  original_dirname <- list.files(expand_dirname)
+  x <- file.path(expand_dirname, original_dirname)
+  y <- file.path(expand_dirname, pkgname)
+  if (!file.rename(x, y)) {
+    stop(sprintf("Problem renaming directory '%s' to '%s'.", x, y))
+  }
+  z <- dirname(path)
+  if (!file.copy(y, z, recursive = TRUE)) {
+    stop(sprintf("Problem copying directory '%s' to '%s'.", y, z))
+  }
+  sed("roxidoExample", pkgname, file.path(path, "DESCRIPTION"))
+  sed("roxidoExample", pkgname, file.path(path, "NAMESPACE"))
   install.packages(path, repos = NULL, type = "source")
 }
 
