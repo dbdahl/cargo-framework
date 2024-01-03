@@ -8,17 +8,17 @@
 #' @export
 #' @importFrom utils install.packages
 #'
-new_package <- function(path, rev = "main") {
+new_package <- function(path, revision = "main", include_justfile = FALSE) {
   pkgname <- basename(path)
   if (!grepl("^[a-zA-Z][a-zA-Z0-9]+$", pkgname)) stop(sprintf("The name '%s' is not a valid.", pkgname))
   if (file.exists(path) || dir.exists(path)) stop(sprintf("The path '%s' already exists.", path))
   owner <- "dbdahl"
   repo <- "roxidoExample"
-  tarball_filename <- tempfile(sprintf("%s_%s_%s_", owner, repo, rev), fileext = ".tar.gz")
+  tarball_filename <- tempfile(sprintf("%s_%s_%s_", owner, repo, revision), fileext = ".tar.gz")
   on.exit(add = TRUE, {
     unlink(tarball_filename, recursive = TRUE, force = TRUE, expand = FALSE)
   })
-  if (0 != download.file(sprintf("https://api.github.com/repos/%s/%s/tarball/%s", owner, repo, rev), tarball_filename, mode = "wb")) {
+  if (0 != download.file(sprintf("https://api.github.com/repos/%s/%s/tarball/%s", owner, repo, revison), tarball_filename, mode = "wb")) {
     stop("Problem downloading repository from Github.")
   }
   expand_dirname <- tempfile()
@@ -38,6 +38,9 @@ new_package <- function(path, rev = "main") {
   }
   sed("roxidoExample", pkgname, file.path(path, "DESCRIPTION"))
   sed("roxidoExample", pkgname, file.path(path, "NAMESPACE"))
+  if (!isTRUE(include_justfile)) {
+    file.remove(file.path(path, "justfile"))
+  }
   install.packages(path, repos = NULL, type = "source")
 }
 

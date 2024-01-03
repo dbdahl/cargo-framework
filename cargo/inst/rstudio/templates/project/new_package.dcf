@@ -3,3 +3,16 @@ Title: Rust-based R Package (using cargo package)
 Subtitle: Create a new R package based on Rust with help from the cargo package
 OpenFiles: tools/src/rust/src/lib.rs, R/myrnorm.R
 Icon: cargo-framework.png
+
+Parameter: revision
+Widget: TextInput
+Label: Revision
+Default: main
+Position: left
+
+Parameter: include_justfile
+Widget: CheckboxInput
+Label: Include 'justfile'
+Default: Off
+Position: right
+
