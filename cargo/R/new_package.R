@@ -18,7 +18,7 @@ new_package <- function(path, revision = "main", include_justfile = FALSE) {
   on.exit(add = TRUE, {
     unlink(tarball_filename, recursive = TRUE, force = TRUE, expand = FALSE)
   })
-  if (0 != download.file(sprintf("https://api.github.com/repos/%s/%s/tarball/%s", owner, repo, revison), tarball_filename, mode = "wb")) {
+  if (0 != download.file(sprintf("https://api.github.com/repos/%s/%s/tarball/%s", owner, repo, revision), tarball_filename, mode = "wb")) {
     stop("Problem downloading repository from Github.")
   }
   expand_dirname <- tempfile()
