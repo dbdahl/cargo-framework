@@ -19,13 +19,14 @@
 #' @param invisible Should the compiled function return values invisibly?
 #' @param force If \code{TRUE}, write to cache directory on first usage without
 #'   asking for user confirmation.
+#' @param revision A git revision to use.  Defaults to "main".
 #'
 #' @return An R function implemented with the supplied Rust code.
 #'
 #' @importFrom utils packageDate packageVersion
 #' @export
 #'
-rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE) {
+rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE, revision = "main") {
   # Parse arguments
   mc <- match.call(expand.dots = FALSE)
   args <- mc[["..."]]
@@ -39,7 +40,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   all_args <- paste0(args_with_type, collapse = ", ")
   code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) -> RObject { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse = "\n"))
   # Set-up directories
-  path_info <- get_lib_path(verbose, cached, force)
+  path_info <- get_lib_path(verbose, cached, force, revision)
   if (is.null(path_info)) {
     return(invisible())
   }
@@ -111,7 +112,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   get(name, envir = parent.frame)
 }
 
-get_lib_path <- function(verbose, cached, force) {
+get_lib_path <- function(verbose, cached, force, revision) {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
   if (!dir.exists(path)) {
@@ -142,7 +143,7 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
   }
   stamp_file <- file.path(path, "stamp")
   if (!isTRUE(cached) || !file.exists(stamp_file) || packageVersion("cargo") > readRDS(stamp_file)) {
-    copy_from_template()
+    copy_from_template(revision = revision)
   }
   verbose <- if (isTRUE(verbose)) {
     TRUE
@@ -159,7 +160,7 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
   list(path = path, lock = lock, success = success, verbose = verbose)
 }
 
-copy_from_template <- function() {
+copy_from_template <- function(revision) {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
   unlink(path, recursive = TRUE, force = TRUE)
@@ -168,8 +169,12 @@ copy_from_template <- function() {
   dir.create(file.path(path, "R"), showWarnings = FALSE)
   rustlib_directory <- file.path(path, "rust")
   dir.create(rustlib_directory, showWarnings = FALSE)
-  file.copy(system.file(file.path("template", "src", "rust", "roxido"), package = "cargo"), rustlib_directory, recursive = TRUE)
-  file.copy(system.file(file.path("template", "src", "rust", "roxido_macro"), package = "cargo"), rustlib_directory, recursive = TRUE)
+  x <- download_roxido_example(revision = revision)
+  on.exit(add = TRUE, {
+    unlink(dirname(x), recursive = TRUE, force = TRUE, expand = FALSE)
+  })
+  file.copy(file.path(x, "src", "rust", "roxido"), rustlib_directory, recursive = TRUE)
+  file.copy(file.path(x, "src", "rust", "roxido_macro"), rustlib_directory, recursive = TRUE)
   unlink(file.path(path, "rust", "target"), recursive = TRUE, force = TRUE)
 }
 

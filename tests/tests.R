@@ -474,12 +474,12 @@ test_that("u8 slice", {
 test_that("attributes", {
   a <- 1
   f <- rust_fn(a, '
-    a.set_attribute(&R::new_symbol("bill", pc), &"bob".to_r(pc));
+    a.set_attribute(R::new_symbol("bill", pc), "bob".to_r(pc));
     a
   ')
   expect_identical(attr(f(a), "bill"), "bob")
   f <- rust_fn(a, '
-    a.get_attribute(&R::new_symbol("dim", pc))
+    a.get_attribute(R::new_symbol("dim", pc))
   ')
   a <- c(1, 2)
   attr(a, "dim") <- c(2, 1)
@@ -496,7 +496,7 @@ test_that("attributes", {
   expect_identical(f(a), c("billy", "bob"))
   f <- rust_fn(a, '
     let a = a.as_matrix().stop();
-    a.set_class(&"asdf".to_r(pc));
+    a.set_class("asdf".to_r(pc));
     a
   ')
   expect_identical(class(f(a)), "asdf")
@@ -509,25 +509,25 @@ test_that("new vectors with names", {
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as f64;
     }
-    a.set_names(&["a", "b", "c"].to_r(pc)).stop();
+    a.set_names(["a", "b", "c"].to_r(pc)).stop();
     a
   ')
   expect_identical(f(), c(a = 0, b = 1, c = 2))
   f <-  rust_fn('
     let a = R::new_vector_double(3, pc);
-    a.set_names(&["a", "b", "c", "d"].to_r(pc)).stop();
+    a.set_names(["a", "b", "c", "d"].to_r(pc)).stop();
     a
   ')
   expect_error(f())
   f <-  rust_fn('
     let a = R::new_vector_double(3, pc);
-    a.set_names(&["a", "b"].to_r(pc)).stop();
+    a.set_names(["a", "b"].to_r(pc)).stop();
     a
   ')
   expect_error(f())
   # expect_error(rust_fn("
   #   let a = R::new_vector_double(3, pc);
-  #   a.set_names(&[1, 2, 3].to_r(pc)).stop();
+  #   a.set_names([1, 2, 3].to_r(pc)).stop();
   #   a
   # "))
   f <-  rust_fn('
@@ -536,7 +536,7 @@ test_that("new vectors with names", {
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as i32;
     }
-    a.set_names(&["a", "b", "c"].to_r(pc)).stop();
+    a.set_names(["a", "b", "c"].to_r(pc)).stop();
     a
   ')
   expect_true(identical(f(), c(a = 0L, b = 1L, c = 2L)))
@@ -546,7 +546,7 @@ test_that("new vectors with names", {
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as u8;
     }
-    a.set_names(&["a", "b", "c"].to_r(pc)).stop();
+    a.set_names(["a", "b", "c"].to_r(pc)).stop();
     a
   ')
   b <- as.raw(c(0, 1, 2))
@@ -558,13 +558,13 @@ test_that("new vectors with names", {
     for (i, x) in slice.iter_mut().enumerate() {
       *x = if i != 0 { 1 } else { 0 };
     }
-    a.set_names(&["a", "b", "c"].to_r(pc)).stop();
+    a.set_names(["a", "b", "c"].to_r(pc)).stop();
     a
   ')
   expect_true(identical(f(), c(a = FALSE, b = TRUE, c = TRUE)))
   f <-  rust_fn('
     let a = R::new_vector_integer(3, pc);
-    a.set_names(&["a", "b"].to_r(pc)).stop();
+    a.set_names(["a", "b"].to_r(pc)).stop();
   ')
   expect_error(f())
 })
@@ -637,8 +637,8 @@ test_that("index into list", {
   f <- rust_fn(index, '
     let index = index.as_usize().stop();
     let a = R::new_list(3, pc);
-    a.set(1, &"bill".to_r(pc)).stop();
-    a.set(2, &4.0.to_r(pc)).stop();
+    a.set(1, "bill".to_r(pc)).stop();
+    a.set(2, 4.0.to_r(pc)).stop();
     a.get(index).stop()
   ')
   expect_identical(f(1), "bill")
@@ -646,13 +646,13 @@ test_that("index into list", {
   expect_error(f(4))
   f <- rust_fn("
     let a = R::new_list(3, pc);
-    a.set(3, &4.0.to_r(pc)).stop();
+    a.set(3, 4.0.to_r(pc)).stop();
     a.get(3).stop()
   ")
   expect_error(f())
   f <- rust_fn("
     let a = R::new_list(3, pc);
-    a.set(2, &4.0.to_r(pc)).stop();
+    a.set(2, 4.0.to_r(pc)).stop();
     a.get(3).stop()
   ")
   expect_error(f())
@@ -666,9 +666,9 @@ test_that("new matrix with names", {
       *x = i as f64;
     }
     let dimnames = R::new_list(2, pc);
-    dimnames.set(0, &["row1"].to_r(pc)).stop();
-    dimnames.set(1, &["col1", "col2", "col3"].to_r(pc)).stop();
-    a.set_dimnames(&dimnames).stop();
+    dimnames.set(0, ["row1"].to_r(pc)).stop();
+    dimnames.set(1, ["col1", "col2", "col3"].to_r(pc)).stop();
+    a.set_dimnames(dimnames).stop();
     a
   ')
   expect_no_error(f())
@@ -726,7 +726,7 @@ test_that("matrix", {
   expect_true(is.vector(f(a)))
   f <- rust_fn(a, '
     let a = a.duplicate(pc);
-    a.set_attribute(&R::new_symbol("dim", pc), &R::null());
+    a.set_attribute(R::new_symbol("dim", pc), R::null());
     a
   ')
   expect_false(is.matrix(f(a)))
@@ -787,14 +787,14 @@ test_that("symbol", {
 test_that("external_ptr", {
   f <- rust_fn("
     let a = vec![10_i32, 11, 13];
-    let b = R::encode(a, &R::null());
+    let b = R::encode(a, R::null());
     let d = b.decode_as_val::<Vec<i32>>();
     d[1]
   ")
   expect_identical(f(), 11L)
   f1_i32 <- rust_fn('
     let a = vec![10_i32, 11, 13];
-    R::encode(a, &"vec_i32".to_r(pc))
+    R::encode(a, "vec_i32".to_r(pc))
   ')
   f2_i32 <- rust_fn(b, "
     let b = b.as_external_ptr().stop();
@@ -805,11 +805,11 @@ test_that("external_ptr", {
   expect_identical(f2_i32(f1_i32()), 11L)
   f1_f64 <- rust_fn('
     let a = vec![10.0, 11.0, 13.0];
-    R::encode(a, &"vec_f64".to_r(pc))
+    R::encode(a, "vec_f64".to_r(pc))
   ')
   f1_raw <- rust_fn('
     let a = vec![10_u8, 11, 13];
-    R::encode(a, &"vec_u8".to_r(pc))
+    R::encode(a, "vec_u8".to_r(pc))
   ')
   f3 <- rust_fn(b, '
     let b = b.as_external_ptr().stop();
@@ -895,7 +895,7 @@ test_that("call", {
   expect_true(f(errfn))
   okfn <- function() 1 + 2
   expect_false(f(okfn))
-  f <- rust_fn(a, b, "a.as_function().stop().call1(&b, pc).stop()")
+  f <- rust_fn(a, b, "a.as_function().stop().call1(b, pc).stop()")
   expect_identical(f(\(x) 2 * x, 10), 20)
 })
 
@@ -916,17 +916,17 @@ test_that("data.frame", {
   expect_identical(f(a, 1), c(10, 11, 12))
   f <- rust_fn(a, index, "
     let b = a.as_data_frame().stop();
-    b.set(index.as_usize().stop(), &[0, -1, -22].to_r(pc)).stop();
+    b.set(index.as_usize().stop(), [0, -1, -22].to_r(pc)).stop();
     b
   ")
   expect_identical(f(a, 1)[, 2], c(0L, -1L, -22L))
   f <- rust_fn('
     let a = R::new_list(2, pc);
-    let _ = a.set(0, &[   1,    2,    3].to_r(pc));
-    let _ = a.set(1, &[10.0, 20.0, 30.0].to_r(pc));
+    let _ = a.set(0, [   1,    2,    3].to_r(pc));
+    let _ = a.set(1, [10.0, 20.0, 30.0].to_r(pc));
     let names = ["i32", "f64"].to_r(pc);
     let row_names = ["row1", "row2", "row3"].to_r(pc);
-    a.to_data_frame(&names, &row_names, pc).stop()
+    a.to_data_frame(names, row_names, pc).stop()
   ')
   a <- data.frame(i32 = 1:3, f64 = c(10, 20, 30), row.names = paste0("row", 1:3))
   expect_identical(f(), a)

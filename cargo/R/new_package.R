@@ -4,6 +4,8 @@
 #'
 #' @param path A path where the package is created.  The name of the
 #'   package is taken as the last element in the file path.
+#' @param revision A git revision to use.  Defaults to "main".
+#' @param include_justfile Should the new package have a `justfile` for convenience?'
 #'
 #' @export
 #' @importFrom utils install.packages
@@ -12,23 +14,11 @@ new_package <- function(path, revision = "main", include_justfile = FALSE) {
   pkgname <- basename(path)
   if (!grepl("^[a-zA-Z][a-zA-Z0-9]+$", pkgname)) stop(sprintf("The name '%s' is not a valid.", pkgname))
   if (file.exists(path) || dir.exists(path)) stop(sprintf("The path '%s' already exists.", path))
-  owner <- "dbdahl"
-  repo <- "roxidoExample"
-  tarball_filename <- tempfile(sprintf("%s_%s_%s_", owner, repo, revision), fileext = ".tar.gz")
+  x <- download_roxido_example(revision = revision)
   on.exit(add = TRUE, {
-    unlink(tarball_filename, recursive = TRUE, force = TRUE, expand = FALSE)
+    unlink(dirname(x), recursive = TRUE, force = TRUE, expand = FALSE)
   })
-  if (0 != download.file(sprintf("https://api.github.com/repos/%s/%s/tarball/%s", owner, repo, revision), tarball_filename, mode = "wb")) {
-    stop("Problem downloading repository from Github.")
-  }
-  expand_dirname <- tempfile()
-  on.exit(add = TRUE, {
-    unlink(expand_dirname, recursive = TRUE, force = TRUE, expand = FALSE)
-  })
-  untar(tarball_filename, exdir = expand_dirname)
-  original_dirname <- list.files(expand_dirname)
-  x <- file.path(expand_dirname, original_dirname)
-  y <- file.path(expand_dirname, pkgname)
+  y <- file.path(dirname(x), pkgname)
   if (!file.rename(x, y)) {
     stop(sprintf("Problem renaming directory '%s' to '%s'.", x, y))
   }

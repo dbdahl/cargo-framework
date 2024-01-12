@@ -12,7 +12,8 @@ rust_fn(
   cached = TRUE,
   longjmp = TRUE,
   invisible = FALSE,
-  force = FALSE
+  force = FALSE,
+  revision = "main"
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ longjmp functionality when Rust code panics?}
 
 \item{force}{If \code{TRUE}, write to cache directory on first usage without
 asking for user confirmation.}
+
+\item{revision}{A git revision to use.  Defaults to "main".}
 }
 \value{
 An R function implemented with the supplied Rust code.
