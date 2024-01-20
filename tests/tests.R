@@ -787,14 +787,14 @@ test_that("symbol", {
 test_that("external_ptr", {
   f <- rust_fn("
     let a = vec![10_i32, 11, 13];
-    let b = R::encode(a, R::null());
-    let d = b.decode_as_val::<Vec<i32>>();
+    let b = R::encode(a, R::null(), false, pc);
+    let d = b.decode_as_val::<Vec<i32>>().stop();
     d[1]
   ")
   expect_identical(f(), 11L)
   f1_i32 <- rust_fn('
     let a = vec![10_i32, 11, 13];
-    R::encode(a, "vec_i32".to_r(pc))
+    R::encode(a, "vec_i32".to_r(pc), false, pc)
   ')
   f2_i32 <- rust_fn(b, "
     let b = b.as_external_ptr().stop();
@@ -805,11 +805,11 @@ test_that("external_ptr", {
   expect_identical(f2_i32(f1_i32()), 11L)
   f1_f64 <- rust_fn('
     let a = vec![10.0, 11.0, 13.0];
-    R::encode(a, "vec_f64".to_r(pc))
+    R::encode(a, "vec_f64".to_r(pc), false, pc)
   ')
   f1_raw <- rust_fn('
     let a = vec![10_u8, 11, 13];
-    R::encode(a, "vec_u8".to_r(pc))
+    R::encode(a, "vec_u8".to_r(pc), false, pc)
   ')
   f3 <- rust_fn(b, '
     let b = b.as_external_ptr().stop();
