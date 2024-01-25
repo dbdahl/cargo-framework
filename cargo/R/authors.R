@@ -12,7 +12,10 @@
 authors <- function() {
   original_dir <- getwd()
   on.exit(setwd(original_dir))
-  desc <- find_package_root()
+  if (!find_package_root()) {
+    stop("Cannot find package root.")
+  }
+  desc <- read.dcf("DESCRIPTION")
   src_rust_dir <- file.path("src", "rust")
   setwd(src_rust_dir)
   # Requires "cargo install cargo-authors"

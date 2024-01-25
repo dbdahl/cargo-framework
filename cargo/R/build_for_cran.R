@@ -31,7 +31,10 @@
 build_for_cran <- function(...) {
   original_dir <- getwd()
   on.exit(setwd(original_dir))
-  desc <- find_package_root()
+  if (!find_package_root()) {
+    stop("Cannot find package root.")
+  }
+  desc <- read.dcf("DESCRIPTION")
   using_roxygen2 <- tryCatch(
     {
       x <- desc[, "RoxygenNote"]
@@ -70,8 +73,5 @@ find_package_root <- function() {
   while (!file.exists(description_file) && !at_root()) {
     setwd("..")
   }
-  if (!file.exists(description_file)) {
-    stop("Cannot find package root.")
-  }
-  read.dcf(description_file)
+  file.exists(description_file)
 }
