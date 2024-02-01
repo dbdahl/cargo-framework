@@ -1,52 +1,48 @@
 rm -rf `Rscript -e 'cat(tools::R_user_dir("cargo", "cache"))'`/rust_fn
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 55090 bytes (53 KB)
-==================================================
 downloaded 53 KB
 
 Build directory: /home/dahl/.cache/R/cargo/rust_fn
     Updating crates.io index
-   Compiling proc-macro2 v1.0.76
+   Compiling proc-macro2 v1.0.78
    Compiling unicode-ident v1.0.12
    Compiling quote v1.0.35
    Compiling syn v2.0.48
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.55s
+    Finished release [optimized] target(s) in 2.88s
    Compiling roxido3 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.10s
+    Finished release [optimized] target(s) in 0.12s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 55090 bytes (53 KB)
-==================================================
 downloaded 53 KB
 
     Updating crates.io index
-   Compiling proc-macro2 v1.0.76
+   Compiling proc-macro2 v1.0.78
    Compiling unicode-ident v1.0.12
    Compiling quote v1.0.35
    Compiling syn v2.0.48
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido5 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.38s
+    Finished release [optimized] target(s) in 2.54s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 55090 bytes (53 KB)
+Content type 'application/x-gzip' length 55102 bytes (53 KB)
 ==================================================
 downloaded 53 KB
 
     Updating crates.io index
-   Compiling proc-macro2 v1.0.76
+   Compiling proc-macro2 v1.0.78
    Compiling unicode-ident v1.0.12
    Compiling quote v1.0.35
    Compiling syn v2.0.48
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido6 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.40s
+    Finished release [optimized] target(s) in 2.49s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 55090 bytes (53 KB)
+Content type 'application/x-gzip' length 55102 bytes (53 KB)
 ==================================================
 downloaded 53 KB
 
@@ -58,7 +54,7 @@ Error in (function ()  : An error was thrown!
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 55090 bytes (53 KB)
+Content type 'application/x-gzip' length 55102 bytes (53 KB)
 ==================================================
 downloaded 53 KB
 
@@ -75,9 +71,9 @@ Cargo version '1.75.0' is available, which satisfies the need for '1.64'.
    Compiling syn v2.0.48
    Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized + debuginfo] target(s) in 2.60s
+    Finished release [optimized + debuginfo] target(s) in 2.91s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized + debuginfo] target(s) in 0.17s
+    Finished release [optimized + debuginfo] target(s) in 0.23s
 ---
 Built Rust static library.
 ** libs
@@ -118,7 +114,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [2s/11s] NOTE
+* checking CRAN incoming feasibility ... NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
