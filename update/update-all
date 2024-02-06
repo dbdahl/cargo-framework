@@ -1,0 +1,10 @@
+#!/usr/bin/fish
+
+set CMD (realpath (dirname (status filename))/update)
+cd ~/docs/devel
+set BASE $PWD
+for d in (fd -t d -g -p '**/rust/roxido')
+  cd $d/../../..
+  $CMD
+  cd $BASE
+end
