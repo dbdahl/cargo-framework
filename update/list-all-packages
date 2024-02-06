@@ -1,0 +1,3 @@
+#!/usr/bin/fish
+
+fd -t d -g -p '**/rust/roxido' ~/docs/devel | xargs dirname | xargs dirname | xargs dirname
