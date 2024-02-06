@@ -12,17 +12,16 @@ if string length -q -- (git status --untracked-files=no --porcelain)
   echo "WARNING: Git repository is not clean." >&2
 end
 
-set base (dirname (dirname (readlink -m (status --current-filename))))/cargo/inst/template
+set base ~/docs/devel/roxidoExample
 
-for x in DOTgitignore \
-         DOTRbuildignore \
+for x in .gitignore \
+         .Rbuildignore \
          configure \
          configure.win \
          DESCRIPTION \
          INSTALL \
          justfile \
          LICENSE \
-         src/dummy.c \
          src/Makevars \
          src/Makevars.win \
          src/rust/build.rs \
@@ -40,10 +39,9 @@ for x in DOTgitignore \
          src/rust/roxido_faer/src/lib.rs \
          tools/cargo_run.R
   set fullsrc $base/$x
-  set name (string replace DOT . $x)
-  if not cmp --silent -- "$fullsrc" "$name"
-    meld "$fullsrc" "$name"
-    echo cp "$fullsrc" "$name"
+  if not cmp --silent -- $fullsrc $x
+    echo cp \"$fullsrc\" \"$PWD/$x\"
+    meld $fullsrc $x
   end
 end
 
