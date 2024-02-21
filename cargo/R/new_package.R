@@ -26,16 +26,10 @@ new_package <- function(path, revision = "main", include_justfile = FALSE) {
   if (!file.copy(y, z, recursive = TRUE)) {
     stop(sprintf("Problem copying directory '%s' to '%s'.", y, z))
   }
-  sed("roxidoExample", pkgname, file.path(path, "DESCRIPTION"))
-  sed("roxidoExample", pkgname, file.path(path, "NAMESPACE"))
+  source(file.path(path, "tools", "rename_package.R"), local = TRUE)
+  rename_package("roxidoExample", pkgname, path)
   if (!isTRUE(include_justfile)) {
     file.remove(file.path(path, "justfile"))
   }
   install.packages(path, repos = NULL, type = "source")
-}
-
-sed <- function(pattern, replacement, filename) {
-  lines <- readLines(filename)
-  lines <- gsub(pattern, replacement, lines)
-  writeLines(lines, filename)
 }
