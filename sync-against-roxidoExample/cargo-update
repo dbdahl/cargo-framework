@@ -2,8 +2,11 @@
 
 for pkg in (./list-all-packages)
     echo "-----------------------------------------------------------------------------------------"
-    echo $pkg
-	cd $pkg
-	cd src/rust
-	cargo msrv
+    cd $pkg/src/rust
+    cargo update
+    cd roxido
+    cargo update
+    cd ../roxido_macro
+    cargo update
+    cargo upgrades
 end

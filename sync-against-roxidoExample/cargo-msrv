@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+for pkg in (./list-all-packages)
+    echo "-----------------------------------------------------------------------------------------"
+    echo $pkg
+    cd $pkg
+    cd src/rust
+    cargo msrv --output-format json
+end
