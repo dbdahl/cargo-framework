@@ -12,9 +12,9 @@ Build directory: /home/dahl/.cache/R/cargo/rust_fn
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.14s
+    Finished release [optimized] target(s) in 3.72s
    Compiling roxido3 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.10s
+    Finished release [optimized] target(s) in 0.11s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
 downloaded 57 KB
 
@@ -26,9 +26,9 @@ downloaded 57 KB
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido5 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.63s
+    Finished release [optimized] target(s) in 3.24s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 59327 bytes (57 KB)
+Content type 'application/x-gzip' length 59278 bytes (57 KB)
 ==================================================
 downloaded 57 KB
 
@@ -40,9 +40,9 @@ downloaded 57 KB
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido6 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.60s
+    Finished release [optimized] target(s) in 3.09s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 59327 bytes (57 KB)
+Content type 'application/x-gzip' length 59278 bytes (57 KB)
 ==================================================
 downloaded 57 KB
 
@@ -54,7 +54,7 @@ Error in (function ()  : An error was thrown!
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 59327 bytes (57 KB)
+Content type 'application/x-gzip' length 59278 bytes (57 KB)
 ==================================================
 downloaded 57 KB
 
@@ -71,9 +71,9 @@ Cargo version '1.76.0' is available, which satisfies the need for '1.65'.
    Compiling syn v2.0.52
    Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized + debuginfo] target(s) in 5.77s
+    Finished release [optimized + debuginfo] target(s) in 5.38s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized + debuginfo] target(s) in 2.68s
+    Finished release [optimized + debuginfo] target(s) in 2.32s
 ---
 Built Rust static library.
 ** libs
