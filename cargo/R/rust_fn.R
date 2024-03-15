@@ -36,7 +36,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   }
   len <- length(args)
   code <- args[[len]]
-  args_with_type <- sapply(as.character(args[-len]), function(arg) paste0(arg, ": &RObject"))
+  args_with_type <- sapply(as.character(args[-len]), function(arg) { if (!grepl(":", arg)) paste0(arg, ": &RObject") else arg })
   all_args <- paste0(args_with_type, collapse = ", ")
   code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse = "\n"))
   # Set-up directories
