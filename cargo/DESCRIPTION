@@ -1,6 +1,6 @@
 Package: cargo
 Title: Develop R Packages using Rust
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu",comment=c(ORCID="0000-0002-8173-1547")))
 Description: A framework is provided to develop R packages using 'Rust' <https://www.rust-lang.org/> with
  minimal overhead, and more wrappers are easily added. Help is provided to use 'Cargo' <https://doc.rust-lang.org/cargo/> in a manner
@@ -12,5 +12,5 @@ License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 4.2.0)
 Suggests: roxygen2 (>= 7.2.3)
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)

@@ -164,9 +164,16 @@ run <- function(..., minimum_version = ".", search_methods = c("cache", "convent
     }
     status <- check_candidate()
     if (status == 0) {
-      result_first <- system3(cargo_cmd, args, env = c(vars, R_CARGO_RUN_COUNTER = 1), stdout = stdout, stderr = stderr)
+      get_vars <- function(count) {
+        if ("R_CARGO_RUN_COUNTER" %in% names(vars)) {
+          vars
+        } else {
+          c(vars, R_CARGO_RUN_COUNTER = count)
+        }
+      }
+      result_first <- system3(cargo_cmd, args, env = get_vars(1), stdout = stdout, stderr = stderr)
       result <- if (run_twice) {
-        system3(cargo_cmd, args, env = c(vars, R_CARGO_RUN_COUNTER = 2), stdout = stdout, stderr = stderr)
+        system3(cargo_cmd, args, env = get_vars(2), stdout = stdout, stderr = stderr)
       } else {
         result_first
       }

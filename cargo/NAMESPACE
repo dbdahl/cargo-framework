@@ -3,6 +3,7 @@
 export(api_documentation)
 export(authors)
 export(build_for_cran)
+export(expand)
 export(install)
 export(new_package)
 export(run)
