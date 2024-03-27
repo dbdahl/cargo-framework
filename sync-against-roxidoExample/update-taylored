@@ -1,0 +1,26 @@
+#!/usr/bin/fish
+
+while not test -f DESCRIPTION
+  if test (pwd) = /
+    echo "ERROR: Could not find DESCRIPTION file." >&2
+    exit 1
+  end
+  cd ..
+end
+
+if string length -q -- (git status --untracked-files=no --porcelain)
+  echo "WARNING: Git repository is not clean." >&2
+end
+
+set base ~/docs/devel/roxidoExample
+
+for x in src/rust/roxido/src/lib.rs \
+         src/rust/roxido/src/r.rs \
+         src/rust/roxido_macro/src/lib.rs \
+         src/rust/roxido_faer/src/lib.rs
+  set fullsrc $base/$x
+  if test -e $PWD/$x
+    cp $fullsrc $PWD/$x
+  end
+end
+
