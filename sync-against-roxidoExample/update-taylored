@@ -14,8 +14,15 @@ end
 
 set base ~/docs/devel/roxidoExample
 
+for x in src/rust/roxido/src/print.rs src/rust/roxido/src/stop.rs src/rust/roxido/src/r.rs
+  if test -e $PWD/$x
+    git rm $PWD/$x
+  end
+end
+
 for x in src/rust/roxido/src/lib.rs \
-         src/rust/roxido/src/r.rs \
+         src/rust/build.rs \
+         src/rust/roxido/src/rbindings.rs \
          src/rust/roxido_macro/src/lib.rs \
          src/rust/roxido_faer/src/lib.rs
   set fullsrc $base/$x
@@ -23,4 +30,3 @@ for x in src/rust/roxido/src/lib.rs \
     cp $fullsrc $PWD/$x
   end
 end
-
