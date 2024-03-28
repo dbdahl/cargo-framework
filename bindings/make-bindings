@@ -2,7 +2,7 @@
 
 cd $(readlink -f $(dirname "$0"))
 CWD="$PWD"
-DEST="$CWD/../cargo/inst/template/src/rust/roxido/src/rbindings.rs"
+DEST="$CWD/../../roxidoExample/src/rust/roxido/src/rbindings.rs"
 
 function usage {
   >&2 echo "usage: $0 R*.tar.gz"
