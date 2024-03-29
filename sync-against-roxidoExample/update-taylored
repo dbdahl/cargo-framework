@@ -21,10 +21,6 @@ for x in src/rust/roxido/src/print.rs src/rust/roxido/src/stop.rs src/rust/roxid
 end
 
 for x in src/rust/roxido/src/lib.rs \
-         src/rust/build.rs \
-         src/rust/roxido/src/rbindings.rs \
-         src/rust/roxido_macro/src/lib.rs \
-         src/rust/roxido_faer/src/lib.rs
   set fullsrc $base/$x
   if test -e $PWD/$x
     cp $fullsrc $PWD/$x
