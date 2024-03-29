@@ -20,7 +20,7 @@ for x in src/rust/roxido/src/print.rs src/rust/roxido/src/stop.rs src/rust/roxid
   end
 end
 
-for x in src/rust/roxido/src/lib.rs \
+for x in src/rust/roxido/src/lib.rs
   set fullsrc $base/$x
   if test -e $PWD/$x
     cp $fullsrc $PWD/$x
