@@ -97,7 +97,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   dynlib.name <- paste0(dynlib.base, if (is_mac) dynlib.ext else "")
   dynlib.path <- file.path(rustlib_directory, "target", "release", dynlib.filename)
   dyn.load(dynlib.path)
-  .Call("set_custom_panic_hook", PACKAGE = dynlib.name)
+  .Call("__private_set_custom_panic_hook", PACKAGE = dynlib.name)
   # Source the associated R code
   parent.frame <- new.env(parent = globalenv())
   r_code_files <- list.files(r_code_directory, full.names = TRUE)
