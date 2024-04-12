@@ -85,7 +85,7 @@ test_that("null", {
 })
 
 test_that("na", {
-  f <- rust_fn("a: &RObject<RScalar>", "
+  f <- rust_fn("a: &RScalar", "
       a.is_na()
   ")
   expect_true(f(NA_real_))
@@ -106,7 +106,7 @@ test_that("na", {
   expect_identical(f(), NA_integer_)
   expect_false(identical(f(), NA))
   expect_false(identical(f(), NA_character_))
-  f <- rust_fn("R::na_bool().to_r(pc).as_vector().stop().to_bool(pc)")
+  f <- rust_fn("R::na_bool().to_r(pc).as_vector().to_bool(pc)")
   expect_false(identical(f(), NA_real_))
   expect_false(identical(f(), NA_integer_))
   expect_identical(f(), NA)
@@ -114,7 +114,7 @@ test_that("na", {
 })
 
 test_that("nan", {
-  f <- rust_fn("a: &RObject<RScalar>", "
+  f <- rust_fn("a: &RScalar", "
       a.is_nan()
   ")
   expect_true(f(NaN))
@@ -187,7 +187,7 @@ test_that("i32", {
 
 test_that("usize", {
   f <- rust_fn("a: usize", "
-      a
+      i32::try_from(a).unwrap()
   ")
   expect_error(f(-1))
   expect_identical(f(0), 0L)
@@ -455,12 +455,12 @@ test_that("u8 slice", {
 test_that("attributes", {
   a <- 1
   f <- rust_fn("a: &mut RObject", '
-    a.set_attribute(RObject::<RSymbol>::new("bill", pc), "bob".to_r(pc));
+    a.set_attribute(RSymbol::from("bill").unwrap(), "bob".to_r(pc));
     a
   ')
   expect_identical(attr(f(a), "bill"), "bob")
   f <- rust_fn(a, '
-    a.get_attribute(RObject::<RSymbol>::dim())
+    a.get_attribute(RSymbol::dim())
   ')
   a <- c(1, 2)
   attr(a, "dim") <- c(2, 1)
@@ -485,7 +485,7 @@ test_that("attributes", {
 
 test_that("new vectors with names", {
   f <-  rust_fn('
-    let a = RObject::<RVector, f64>::new(3, pc);
+    let a = RVector::<f64>::new(3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as f64;
@@ -495,19 +495,19 @@ test_that("new vectors with names", {
   ')
   expect_identical(f(), c(a = 0, b = 1, c = 2))
   f <-  rust_fn('
-    let a = RObject::<RVector, f64>::new(3, pc);
+    let a = RVector::<f64>::new(3, pc);
     a.set_names(["a", "b", "c", "d"].to_r(pc)).stop();
     a
   ')
   expect_error(f())
   f <-  rust_fn('
-    let a = RObject::<RVector, f64>::new(3, pc);
+    let a = RVector::<f64>::new(3, pc);
     a.set_names(["a", "b"].to_r(pc)).stop();
     a
   ')
   expect_error(f())
   f <-  rust_fn('
-    let a = RObject::<RVector, i32>::new(3, pc);
+    let a = RVector::<i32>::new(3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as i32;
@@ -517,7 +517,7 @@ test_that("new vectors with names", {
   ')
   expect_true(identical(f(), c(a = 0L, b = 1L, c = 2L)))
   f <-  rust_fn('
-    let a = RObject::<RVector, u8>::new(3, pc);
+    let a = RVector::<u8>::new(3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as u8;
@@ -529,7 +529,7 @@ test_that("new vectors with names", {
   names(b) <- c("a", "b", "c")
   expect_true(identical(f(), b))
   f <-  rust_fn('
-    let a = RObject::<RVector, bool>::new(3, pc);
+    let a = RVector::<bool>::new(3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = if i != 0 { 1 } else { 0 };
@@ -539,7 +539,7 @@ test_that("new vectors with names", {
   ')
   expect_true(identical(f(), c(a = FALSE, b = TRUE, c = TRUE)))
   f <-  rust_fn('
-    let a = RObject::<RVector, i32>::new(3, pc);
+    let a = RVector::<i32>::new(3, pc);
     a.set_names(["a", "b"].to_r(pc)).stop();
   ')
   expect_error(f())
@@ -547,42 +547,42 @@ test_that("new vectors with names", {
 
 test_that("index into vector", {
   f <- rust_fn("
-    let a = RObject::<RVector, f64>::new(3, pc);
+    let a = RVector::<f64>::new(3, pc);
     a.set(2, 4.0).stop();
     a.get(2).stop()
   ")
   expect_identical(f(), 4)
   f <- rust_fn("
-    let a = RObject::<RVector, f64>::new(3, pc);
+    let a = RVector::<f64>::new(3, pc);
     a.set(3, 4.0).stop();
     a.get(3).stop()
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = RObject::<RVector, f64>::new(3, pc);
+    let a = RVector::<f64>::new(3, pc);
     a.set(2, 4.0).stop();
     a.get(3).stop()
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = RObject::<RVector, i32>::new(3, pc);
+    let a = RVector::<i32>::new(3, pc);
     a.set(2, 4).stop();
     a.get(2).stop()
   ")
   expect_identical(f(), 4L)
   f <- rust_fn("
-    let a = RObject::<RVector, u8>::new(3, pc);
+    let a = RVector::<u8>::new(3, pc);
     a.set(2, 4).stop();
     a.get(2).stop()
   ")
   expect_identical(f(), as.raw(4))
   f <- rust_fn("
-    let a = RObject::<RVector, bool>::new(3, pc);
-    a.set(0, 0).stop();
-    a.set_bool(2, true).stop();
-    assert!(a.get_bool(2).stop() == true);
-    a.set(1, 1).stop();
-    assert!(a.get(1).stop() == 1);
+    let a = RVector::<bool>::new(3, pc);
+    a.set(0, false).stop();
+    a.set_i32(2, 1).stop();
+    assert!(a.get(2).stop() == true);
+    a.set(1, true).stop();
+    assert!(a.get_i32(1).stop() == 1);
     a
   ")
   expect_equal(f(), c(FALSE, TRUE, TRUE))
@@ -590,28 +590,28 @@ test_that("index into vector", {
 
 test_that("index into matrix", {
   f <- rust_fn("
-    let a = RObject::<RMatrix, f64>::new(2, 3, pc);
-    a.set((1, 2), 4.0).stop();
-    a.get((1, 2)).stop()
+    let a = RMatrix::<f64>::new(2, 3, pc);
+    a.set(1, 2, 4.0).stop();
+    a.get(1, 2).stop()
   ")
   expect_identical(f(), 4)
   f <- rust_fn("
-    let a = RObject::<RMatrix, f64>::new(2, 3, pc);
-    a.set((2, 2), 4.0).stop();
-    a.get((2, 2)).stop()
+    let a = RMatrix::<f64>::new(2, 3, pc);
+    a.set(2, 2, 4.0).stop();
+    a.get(2, 2).stop()
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = RObject::<RMatrix, f64>::new(2, 3, pc);
-    a.set((1, 2), 4.0).stop();
-    a.get((2, 2)).stop()
+    let a = RMatrix::<f64>::new(2, 3, pc);
+    a.set(1, 2, 4.0).stop();
+    a.get(2, 2).stop()
   ")
   expect_error(f())
 })
 
 test_that("index into list", {
   f <- rust_fn("index: usize", '
-    let a = RObject::<RList>::new(3, pc);
+    let a = RList::new(3, pc);
     a.set(1, "bill".to_r(pc)).stop();
     a.set(2, 4.0.to_r(pc)).stop();
     a.get(index).stop()
@@ -620,13 +620,13 @@ test_that("index into list", {
   expect_identical(f(2), 4)
   expect_error(f(4))
   f <- rust_fn("
-    let a = RObject::<RList>::new(3, pc);
+    let a = RList::new(3, pc);
     a.set(3, 4.0.to_r(pc)).stop();
     a.get(3).stop()
   ")
   expect_error(f())
   f <- rust_fn("
-    let a = RObject::<RList>::new(3, pc);
+    let a = RList::new(3, pc);
     a.set(2, 4.0.to_r(pc)).stop();
     a.get(3).stop()
   ")
@@ -635,12 +635,12 @@ test_that("index into list", {
 
 test_that("new matrix with names", {
   f <-  rust_fn('
-    let a = RObject::<RMatrix, f64>::new(1, 3, pc);
+    let a = RMatrix::<f64>::new(1, 3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as f64;
     }
-    let dimnames = RObject::<RList>::new(2, pc);
+    let dimnames = RList::new(2, pc);
     dimnames.set(0, ["row1"].to_r(pc)).stop();
     dimnames.set(1, ["col1", "col2", "col3"].to_r(pc)).stop();
     a.set_dimnames(dimnames).stop();
@@ -648,7 +648,7 @@ test_that("new matrix with names", {
   ')
   expect_no_error(f())
   f <-  rust_fn("
-    let a = RObject::<RMatrix, i32>::new(1, 3, pc);
+    let a = RMatrix::<i32>::new(1, 3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as i32;
@@ -656,18 +656,10 @@ test_that("new matrix with names", {
   ")
   expect_no_error(f())
   f <-  rust_fn("
-    let a = RObject::<RMatrix, u8>::new(1, 3, pc);
+    let a = RMatrix::<u8>::new(1, 3, pc);
     let slice = a.slice_mut();
     for (i, x) in slice.iter_mut().enumerate() {
       *x = i as u8;
-    }
-  ")
-  expect_no_error(f())
-  f <-  rust_fn("
-    let a = RObject::<RMatrix, bool>::new(1, 3, pc);
-    let slice = a.slice_mut();
-    for (i, x) in slice.iter_mut().enumerate() {
-      *x = if i != 0 { 1 } else { 0 };
     }
   ")
   expect_no_error(f())
@@ -675,10 +667,9 @@ test_that("new matrix with names", {
 
 test_that("new arrary", {
   f <-  rust_fn("
-    let _: &[f64] = RObject::<RMatrix, f64>::new(1, 3, pc).slice();
-    let _: &[i32] = RObject::<RMatrix, i32>::new(1, 3, pc).slice();
-    let _: &[u8] =  RObject::<RMatrix, u8>::new(1, 3, pc).slice();
-    let _: &[i32] = RObject::<RMatrix, bool>::new(1, 3, pc).slice();
+    let _: &[f64] = RMatrix::<f64>::new(1, 3, pc).slice();
+    let _: &[i32] = RMatrix::<i32>::new(1, 3, pc).slice();
+    let _: &[u8] =  RMatrix::<u8>::new(1, 3, pc).slice();
   ")
   expect_no_error(f())
 })
@@ -695,13 +686,13 @@ test_that("matrix", {
   expect_identical(f(a), c(2L, 4L))
   f <- rust_fn("a", "
     let b = a.as_matrix().stop();
-    b.clone(pc).to_vector()
+    b.clone(pc).to_vector_mut()
   ")
   expect_identical(f(a), as.integer(a))
   expect_true(is.vector(f(a)))
   f <- rust_fn(a, '
     let a = a.clone(pc);
-    a.set_attribute(RObject::<RSymbol>::dim(), R::null());
+    a.set_attribute(RSymbol::dim(), R::null());
     a
   ')
   expect_false(is.matrix(f(a)))
@@ -740,21 +731,20 @@ test_that("array", {
   f <-  rust_fn(a, "
     let a = a.as_array().stop().as_i32().stop();
     let b = a.dim();
-    (&b[..]).to_r(pc)
+    b.iter().map(|x| i32::try_from(*x).unwrap()).to_r(pc)
   ")
   a <- array(1:24, dim = c(2L, 3L, 4L))
   expect_identical(f(a), c(2L, 3L, 4L))
   f <-  rust_fn(a, "
     let a = a.as_array().stop().as_f64().stop();
-    let b = a.dim();
-    (&b[..]).to_r(pc)
+    a.dim().iter().map(|x| *x as i32).to_r(pc)
   ")
   expect_error(f(a))
 })
 
 test_that("symbol", {
   f <- rust_fn('
-    RObject::<RSymbol>::new("bill", pc)
+    RSymbol::from("bobby").unwrap()
   ')
   expect_identical(class(f()), "name")
 })
@@ -762,14 +752,14 @@ test_that("symbol", {
 test_that("external_ptr", {
   f <- rust_fn("
     let a = vec![10_i32, 11, 13];
-    let b = RObject::<RExternalPtr>::encode_full(a, R::null(), false, pc);
+    let b = RExternalPtr::encode_full(a, R::null(), false, pc);
     let d = b.decode_val::<Vec<i32>>().stop();
     d[1]
   ")
   expect_identical(f(), 11L)
   f1_i32 <- rust_fn('
     let a = vec![10_i32, 11, 13];
-    RObject::<RExternalPtr>::encode_full(a, "vec_i32".to_r(pc), false, pc)
+    RExternalPtr::encode_full(a, "vec_i32".to_r(pc), false, pc)
   ')
   f2_i32 <- rust_fn(b, "
     let b = b.as_external_ptr().stop();
@@ -780,24 +770,24 @@ test_that("external_ptr", {
   expect_identical(f2_i32(f1_i32()), 11L)
   f1_f64 <- rust_fn('
     let a = vec![10.0, 11.0, 13.0];
-    RObject::<RExternalPtr>::encode(a, "vec_f64", pc)
+    RExternalPtr::encode(a, "vec_f64", pc)
   ')
   f1_raw <- rust_fn('
     let a = vec![10_u8, 11, 13];
-    RObject::<RExternalPtr>::encode(a, "vec_u8", pc)
+    RExternalPtr::encode(a, "vec_u8", pc)
   ')
   f3 <- rust_fn(b, '
     let b = b.as_external_ptr().stop();
-    let tag = b.tag().as_vector().stop().as_character().stop();
+    let tag = b.tag().as_vector().stop().as_char().stop();
     let s = tag.get(0).stop();
     let result: &RObject = if s == "vec_i32" {
       let d = b.decode_ref::<Vec<i32>>();
       let e: i32 = d[1];
-      e.to_r(pc).as_unknown()
+      e.to_r(pc).as_robject()
     } else if s == "vec_f64" {
       let d = b.decode_ref::<Vec<f64>>();
       let e: f64 = d[1];
-      e.to_r(pc).as_unknown()
+      e.to_r(pc).as_robject()
     } else {
       stop!("Unsupported type")
     };
@@ -826,7 +816,7 @@ test_that("string", {
   ')
   expect_identical(f(), c("adf", "billy", "bob"))
   f <- rust_fn(a, "
-    let b = a.as_vector().stop().as_character().stop();
+    let b = a.as_vector().stop().as_char().stop();
     b.get(1).stop()
   ")
   expect_identical(f(c("adf", "billy", "bob")), "billy")
@@ -874,33 +864,30 @@ test_that("call", {
 
 test_that("data.frame", {
   f <- rust_fn(a, "
-    let b = a.as_data_frame().stop();
+    let b = a.as_list().stop();
     b.get_names()
   ")
   expect_error(f(1))
   a <- data.frame(a = 1:3, b = c(10, 11, 12))
   expect_identical(f(a), c("a", "b"))
   f <- rust_fn(a, "index: usize", "
-    let b = a.as_data_frame().stop();
+    let b = a.as_list().stop();
     b.get(index).stop()
   ")
   expect_error(f(a, 3))
   expect_identical(f(a, 0), 1:3)
   expect_identical(f(a, 1), c(10, 11, 12))
-  f <- rust_fn("a: &mut RObject<RList, RDataFrame>", "index: usize", "
-    let b = a.as_data_frame_mut().stop();
-    b.set(index, [0, -1, -22].to_r(pc)).stop();
+  f <- rust_fn("a: &mut RList", "index: usize", "
+    a.set(index, [0, -1, -22].to_r(pc)).stop();
   ")
   f(a, 1)
   expect_identical(a[, 2], c(0L, -1L, -22L))
   f <- rust_fn('
-    let a = RObject::<RList>::new(2, pc);
+    let a = RList::with_names(&["i32", "f64"], pc);
     let _ = a.set(0, [   1,    2,    3].to_r(pc));
     let _ = a.set(1, [10.0, 20.0, 30.0].to_r(pc));
-    let names = ["i32", "f64"].to_r(pc);
-    let row_names = ["row1", "row2", "row3"].to_r(pc);
-    a.to_data_frame(names, row_names, pc).stop()
+    a
   ')
-  a <- data.frame(i32 = 1:3, f64 = c(10, 20, 30), row.names = paste0("row", 1:3))
+  a <- list(i32 = 1:3, f64 = c(10, 20, 30))
   expect_identical(f(), a)
 })

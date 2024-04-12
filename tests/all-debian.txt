@@ -1,79 +1,82 @@
 rm -rf `Rscript -e 'cat(tools::R_user_dir("cargo", "cache"))'`/rust_fn
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-downloaded 57 KB
+downloaded 58 KB
 
 Build directory: /home/dahl/.cache/R/cargo/rust_fn
     Updating crates.io index
    Compiling proc-macro2 v1.0.79
    Compiling unicode-ident v1.0.12
-   Compiling quote v1.0.35
-   Compiling syn v2.0.55
+   Compiling quote v1.0.36
+   Compiling syn v2.0.58
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.08s
+    Finished release [optimized] target(s) in 2.89s
    Compiling roxido3 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 0.10s
+    Finished release [optimized] target(s) in 0.08s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-downloaded 57 KB
+downloaded 58 KB
 
     Updating crates.io index
    Compiling proc-macro2 v1.0.79
    Compiling unicode-ident v1.0.12
-   Compiling quote v1.0.35
-   Compiling syn v2.0.55
+   Compiling quote v1.0.36
+   Compiling syn v2.0.58
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido5 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.70s
+    Finished release [optimized] target(s) in 3.02s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 59229 bytes (57 KB)
+Content type 'application/x-gzip' length 60275 bytes (58 KB)
 ==================================================
-downloaded 57 KB
+downloaded 58 KB
 
     Updating crates.io index
    Compiling proc-macro2 v1.0.79
    Compiling unicode-ident v1.0.12
-   Compiling quote v1.0.35
-   Compiling syn v2.0.55
+   Compiling quote v1.0.36
+   Compiling syn v2.0.58
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido6 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.73s
+    Finished release [optimized] target(s) in 2.90s
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 59229 bytes (57 KB)
+Content type 'application/x-gzip' length 60275 bytes (58 KB)
 ==================================================
-downloaded 57 KB
+downloaded 58 KB
 
+thread '<unnamed>' panicked at src/lib.rs:2:24:
+called `Result::unwrap()` on an `Err` value: TryFromIntError(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 thread '<unnamed>' panicked at src/lib.rs:2:21:
-called `Result::unwrap()` on an `Err` value: "Not a function"
+called `Result::unwrap()` on an `Err` value: "Not a function."
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 Error in (function ()  : An error was thrown!
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 264 ]
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 263 ]
 rm -rf testpkg
 Rscript -e "cargo::new_package('testpkg')"
 trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 59229 bytes (57 KB)
+Content type 'application/x-gzip' length 60275 bytes (58 KB)
 ==================================================
-downloaded 57 KB
+downloaded 58 KB
 
 * installing *source* package ‘testpkg’ ...
 ** using staged installation
 ---
 Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
 Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.77.1' is available, which satisfies the need for '1.65'.
+Cargo version '1.77.2' is available, which satisfies the need for '1.65'.
    Compiling proc-macro2 v1.0.79
    Compiling unicode-ident v1.0.12
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
    Compiling quote v1.0.35
-   Compiling syn v2.0.55
+   Compiling syn v2.0.57
    Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized + debuginfo] target(s) in 4.79s
+    Finished release [optimized + debuginfo] target(s) in 5.14s
    Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized + debuginfo] target(s) in 2.07s
+    Finished release [optimized + debuginfo] target(s) in 2.56s
 ---
 Built Rust static library.
 ** libs
@@ -114,7 +117,7 @@ R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
 * checking for file ‘testpkg/DESCRIPTION’ ... OK
 * this is package ‘testpkg’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [2s/11s] NOTE
+* checking CRAN incoming feasibility ... [2s/10s] NOTE
 Maintainer: ‘First Last <name@gmail.com>’
 
 New submission
