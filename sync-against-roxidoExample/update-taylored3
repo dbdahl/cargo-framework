@@ -1,0 +1,25 @@
+#!/usr/bin/fish
+
+while not test -f DESCRIPTION
+  if test (pwd) = /
+    echo "ERROR: Could not find DESCRIPTION file." >&2
+    exit 1
+  end
+  cd ..
+end
+
+if string length -q -- (git status --untracked-files=no --porcelain)
+  echo "WARNING: Git repository is not clean." >&2
+end
+
+set base ~/docs/devel/roxidoExample
+
+cd src/rust
+
+rm roxido/src/lib.rs
+cp ~/docs/devel/roxidoExample/src/rust/roxido/src/lib.rs roxido/src/lib.rs
+
+rm roxido_macro/src/lib.rs
+cp ~/docs/devel/roxidoExample/src/rust/roxido_macro/src/lib.rs roxido_macro/src/lib.rs
+
+cargo update; and cargo check; and cargo clippy; and just install; and git add -u; and git commit -m 'Latest framework'; and git push
