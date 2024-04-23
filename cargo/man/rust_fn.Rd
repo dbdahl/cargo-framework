@@ -13,7 +13,7 @@ rust_fn(
   longjmp = TRUE,
   invisible = FALSE,
   force = FALSE,
-  revision = "main"
+  which = NULL
 )
 }
 \arguments{
@@ -35,7 +35,7 @@ is used to upgrade the Cargo installation if needed.}
 function is run.  If \code{"never"}, Cargo is always run in quiet mode. In
 any case, errors in code are always shown.}
 
-\item{cached}{Should Cargo use previously compiled artifacts?}
+\item{cached}{Should Cargo use previously downloaded and compiled artifacts?}
 
 \item{longjmp}{Should the compiled function use the faster (but experimental)
 longjmp functionality when Rust code panics?}
@@ -45,7 +45,10 @@ longjmp functionality when Rust code panics?}
 \item{force}{If \code{TRUE}, write to cache directory on first usage without
 asking for user confirmation.}
 
-\item{revision}{A git revision to use.  Defaults to "main".}
+\item{which}{NULL or a vector of length one with name either \code{'tag'} or
+\code{'branch'} indicating the specific version of the roxido framework to
+use.  If NULL, \code{'c(tag = "latest")'} is used.  This only has an
+effect when downloading artifacts (e.g., when \code{cached = FALSE}).}
 }
 \value{
 An R function implemented with the supplied Rust code.

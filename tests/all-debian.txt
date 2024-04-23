@@ -1,50 +1,54 @@
 rm -rf `Rscript -e 'cat(tools::R_user_dir("cargo", "cache"))'`/rust_fn
 Rscript -e 'testthat::test_file("tests.R", reporter=check_reporter())'
-trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-downloaded 58 KB
+trying URL 'https://github.com/dbdahl/roxidoExample/archive/refs/tags/latest.tar.gz'
+Content type 'application/x-gzip' length 62463 bytes (60 KB)
+==================================================
+downloaded 60 KB
 
 Build directory: /home/dahl/.cache/R/cargo/rust_fn
     Updating crates.io index
-   Compiling proc-macro2 v1.0.79
+   Compiling proc-macro2 v1.0.81
    Compiling unicode-ident v1.0.12
    Compiling quote v1.0.36
-   Compiling syn v2.0.58
+   Compiling syn v2.0.60
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido1 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.89s
+    Finished release [optimized] target(s) in 3.11s
    Compiling roxido3 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
     Finished release [optimized] target(s) in 0.08s
-trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-downloaded 58 KB
+trying URL 'https://github.com/dbdahl/roxidoExample/archive/refs/tags/latest.tar.gz'
+Content type 'application/x-gzip' length 62463 bytes (60 KB)
+==================================================
+downloaded 60 KB
 
     Updating crates.io index
-   Compiling proc-macro2 v1.0.79
+   Compiling proc-macro2 v1.0.81
    Compiling unicode-ident v1.0.12
    Compiling quote v1.0.36
-   Compiling syn v2.0.58
+   Compiling syn v2.0.60
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido5 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 3.02s
-trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 60275 bytes (58 KB)
+    Finished release [optimized] target(s) in 3.09s
+trying URL 'https://github.com/dbdahl/roxidoExample/archive/refs/tags/latest.tar.gz'
+Content type 'application/x-gzip' length 62463 bytes (60 KB)
 ==================================================
-downloaded 58 KB
+downloaded 60 KB
 
     Updating crates.io index
-   Compiling proc-macro2 v1.0.79
+   Compiling proc-macro2 v1.0.81
    Compiling unicode-ident v1.0.12
    Compiling quote v1.0.36
-   Compiling syn v2.0.58
+   Compiling syn v2.0.60
    Compiling roxido_macro v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido_macro)
    Compiling roxido v0.6.0 (/home/dahl/.cache/R/cargo/rust_fn/rust/roxido)
    Compiling roxido6 v0.1.0 (/home/dahl/.cache/R/cargo/rust_fn/rust)
-    Finished release [optimized] target(s) in 2.90s
-trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 60275 bytes (58 KB)
+    Finished release [optimized] target(s) in 3.11s
+trying URL 'https://github.com/dbdahl/roxidoExample/archive/refs/tags/latest.tar.gz'
+Content type 'application/x-gzip' length 62463 bytes (60 KB)
 ==================================================
-downloaded 58 KB
+downloaded 60 KB
 
 thread '<unnamed>' panicked at src/lib.rs:2:24:
 called `Result::unwrap()` on an `Err` value: TryFromIntError(())
@@ -54,136 +58,3 @@ called `Result::unwrap()` on an `Err` value: "Not a function."
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 Error in (function ()  : An error was thrown!
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 263 ]
-rm -rf testpkg
-Rscript -e "cargo::new_package('testpkg')"
-trying URL 'https://api.github.com/repos/dbdahl/roxidoExample/tarball/main'
-Content type 'application/x-gzip' length 60275 bytes (58 KB)
-==================================================
-downloaded 58 KB
-
-* installing *source* package ‘testpkg’ ...
-** using staged installation
----
-Trying to find a suitable Cargo using tools::R_user_dir('cargo', 'cache').
-Trying to use Cargo at: /home/dahl/.cache/R/cargo/cargo/bin/cargo
-Cargo version '1.77.2' is available, which satisfies the need for '1.65'.
-   Compiling proc-macro2 v1.0.79
-   Compiling unicode-ident v1.0.12
-   Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-   Compiling quote v1.0.35
-   Compiling syn v2.0.57
-   Compiling roxido_macro v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido_macro)
-   Compiling roxido v0.6.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust/roxido)
-    Finished release [optimized + debuginfo] target(s) in 5.14s
-   Compiling rust v0.1.0 (/home/dahl/docs/devel/cargo-framework/tests/testpkg/src/rust)
-    Finished release [optimized + debuginfo] target(s) in 2.56s
----
-Built Rust static library.
-** libs
-using C compiler: ‘gcc (Debian 12.2.0-14) 12.2.0’
-gcc -I"/home/dahl/.local/R/4.3.2-latest/lib/R/include" -DNDEBUG   -I/usr/local/include    -fpic  -g -O2  -c shim.c -o shim.o
-gcc -shared -L/home/dahl/.local/R/4.3.2-latest/lib/R/lib -L/usr/local/lib -o testpkg.so shim.o -L. -lrust -L/home/dahl/.local/R/4.3.2-latest/lib/R/lib -lR
-installing to /home/dahl/.local/R/4.3.2-latest/lib/R/library/00LOCK-testpkg/00new/testpkg/libs
-** R
-** inst
-** byte-compile and prepare package for lazy loading
-** help
-*** installing help indices
-** building package indices
-** testing if installed package can be loaded from temporary location
-** checking absolute paths in shared objects and dynamic libraries
-** testing if installed package can be loaded from final location
-** testing if installed package keeps a record of temporary installation path
-* DONE (testpkg)
-R CMD build testpkg
-* checking for file ‘testpkg/DESCRIPTION’ ... OK
-* preparing ‘testpkg’:
-* checking DESCRIPTION meta-information ... OK
-* cleaning src
-* checking for LF line-endings in source and make files and shell scripts
-* checking for empty or unneeded directories
-* building ‘testpkg_0.1.0.tar.gz’
-
-R CMD check --as-cran --no-manual testpkg_0.1.0.tar.gz
-* using log directory ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck’
-* using R version 4.3.2 (2023-10-31)
-* using platform: x86_64-pc-linux-gnu (64-bit)
-* R was compiled by
-    gcc (Debian 12.2.0-14) 12.2.0
-    GNU Fortran (Debian 12.2.0-14) 12.2.0
-* running under: Debian GNU/Linux 12 (bookworm)
-* using session charset: UTF-8
-* using options ‘--no-manual --as-cran’
-* checking for file ‘testpkg/DESCRIPTION’ ... OK
-* this is package ‘testpkg’ version ‘0.1.0’
-* package encoding: UTF-8
-* checking CRAN incoming feasibility ... [2s/10s] NOTE
-Maintainer: ‘First Last <name@gmail.com>’
-
-New submission
-* checking package namespace information ... OK
-* checking package dependencies ... OK
-* checking if this is a source package ... OK
-* checking if there is a namespace ... OK
-* checking for executable files ... OK
-* checking for hidden files and directories ... OK
-* checking for portable file names ... OK
-* checking for sufficient/correct file permissions ... OK
-* checking whether package ‘testpkg’ can be installed ... OK
-* used C compiler: ‘gcc (Debian 12.2.0-14) 12.2.0’
-* checking installed package size ... OK
-* checking package directory ... OK
-* checking for future file timestamps ... OK
-* checking DESCRIPTION meta-information ... NOTE
-Authors@R field gives persons with invalid ORCID identifiers:
-  First Last <name@gmail.com> [aut, cre] (ORCID-ID)
-* checking top-level files ... OK
-* checking for left-over files ... OK
-* checking index information ... OK
-* checking package subdirectories ... OK
-* checking R files for non-ASCII characters ... OK
-* checking R files for syntax errors ... OK
-* checking whether the package can be loaded ... OK
-* checking whether the package can be loaded with stated dependencies ... OK
-* checking whether the package can be unloaded cleanly ... OK
-* checking whether the namespace can be loaded with stated dependencies ... OK
-* checking whether the namespace can be unloaded cleanly ... OK
-* checking use of S3 registration ... OK
-* checking dependencies in R code ... OK
-* checking S3 generic/method consistency ... OK
-* checking replacement functions ... OK
-* checking foreign function calls ... OK
-* checking R code for possible problems ... OK
-* checking Rd files ... OK
-* checking Rd metadata ... OK
-* checking Rd line widths ... OK
-* checking Rd cross-references ... OK
-* checking for missing documentation entries ... OK
-* checking for code/documentation mismatches ... OK
-* checking Rd \usage sections ... OK
-* checking Rd contents ... OK
-* checking for unstated dependencies in examples ... OK
-* checking line endings in shell scripts ... OK
-* checking line endings in C/C++/Fortran sources/headers ... OK
-* checking line endings in Makefiles ... OK
-* checking compilation flags in Makevars ... OK
-* checking for GNU extensions in Makefiles ... OK
-* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
-* checking use of PKG_*FLAGS in Makefiles ... OK
-* checking use of SHLIB_OPENMP_*FLAGS in Makefiles ... OK
-* checking pragmas in C/C++ headers and code ... OK
-* checking compilation flags used ... OK
-* checking compiled code ... OK
-* checking examples ... OK
-* checking for non-standard things in the check directory ... OK
-* checking for detritus in the temp directory ... OK
-* DONE
-
-Status: 2 NOTEs
-See
-  ‘/home/dahl/docs/devel/cargo-framework/tests/testpkg.Rcheck/00check.log’
-for details.
-
-
-Rscript -e "set.seed(234); testpkg::myrnorm(3,0,1)"
-[1]  0.6607697 -2.0529830 -1.4992061

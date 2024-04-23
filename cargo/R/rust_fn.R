@@ -13,20 +13,23 @@
 #'   \code{FALSE}, Cargo is run in quiet mode, except for the first time this
 #'   function is run.  If \code{"never"}, Cargo is always run in quiet mode. In
 #'   any case, errors in code are always shown.
-#' @param cached Should Cargo use previously compiled artifacts?
+#' @param cached Should Cargo use previously downloaded and compiled artifacts?
 #' @param longjmp Should the compiled function use the faster (but experimental)
 #'   longjmp functionality when Rust code panics?
 #' @param invisible Should the compiled function return values invisibly?
 #' @param force If \code{TRUE}, write to cache directory on first usage without
 #'   asking for user confirmation.
-#' @param revision A git revision to use.  Defaults to "main".
+#' @param which NULL or a vector of length one with name either \code{'tag'} or
+#'   \code{'branch'} indicating the specific version of the roxido framework to
+#'   use.  If NULL, \code{'c(tag = "latest")'} is used.  This only has an
+#'   effect when downloading artifacts (e.g., when \code{cached = FALSE}).
 #'
 #' @return An R function implemented with the supplied Rust code.
 #'
 #' @importFrom utils packageDate packageVersion
 #' @export
 #'
-rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE, revision = "main") {
+rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0", verbose = FALSE, cached = TRUE, longjmp = TRUE, invisible = FALSE, force = FALSE, which = NULL) {
   # Parse arguments
   mc <- match.call(expand.dots = FALSE)
   args <- mc[["..."]]
@@ -40,7 +43,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   all_args <- paste0(args_with_type, collapse = ", ")
   code <- sprintf("#[allow(unused_imports)] use roxido::*; #[roxido(longjmp = %s, invisible = %s)] fn func(%s) { %s\n}", tolower(isTRUE(longjmp)), tolower(isTRUE(invisible)), all_args, paste0(code, collapse = "\n"))
   # Set-up directories
-  path_info <- get_lib_path(verbose, cached, force, revision)
+  path_info <- get_lib_path(verbose, cached, force, which)
   if (is.null(path_info)) {
     return(invisible())
   }
@@ -112,7 +115,7 @@ rust_fn <- function(..., dependencies = character(0), minimum_version = "1.31.0"
   get(name, envir = parent.frame)
 }
 
-get_lib_path <- function(verbose, cached, force, revision) {
+get_lib_path <- function(verbose, cached, force, which) {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
   if (!dir.exists(path)) {
@@ -143,7 +146,7 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
   }
   stamp_file <- file.path(path, "stamp")
   if (!isTRUE(cached) || !file.exists(stamp_file) || packageVersion("cargo") > readRDS(stamp_file)) {
-    copy_from_template(revision = revision)
+    copy_from_template(which)
   }
   verbose <- if (isTRUE(verbose)) {
     TRUE
@@ -160,7 +163,7 @@ directory.\n\n', path, days_until_next_purge, basename(last_purge_filename()))
   list(path = path, lock = lock, success = success, verbose = verbose)
 }
 
-copy_from_template <- function(revision) {
+copy_from_template <- function(which = NULL) {
   parent <- cache_dir()
   path <- file.path(parent, "rust_fn")
   unlink(path, recursive = TRUE, force = TRUE)
@@ -169,13 +172,38 @@ copy_from_template <- function(revision) {
   dir.create(file.path(path, "R"), showWarnings = FALSE)
   rustlib_directory <- file.path(path, "rust")
   dir.create(rustlib_directory, showWarnings = FALSE)
-  x <- download_roxido_example(revision = revision)
+  x <- download_roxido_example(which = which)
   on.exit(add = TRUE, {
     unlink(dirname(x), recursive = TRUE, force = TRUE, expand = FALSE)
   })
   file.copy(file.path(x, "src", "rust", "roxido"), rustlib_directory, recursive = TRUE)
   file.copy(file.path(x, "src", "rust", "roxido_macro"), rustlib_directory, recursive = TRUE)
   unlink(file.path(path, "rust", "target"), recursive = TRUE, force = TRUE)
+}
+
+#' @importFrom utils download.file untar
+download_roxido_example <- function(which = NULL) {
+  owner <- "dbdahl"
+  base_package_name <- "roxidoExample"
+  if (is.null(which)) which <- c(tag = "latest")
+  url <- if (identical(names(which), "branch")) {
+    sprintf("https://github.com/%s/%s/archive/refs/heads/%s.tar.gz", owner, base_package_name, which)
+  } else if (identical(names(which), "tag")) {
+    sprintf("https://github.com/%s/%s/archive/refs/tags/%s.tar.gz", owner, base_package_name, which)
+  } else {
+    stop("'which' argument should be NULL or a vector of length one with name either 'tag' or 'branch'.")
+  }
+  tarball_filename <- tempfile(sprintf("%s_%s_%s_", owner, base_package_name, which), fileext = ".tar.gz")
+  on.exit(add = TRUE, {
+    unlink(tarball_filename, recursive = TRUE, force = TRUE, expand = FALSE)
+  })
+  if (0 != download.file(url, tarball_filename, mode = "wb")) {
+    stop("Problem downloading repository from Github.")
+  }
+  expand_dirname <- tempfile()
+  untar(tarball_filename, exdir = expand_dirname)
+  original_dirname <- list.files(expand_dirname)
+  file.path(expand_dirname, original_dirname)
 }
 
 globals <- new.env(parent = emptyenv())

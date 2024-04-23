@@ -5,6 +5,6 @@ build:
   rm -f *.tar.gz
   R CMD build .
 
-cran: && build
+roxygen2: && build
   Rscript -e 'roxygen2::roxygenize()'
 

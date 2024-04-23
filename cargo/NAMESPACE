@@ -3,5 +3,7 @@
 export(install)
 export(run)
 export(rust_fn)
+importFrom(utils,download.file)
 importFrom(utils,packageDate)
 importFrom(utils,packageVersion)
+importFrom(utils,untar)
