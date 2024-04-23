@@ -1,11 +1,11 @@
 Package: cargo
-Title: Develop R Packages using Rust
-Version: 0.5.1
+Title: Functions to Define R Functions from Inlined Rust Code
+Version: 0.6.0
 Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu",comment=c(ORCID="0000-0002-8173-1547")))
-Description: A framework is provided to develop R packages using 'Rust' <https://www.rust-lang.org/> with
- minimal overhead, and more wrappers are easily added. Help is provided to use 'Cargo' <https://doc.rust-lang.org/cargo/> in a manner
- consistent with CRAN policies. 'Rust' code can also be embedded directly in an R script. The package is not official, affiliated with,
- nor endorsed by the Rust project.
+Description: Dynamically define R functions with inlined 'Rust' code. Help
+  is provided to run 'Cargo' <https://doc.rust-lang.org/cargo/> in a manner
+  consistent with CRAN policies in R packages using 'Rust'. The package is not
+  official, affiliated with, nor endorsed by the Rust project.
 URL: https://github.com/dbdahl/cargo-framework (repository)
 BugReports: https://github.com/dbdahl/cargo-framework/issues
 License: MIT + file LICENSE | Apache License 2.0
