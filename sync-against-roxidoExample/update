@@ -33,8 +33,7 @@ for x in .gitignore \
          src/rust/roxido_macro/src/lib.rs \
          src/rust/roxido_faer/Cargo.toml \
          src/rust/roxido_faer/src/lib.rs \
-         tools/cargo_run.R \
-         tools/rename_package.R
+         tools/cargo_run.R
   set fullsrc $base/$x
   if not cmp --silent -- $fullsrc $x
     echo cp \"$fullsrc\" \"$PWD/$x\"
