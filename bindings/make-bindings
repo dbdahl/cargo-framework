@@ -41,7 +41,7 @@ cd src/include
 rm $DEST
 
 cat <<EOT > $DEST
-//! Automatically Generated Bindings for R's C API.
+//! Automatically generated bindings for R's C API.
 #![allow(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
